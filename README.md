@@ -72,3 +72,4 @@ npm test
 
 `0.15.0`
 - implementation ported from [FsEx](https://github.com/goswinr/FsEx/blob/main/Src/StringModule.fs )
+- added more tests
