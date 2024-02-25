@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "scripts": {
+    "_": "dotnet fable ../Str.fsproj --verbose --noCache &&",
+    "pretest": " dotnet fable --verbose -o dist/tests --noCache",
+    "test": "mocha dist/tests"
+  },
+  "dependencies": {
+    "mocha": "^10.3.0"
+  }
+}
