@@ -6,7 +6,7 @@ open System
 /// Extensions for StringBuilder
 // like indexOf(str), append which returns unit, ..
 [<AutoOpen>]
-module AutoOpenExtensionsStringBuilder = 
+module AutoOpenExtensionsStringBuilder =
     type Text.StringBuilder with
 
         /// Like .Append(string) but returning unit
@@ -24,8 +24,8 @@ module AutoOpenExtensionsStringBuilder =
         // TODO: add overload with length: sb.IndexOf (c:char, from:int, length:int )
 
         /// Like .IndexOf for strings, returns -1 if not found
-        member sb.IndexOf (c:char, from:int ) :int = 
-            let rec find i = 
+        member sb.IndexOf (c:char, from:int ) :int =
+            let rec find i =
                 if   i = sb.Length then -1
                 elif sb.[i] = c    then i
                 else find (i+1)
@@ -33,7 +33,7 @@ module AutoOpenExtensionsStringBuilder =
 
         /// Like .IndexOf for strings, returns -1 if not found
         /// Always uses StringComparison.Ordinal
-        member sb.IndexOf (t:string, from:int):int= 
+        member sb.IndexOf (t:string, from:int):int=
             // could in theory be improved be using a rolling hash value
             // see also Array.findArray implementation
             // or https://stackoverflow.com/questions/12261344/fastest-search-method-in-stringbuilder
@@ -50,16 +50,16 @@ module AutoOpenExtensionsStringBuilder =
             find from 0
 
         /// Like .IndexOf for strings, returns -1 if not found
-        member inline sb.IndexOf (c:char) :int = 
+        member inline sb.IndexOf (c:char) :int =
             sb.IndexOf(c,0)
 
         /// Like .IndexOf for strings, returns -1 if not found
         /// always StringComparison.Ordinal
-        member inline sb.IndexOf (t:string):int= 
+        member inline sb.IndexOf (t:string):int=
             sb.IndexOf(t,0)
 
-        member inline sb.Contains (c:char) :bool = 
+        member inline sb.Contains (c:char) :bool =
             sb.IndexOf c <> -1
 
-        member inline sb.Contains (s:string) :bool = 
-            sb.IndexOf s <> -1 
+        member inline sb.Contains (s:string) :bool =
+            sb.IndexOf s <> -1
