@@ -4,10 +4,9 @@ open System
 open System.Text
 open ExtensionsString // for StrException
 
-#if FABLE_COMPILER
+#if FABLE_COMPILER_JAVASCRIPT
 open Fable.Core
 open Fable.Core.JsInterop
-#else
 #endif
 
 
@@ -15,98 +14,18 @@ open Fable.Core.JsInterop
 [<RequireQualifiedAccess>]
 module Str =
 
-    /// Joins string into one line.
-    /// Replaces line break with a space character.
-    /// Skips leading whitespace on each line.
-    /// Joins multiple whitespaces into one.
-    /// If string is null returns *null string*
-    /// Does not include surrounding quotes.
-    let formatInOneLine (s:string) =
-        if isNull s then
-            "*null string*"
-        else
-            let sb = StringBuilder(s.Length)
-            let rec loop addNextWhite i =
-                if i<s.Length then
-                    match s.[i] with
-                    |'\r'|'\n' | ' ' | '\t'->
-                        if addNextWhite then sb.Append(' ') |> ignore<StringBuilder> // to have at least on space separating new lines
-                        loop false (i+1)
-                    | c  ->
-                        sb.Append(c) |> ignore<StringBuilder>
-                        loop true (i+1)
-            loop false 0
-            // TODO delete trailing space if there is one??
-            sb.ToString()
-
-    /// Reduces a string length for display to a maximum Length.
-    /// Shows (..) as placeholder for skipped characters if string is longer than maxCharCount.
-    /// If maxChars is bigger than 35 the placeholder will include the count of skipped characters: e.g. ( ... and 123 more chars.).
-    /// maxCharCount will be set to be minimum 6.
-    /// Returned strings are enclosed in quotation marks: '"'.
-    /// If input is null it returns *null string*
-    let formatTruncated (maxCharCount:int) (s:string) : string =
-        let maxChar = max 8 maxCharCount
-        if isNull s then
-            if maxChar >= 15 then
-                "*null string*"
-            else
-                "*null*"
-        elif s.Length <= maxChar  then
-            str{ "\"" ; s ; "\"" }
-        else
-            let len = s.Length
-            if   maxChar <= 10 then str{ "\"" ;  s.Substring(0, maxChar-2-2) ; "(..)"                           ; "\"" }
-            elif maxChar <= 20 then str{ "\"" ;  s.Substring(0, maxChar-3-2) ; "(..)"  ; s.Substring(len-1, 1)  ; "\"" }
-            elif maxChar <= 35 then str{ "\"" ;  s.Substring(0, maxChar-5-2) ; "(...)" ; s.Substring(len-2, 2)  ; "\"" }
-            else
-                let suffixLen = 1 + maxChar / 20 // using 5% for end of string
-                let counterLen = "[< ..99 more chars.. >]".Length
-                str{
-                    "\""
-                    s.Substring(0, maxChar-counterLen-suffixLen)
-                    "( ... and "; len - maxChar+counterLen  ; " more chars.)"
-                    s.Substring(len-suffixLen, suffixLen)
-                    "\""
-                    }
+    /// For string formatting in exceptions. Including surrounding quotes
+    let exnf s = ExtensionsString.exnf s
 
 
-    /// Adds a note about trimmed line count if there are more ( ... and %d more lines.).
-    /// Returned strings are enclosed in quotation marks: '"'.
-    /// If string is null returns *null string*.
-    let formatTruncatedToMaxLines (maxLineCount:int) (s:string) =
-        let maxLines = max 1 maxLineCount
-        if isNull s then
-            "*null string*"
-        elif s.Length < 2 then
-            s
-        else
-            let mutable found = if s.[0]= '\n' then 1 else 0
-            let mutable i = 0
-            let mutable stopPos = 0
-            while i >= 0 do
-                if i+1=s.Length then // end of string reached with a '\n'
-                    i<- -1
-                else
-                    i <- s.IndexOf('\n', i+1)
-                    found <- found + 1
-                    if found = maxLines then
-                        stopPos <- i
-
-            if stopPos > 0  && found - maxLines > 1 then // if there is just one more line print it instead of the note
-                str{
-                    "\""
-                    s.Substring(0,stopPos+1)
-                    "(... and "
-                    found - maxLines
-                    " more lines.)\""
-                    }
-            else
-                s
-
-
-    /// For string formatting in exceptions below. Including surrounding quotes
-    let private exnf s  = s |> formatTruncated 100 //|> formatInOneLine
+    /// <summary>Gets an element from an string. (Use string.getNeg(i) function if you want to use negative indices too.)</summary>
+    /// <param name="str">The input string.</param>
+    /// <param name="index">The input index.</param>
+    /// <returns>The value of the string at the given index.</returns>
+    /// <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the index is negative or the input string does not contain enough elements.</exception>
+    let inline get (str:string) index =
+        if isNull str then StrException.Raise "Str.get: str is null"
+        str.Get index
 
     ///<summary>
     /// The Knuth-Morris-Pratt Algorithm for finding a pattern within a piece of text.
@@ -117,12 +36,17 @@ module Str =
     /// <param name="searchFromIdx">The index to start searching from</param>
     /// <param name="searchLength">The length of the text to search in</param>
     /// <param name="findNoMoreThan">The maximum number of occurrences to find</param>
-    /// <returns>A list of the indices of the occurrences of the pattern in the text.
+    /// <returns>Return s list of the indices of the occurrences of the pattern in the text.
     /// The distance between these indices may be less than the pattern length
-    /// Overlapping patterns are returned each time. e.g "abab" in "abababab" will return [0,2,4]</returns>
-    let indicesOf (text:string, pattern:string, searchFromIdx,  searchLength, findNoMoreThan): ResizeArray<int> =
+    /// Overlapping patterns are returned each time. e.g "abab" in "abababab" will return [0;2;4]</returns>
+    let indicesOf (text:string, pattern:string, searchFromIdx:int,  searchLength:int, findNoMoreThan:int): ResizeArray<int> =
         if isNull pattern then StrException.Raise "Str.indicesOf: pattern is null"
         if isNull text    then StrException.Raise "Str.indicesOf: text is null"
+        if pattern.Length = 0 then StrException.Raise "Str.indicesOf: pattern string is empty"
+        if searchFromIdx < 0 then StrException.Raise "Str.indicesOf: searchFromIdx:%d can't be negative. looking for %s in %s" searchFromIdx (exnf pattern) (exnf text)
+        if searchLength  < 0 then StrException.Raise "Str.indicesOf: searchLength:%d can't be negative. looking for %s in %s" searchLength (exnf pattern) (exnf text)
+        if searchFromIdx + searchLength > text.Length then StrException.Raise "Str.indicesOf: searchFromIdx:%d + searchLength:%d can't be longer than text:%d. looking for %s in %s" searchFromIdx searchLength text.Length (exnf pattern) (exnf text)
+
         if pattern.Length > text.Length || findNoMoreThan = 0 then
             ResizeArray()
         elif pattern.Length = text.Length && pattern = text then
@@ -130,17 +54,13 @@ module Str =
             r.Add(0)
             r
         else
-            if pattern.Length = 0 then StrException.Raise "Str.indicesOf: pattern is empty"
-            if searchFromIdx < 0 then StrException.Raise "Str.indicesOf: searchFromIdx:%d can't be negative. looking for %s in %s" searchFromIdx (exnf pattern) (exnf text)
-            if searchLength  < 0 then StrException.Raise "Str.indicesOf: searchLength:%d can't be negative. looking for %s in %s" searchLength (exnf pattern) (exnf text)
-            if searchFromIdx + searchLength > text.Length then StrException.Raise "Str.indicesOf: searchFromIdx:%d + searchLength:%d can't be longer than text:%d. looking for %s in %s" searchFromIdx searchLength text.Length (exnf pattern) (exnf text)
             //adapted from https://gist.github.com/Nabid/fde41e7c2b0b681ac674ccc93c1daeb1
             let M  = pattern.Length
             let lpsArray  = Array.zeroCreate M
             let mutable len = 0
             lpsArray.[0] <- 0
             let mutable i  = 1
-            while (i < M) do
+            while i < M do
                 if pattern.[i] = pattern.[len] then
                     len <- len + 1
                     lpsArray.[i] <- len
@@ -156,7 +76,7 @@ module Str =
             let matchedIndices  = new ResizeArray<int>()
             i <- searchFromIdx
             let mutable j  = 0
-            while (i < N) do
+            while i < N do
                 if text.[i] = pattern.[j] then
                     i <- i + 1
                     j <- j + 1
@@ -192,7 +112,7 @@ module Str =
     /// Remove characters from the starts.
     /// fromString.Substring(skipLength)
     let (*inline*) skip (skipLength:int) (fromString:string) :string =
-        if isNull fromString   then StrException.Raise "Str.skip: fromString is null (skipLength:%d)" skipLength
+        if isNull fromString  then StrException.Raise "Str.skip: fromString is null (skipLength:%d)" skipLength
         if skipLength > fromString.Length then StrException.Raise "Str.skip: skipLength:%d is longer than string %s" skipLength (exnf fromString)
         if skipLength < 0 then StrException.Raise "Str.skip: skipLength:%d cant be negative(for  %s)" skipLength (exnf fromString)
         fromString.Substring(skipLength)
@@ -222,7 +142,7 @@ module Str =
     /// (Will return the same string instance, if char to remove is not found)
     /// Code: fromString.Replace(charToRemove.ToString(), "")
     let (*inline*) deleteChar (charToRemove:char) (fromString:string) :string =
-        if isNull fromString   then StrException.Raise "Str.delete: fromString is null (charToRemove:'%c')" charToRemove
+        if isNull fromString then StrException.Raise "Str.delete: fromString is null (charToRemove:'%c')" charToRemove
         fromString.Replace(charToRemove.ToString(), "") // will return the same instance if text to remove is not found
 
 
@@ -393,7 +313,7 @@ module Str =
     /// Fails if not both splitters are found.
     /// Delimiters are excluded in the returned strings
     let (*inline*) betweenChars (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string) :string =
-        if isNull stringToSplit  then StrException.Raise "Str.between: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
+        if isNull stringToSplit then StrException.Raise "Str.between: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
         if start = -1 then StrException.Raise "Str.between: firstSplitter: '%c' not found in stringToSplit: %s  (secondSplitter: '%c')" ( firstSplitter) (exnf stringToSplit) ( secondSplitter)
         else
@@ -408,7 +328,7 @@ module Str =
     /// Returns None if not both splitters are found.
     /// Delimiters are excluded in the returned strings
     let (*inline*) tryBetweenChars (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string): option<string>  =
-        if isNull stringToSplit  then StrException.Raise "Str.tryBetween: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
+        if isNull stringToSplit then StrException.Raise "Str.tryBetween: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
         if start = -1 then None
         else
@@ -422,7 +342,7 @@ module Str =
     /// Returns full input string if not both splitters are found.
     /// Delimiters are excluded in the returned strings
     let (*inline*) betweenCharsOrInput (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string): string  =
-        if isNull stringToSplit  then StrException.Raise "Str.betweenOrInput: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
+        if isNull stringToSplit then StrException.Raise "Str.betweenOrInput: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
         if start = -1 then stringToSplit
         else
@@ -437,7 +357,7 @@ module Str =
     /// The splitter is not included in the two return strings.
     let (*inline*) splitOnce (splitter:string) (stringToSplit:string) : string*string =
         if isNull stringToSplit then StrException.Raise "Str.splitOnce: stringToSplit is null (splitter:%s)" (exnf splitter)
-        if isNull splitter         then StrException.Raise "Str.splitOnce: splitter is null (stringToSplit:%s)" (exnf stringToSplit)
+        if isNull splitter      then StrException.Raise "Str.splitOnce: splitter is null (stringToSplit:%s)" (exnf stringToSplit)
         let start = stringToSplit.IndexOf(splitter, StringComparison.Ordinal)
         if start = -1 then StrException.Raise "Str.splitOnce: splitter %s not found in stringToSplit: %s" (exnf splitter) (exnf stringToSplit)
         else               stringToSplit.Substring(0, start), stringToSplit.Substring(start + splitter.Length)
@@ -465,7 +385,7 @@ module Str =
     /// Splitter is not included in the two return strings.
     let (*inline*) trySplitOnce (splitter:string) (stringToSplit:string) : option<string*string> =
         if isNull stringToSplit then StrException.Raise "Str.trySplitOnce: stringToSplit is null (splitter:%s)" (exnf splitter)
-        if isNull splitter         then StrException.Raise "Str.trySplitOnce: splitter is null (stringToSplit:%s)" (exnf stringToSplit)
+        if isNull splitter      then StrException.Raise "Str.trySplitOnce: splitter is null (stringToSplit:%s)" (exnf stringToSplit)
         let start = stringToSplit.IndexOf(splitter, StringComparison.Ordinal)
         if start = -1 then None
         else               Some (stringToSplit.Substring(0, start), stringToSplit.Substring(start + splitter.Length))
@@ -542,8 +462,6 @@ module Str =
         find 0 0
 
 
-
-
     /// Add a suffix to string
     let (*inline*) addSuffix (suffix:string) (txt:string) =
         if isNull txt then StrException.Raise "Str.addSuffix: txt is null"
@@ -565,6 +483,29 @@ module Str =
         if isNull txt then StrException.Raise "Str.inSingleQuotes: txt is null"
         "'" + txt + "'"
 
+    /// Joins string into one line.
+    /// Replaces line break with a space character.
+    /// Skips leading whitespace on each line.
+    /// Joins multiple whitespaces into one.
+    /// If string is null returns *null string*
+    /// Does not include surrounding quotes.
+    let inline formatInOneLine (s:string) =
+        Format.inOneLine(s)
+
+    /// Reduces a string length for display to a maximum Length.
+    /// Shows (..) as placeholder for skipped characters if string is longer than maxCharCount.
+    /// If maxChars is bigger than 35 the placeholder will include the count of skipped characters: e.g. ( ... and 123 more chars.).
+    /// maxCharCount will be set to be minimum 6.
+    /// Returned strings are enclosed in quotation marks: '"'.
+    /// If input is null it returns *null string*
+    let inline formatTruncated (maxCharCount:int) (s:string) =
+        Format.truncated(maxCharCount)(s)
+
+    /// Adds a note about trimmed line count if there are more ( ... and %d more lines.).
+    /// Returned strings are enclosed in quotation marks: '"'.
+    /// If string is null returns *null string*.
+    let inline formatTruncatedToMaxLines (maxLineCount:int) (s:string) =
+        Format.truncatedToMaxLines(maxLineCount)(s)
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
@@ -988,16 +929,21 @@ module Str =
     /// eventually returns string.Normalize(NormalizationForm.FormC)
     /// (in Fable this just call txt.normalize("NFKD") instead)
     let normalize (txt:string ) =
-        if isNull txt then StrException.Raise "Str.normalize: txt is null"
-        #if FABLE_COMPILER
-        //https://stackoverflow.com/a/37511463/969070:
-        let n :string = txt?normalize("NFD")
-        emitJsExpr n """$0.replace(/\p{Diacritic}/gu, "")"""
+                if isNull txt then StrException.Raise "Str.normalize: txt is null"
+
+        #if FABLE_COMPILER_JAVASCRIPT
+                //https://stackoverflow.com/a/37511463/969070:
+                let n :string = txt?normalize("NFD")
+                emitJsExpr n """$0.replace(/\p{Diacritic}/gu, "")"""
         #else
-        // better: https://github.com/apache/lucenenet/blob/master/src/Lucene.Net.Analysis.Common/Analysis/Miscellaneous/ASCIIFoldingFilter.cs
-        // https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-from-a-string-in-net
-        txt.Normalize(System.Text.NormalizationForm.FormD)
-        |> Seq.filter ( fun c -> Globalization.CharUnicodeInfo.GetUnicodeCategory(c) <> Globalization.UnicodeCategory.NonSpacingMark  )
-        |> String.Concat
-        |> fun s -> s.Normalize(NormalizationForm.FormC)
+            #if FABLE_COMPILER // Fail for all other Fable targets ( eg, Rust, Python)
+                failwith "Str.normalize: not implemented for Fable targets other than JS"
+            #else
+                // better: https://github.com/apache/lucenenet/blob/master/src/Lucene.Net.Analysis.Common/Analysis/Miscellaneous/ASCIIFoldingFilter.cs
+                // https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-from-a-string-in-net
+                txt.Normalize(System.Text.NormalizationForm.FormD)
+                |> Seq.filter ( fun c -> Globalization.CharUnicodeInfo.GetUnicodeCategory(c) <> Globalization.UnicodeCategory.NonSpacingMark  )
+                |> String.Concat
+                |> fun s -> s.Normalize(NormalizationForm.FormC)
+            #endif
         #endif

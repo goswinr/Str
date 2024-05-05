@@ -23,8 +23,9 @@ With nicer IndexOutOfRangeExceptions that include the bad index and the actual s
 Just open the namespace
 
 ```fsharp
-open Str
+open global.Str // the use of the 'global' specifier is needed when used in F# scripts, so that a second call to 'open Str' does not try to open the Str module that has a RequireQualifiedAccess attribute
 ```
+
 this namespace contains:
 - a module also called `Str`
 - a  Computational Expressions called `str`

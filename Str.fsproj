@@ -47,15 +47,12 @@
     <PackageTags>fsharp;string;fable;fable-library</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(DefineConstants.Contains('FABLE_COMPILER'))">
-    <PackageReference Include="Fable.Core" Version="4.3.0" />
-  </ItemGroup>
 
   <ItemGroup>
-    <!-- <PackageReference Include="Fable.Core" Version="4.3.0" /> -->
-
     <!-- use  Update="FSharp.Core" Version="5.0.2 otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
     <PackageReference Update="FSharp.Core" Version="5.0.2" />
+    <PackageReference Include="Fable.Core" Version="4.3.0"  Condition="$(DefineConstants.Contains('FABLE_COMPILER'))" />
+    <!-- see https://github.com/thoth-org/Thoth.Json.Net/issues/59  it needs the fable compiler flag: - -test:MSBuildCracker -->
 
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
