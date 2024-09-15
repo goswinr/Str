@@ -561,17 +561,17 @@ module Str =
     let (*inline*) compareIgnoreCase strA strB =
         if isNull strA then StrException.Raise "Str.compareIgnoreCase: strA is null, strB: %s" (exnf strB)
         if isNull strB then StrException.Raise "Str.compareIgnoreCase: strB is null, strA: %s" (exnf strA)
-        #if FABLE_COMPILER
-        String.Compare(strA.ToLower(), strB.ToLower(), StringComparison.Ordinal)
-        #else
         String.Compare(strA, strB, StringComparison.OrdinalIgnoreCase )
-        #endif
 
     /// Determines whether the end of this string instance matches the specified string, using StringComparison.Ordinal.
     let (*inline*) endsWith (stringToFindAtEnd : string) (stringSearchInAtEnd:string)  =
         if isNull stringToFindAtEnd then StrException.Raise "Str.endsWith: stringToFindAtEnd is null. (stringSearchInAtEnd:%s) " (exnf stringSearchInAtEnd)
         if isNull stringSearchInAtEnd then StrException.Raise "Str.endsWith: stringSearchInAtEnd is null. (stringToFindAtEnd:%s) " (exnf stringToFindAtEnd)
+        #if FABLE_COMPILER
+        stringSearchInAtEnd.EndsWith(stringToFindAtEnd)
+        #else
         stringSearchInAtEnd.EndsWith(stringToFindAtEnd, StringComparison.Ordinal)
+        #endif
 
     /// Determines whether the end of this string instance matches the specified string, using StringComparison.OrdinalIgnoreCase.
     let (*inline*) endsWithIgnoreCase (stringToFindAtEnd : string) (stringSearchInAtEnd:string)  =
@@ -593,11 +593,8 @@ module Str =
     let (*inline*) startsWithIgnoreCase (stringToFindAtStart:string) (stringToSearchIn:string)  =
         if isNull stringToFindAtStart then StrException.Raise "Str.startsWithIgnoreCase: stringToFindAtStart is null.  (stringToSearchIn:%s) "  (exnf stringToSearchIn)
         if isNull stringToSearchIn then StrException.Raise "Str.startsWithIgnoreCase: stringToSearchIn is null. (stringToFindAtStart:%s)  " (exnf stringToFindAtStart)
-        #if FABLE_COMPILER
-        stringToSearchIn.ToLower().StartsWith(stringToFindAtStart.ToLower())
-        #else
         stringToSearchIn.StartsWith(stringToFindAtStart, StringComparison.OrdinalIgnoreCase)
-        #endif
+
 
     /// Determines whether two specified String objects have the same value, using StringComparison.Ordinal.(=fastest comparison)
     let (*inline*) equals strA strB  =
@@ -609,11 +606,8 @@ module Str =
     let (*inline*) equalsIgnoreCase strA strB =
         if isNull strA then StrException.Raise "Str.equalsIgnoreCase: strA is null, strB: %s" (exnf strB)
         if isNull strB then StrException.Raise "Str.equalsIgnoreCase: strB is null, strA: %s" (exnf strA)
-        #if FABLE_COMPILER
-        strA.ToLower() = strB.ToLower()
-        #else
         String.Equals(strA, strB, StringComparison.OrdinalIgnoreCase )
-        #endif
+
 
     /// Reports the zero-based index of the first occurrence of the specified Unicode character in this string.
     let (*inline*) indexOfChar (charToFind:char) (stringToSearchIn:string)  =
@@ -630,7 +624,7 @@ module Str =
     /// When used in Fable this use the Knuth-Morris-Pratt algorithm via Str.indicesOf
     let (*inline*) indexOfCharFromFor (charToFind:char) startIndex count (stringToSearchIn:string)  =
         if isNull stringToSearchIn then StrException.Raise "Str.indexOfCharFromFor : stringToSearchIn is null. (charToFind:'%c')  (startIndex:%d)  (count:%d) " charToFind startIndex count
-        #if FABLE_COMPILER
+        #if FABLE_COMPILER // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
         let f = indicesOf (stringToSearchIn, string charToFind, startIndex, count, 1)
         if f.Count = 0 then -1 else f.[0]
         #else
@@ -656,8 +650,8 @@ module Str =
     let (*inline*) indexOfStringFromFor (stringToFind:string) (startIndex:int) (count:int) (stringToSearchIn:string)  =
         if isNull stringToFind then StrException.Raise "Str.indexOfStringFromFor: stringToFind is null. (startIndex:%d)  (count:%d)  (stringToSearchIn:%s) " startIndex count (exnf stringToSearchIn)
         if isNull stringToSearchIn then StrException.Raise "Str.indexOfStringFromFor: stringToSearchIn is null. (stringToFind:%s)  (startIndex:%d)  (count:%d) " (exnf stringToFind) startIndex count
-        // TODO add check that Count and start Index is withIn string
-        #if FABLE_COMPILER
+        //TODO add check that Count and start Index is withIn string
+        #if FABLE_COMPILER // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
         let f = indicesOf (stringToSearchIn, stringToFind, startIndex, count, 1)
         if f.Count = 0 then -1 else f.[0]
         #else
