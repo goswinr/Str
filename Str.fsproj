@@ -16,12 +16,11 @@
     <Title>Str</Title>
     <Product>Str</Product>
     <PackageId>Str</PackageId>
-    <Version>0.16.0</Version>
-    <AssemblyVersion>0.16.0</AssemblyVersion>
-    <FileVersion>0.16.0</FileVersion>
+    <Version>0.17.0</Version>
+    <AssemblyVersion>0.17.0</AssemblyVersion>
+    <FileVersion>0.17.0</FileVersion>
     <PackageReleaseNotes>
-    - fix overloads for if StringComparison
-    - check TS build in Fable
+      - change Str to static class from module
     </PackageReleaseNotes>
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2021</Copyright>
@@ -30,6 +29,7 @@
     <!--used on nuget.org-->
     <WarningLevel>5</WarningLevel>
     <!-- WarningLevel 3 is default , see https://github.com/dsyme/fsharp-presentations/blob/master/design-notes/off-by-default-warnings.md -->
+   <Configuration>Release</Configuration>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -50,9 +50,9 @@
 
   <ItemGroup>
     <!-- use  Update="FSharp.Core" Version="5.0.2 otherwise the minimum FSharp.Core version would be forced by the SDK used for building it. this would be needlessly too high-->
-    <PackageReference Update="FSharp.Core" Version="5.0.2" />
+    <PackageReference Update="FSharp.Core" Version="6.0.7" />
     <PackageReference Include="Fable.Core" Version="4.3.0"  Condition="$(DefineConstants.Contains('FABLE_COMPILER'))" />
-    <!-- see https://github.com/thoth-org/Thoth.Json.Net/issues/59  it needs the fable compiler flag: - -test:MSBuildCracker -->
+    <!-- see https://github.com/thoth-org/Thoth.Json.Net/issues/59 it needs the fable compiler flag: - -test:MSBuildCracker -->
 
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>

@@ -23,7 +23,7 @@ With nicer IndexOutOfRangeExceptions that include the bad index and the actual s
 Just open the namespace
 
 ```fsharp
-open global.Str // the use of the 'global' specifier is needed when used in F# scripts, so that a second call to 'open Str' does not try to open the Str module that has a RequireQualifiedAccess attribute
+open Str
 ```
 
 this namespace contains:
@@ -69,6 +69,9 @@ npm test
 
 
 ### Changelog
+`0.17.0`
+- change Str to static class from module
+
 `0.16.0`
 - fix overloads for if StringComparison
 - check TS build in Fable
