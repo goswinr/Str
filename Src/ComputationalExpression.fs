@@ -64,7 +64,7 @@ module ComputationalExpressions =
                 try body b finally compensation  b
 
         member inline this.Using(disposable: #IDisposable, body: #IDisposable -> StringBuilder -> unit) =
-            this.TryFinally(  body disposable ,  fun (b: StringBuilder)  ->
+            this.TryFinally(  body disposable ,  fun (_: StringBuilder)  ->
                 if not <| Object.ReferenceEquals(disposable,null) then // might be disposed already
                     disposable.Dispose() )
 

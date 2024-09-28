@@ -49,20 +49,20 @@ let hello = // "Hello, World !!!"
 [MIT](https://raw.githubusercontent.com/goswinr/Str/main/LICENSE.txt)
 
 ### Test
-All Tests from the from `FSharp.Core`'s `Array` module ported and adapted to run in both javascript and dotnet.
+All Tests run in both javascript and dotnet.
 go to the tests folder
 
 ```bash
 cd Tests
 ```
 
-For testing with .NET using Expecto run
+For testing with .NET using Expecto:
 
 ```bash
 dotnet run
 ```
 
-for testing with Fable.Mocha run
+for testing with Fable.Mocha:
 
 ```bash
 npm test
