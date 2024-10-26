@@ -1,14 +1,12 @@
-![Logo](https://raw.githubusercontent.com/goswinr/Str/main/Doc/logo128.png)
+![Logo](https://raw.githubusercontent.com/goswinr/Str/main/docs/img/logo128.png)
 # Str
 
-[![license](https://img.shields.io/github/license/goswinr/Str)](LICENSE)
-![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 [![Str on nuget.org](https://img.shields.io/nuget/v/Str)](https://www.nuget.org/packages/Str/)
-[![Str on fuget.org](https://www.fuget.org/packages/Str/badge.svg)](https://www.fuget.org/packages/Str)
+[![license](https://img.shields.io/github/license/goswinr/Str)](LICENSE.md)
+![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 
 Str is an F# extension and module library for `System.String`
 It also works with [Fable](https://fable.io/).
-
 
 ### It Includes:
 
@@ -20,15 +18,15 @@ With nicer IndexOutOfRangeExceptions that include the bad index and the actual s
 - Extensive Tests
 
 ### Usage
-Just open the namespace
+Just open the module
 
 ```fsharp
 open Str
 ```
 
-this namespace contains:
-- a module also called `Str`
-- a  Computational Expressions called `str`
+this module contains:
+- a static class also called `Str`
+- a Computational Expressions called `str`
 - this will also auto open the extension members on `System.String`
 
 then you can do:
@@ -44,8 +42,10 @@ let hello = // "Hello, World !!!"
     }
 ```
 
-### License
-[MIT](https://raw.githubusercontent.com/goswinr/Str/main/LICENSE.txt)
+### Full Documentation
+
+[https://goswinr.github.io/Str](https://goswinr.github.io/Str)
+
 
 ### Test
 All Tests run in both javascript and dotnet.
@@ -67,16 +67,8 @@ for testing with Fable.Mocha:
 npm test
 ```
 
+### License
+[MIT](https://raw.githubusercontent.com/goswinr/Str/main/LICENSE.md)
 
 ### Changelog
-
-`0.17.0`
-- change Str to static class from module
-
-`0.16.0`
-- fix overloads for if StringComparison
-- check TS build in Fable
-
-`0.15.0`
-- implementation ported from [FsEx](https://github.com/goswinr/FsEx/blob/main/Src/StringModule.fs )
-- added more tests
+see [CHANGELOG.md](https://raw.githubusercontent.com/goswinr/Str/main/CHANGELOG.md)
