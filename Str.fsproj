@@ -16,16 +16,16 @@
     <Title>Str</Title>
     <Product>Str</Product>
     <PackageId>Str</PackageId>
-    <Version>0.17.0</Version>
-    <AssemblyVersion>0.17.0</AssemblyVersion>
-    <FileVersion>0.17.0</FileVersion>
+    <Version>0.17.1</Version>
+    <AssemblyVersion>0.17.1</AssemblyVersion>
+    <FileVersion>0.17.1</FileVersion>
     <PackageReleaseNotes>
       - change Str to static class from module
     </PackageReleaseNotes>
     <Authors>GoswinR</Authors>
     <Copyright>Goswin Rothenthal 2021</Copyright>
-    <Description>An F# module and extensions library for Str. Works in Fable too.</Description>
-    <PackageDescription>An F# module and extensions Str. Works in Fable too.</PackageDescription>
+    <Description>An F# module and extensions library for .NET strings. Works in Fable too.</Description>
+    <PackageDescription>An F# module and extensions .NET strings. Works in Fable too.</PackageDescription>
     <!--used on nuget.org-->
     <WarningLevel>5</WarningLevel>
     <!-- WarningLevel 3 is default , see https://github.com/dsyme/fsharp-presentations/blob/master/design-notes/off-by-default-warnings.md -->
@@ -46,6 +46,8 @@
     <PackageIcon>logo128.png</PackageIcon>
     <PackageReadmeFile>READMEnuget.md</PackageReadmeFile>
     <PackageTags>fsharp;string;fable;fable-library</PackageTags>
+    <DebugType>embedded</DebugType>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
 

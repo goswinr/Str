@@ -1,14 +1,14 @@
+![Logo](https://raw.githubusercontent.com/goswinr/Str/main/Doc/logo128.png)
 # Str
 
-[![Str on fuget.org](https://www.fuget.org/packages/Str/badge.svg)](https://www.fuget.org/packages/Str)
-![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 [![license](https://img.shields.io/github/license/goswinr/Str)](LICENSE)
+![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
+[![Str on fuget.org](https://www.fuget.org/packages/Str/badge.svg)](https://www.fuget.org/packages/Str)
 
 Str is an F# extension and module library for `System.String`
 It also works with [Fable](https://fable.io/).
 
 
-![Logo](https://raw.githubusercontent.com/goswinr/Str/main/Doc/logo.png)
 
 ### It Includes:
 
