@@ -45,8 +45,8 @@
     <DebugType>embedded</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <RepositoryUrl>https://github.com/goswinr/Str</RepositoryUrl>
-    <FsDocsLicenseLink>https://github.com/goswinr/Str/blob/main/LICENSE.md</FsDocsLicenseLink>
-    <FsDocsReleaseNotesLink>https://github.com/goswinr/Str/blob/main/CHANGELOG.md</FsDocsReleaseNotesLink>
+    <FsDocsLicenseLink>https://goswinr.github.io/Str/LICENSE.html</FsDocsLicenseLink>
+    <FsDocsReleaseNotesLink>https://goswinr.github.io/Str/CHANGELOG.html</FsDocsReleaseNotesLink>
     <PackageProjectUrl>https://goswinr.github.io/Str</PackageProjectUrl>
   </PropertyGroup>
 
@@ -65,9 +65,9 @@
     <None Include="docs/img/logo128.png" Pack="true" PackagePath="" />    <!--PackagePath = "" makes the file available to nuget pack tool-->
     <Content Include="*.fsproj; **/*.fs; **/*.fsi" PackagePath="fable/" />
 
-    <Compile Include="Src\StringBuilder.fs" />
-    <Compile Include="Src\ComputationalExpression.fs" />
-    <Compile Include="Src\Extensions.fs" />
-    <Compile Include="Src\Module.fs" />
+    <Compile Include="Src/StringBuilder.fs" />
+    <Compile Include="Src/ComputationalExpression.fs" />
+    <Compile Include="Src/Extensions.fs" />
+    <Compile Include="Src/Module.fs" />
   </ItemGroup>
 </Project>

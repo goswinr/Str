@@ -29,6 +29,17 @@ jobs:
       # Build the code for the API documentation
       - name: Build code
         run: dotnet build -c Release Str.sln
+
+      # Copy README.md to docs folder as index.md //adde by Goswin
+      - name: make README the index
+        run: cp README.md docs/index.md
+      # Copy LICENSE to docs folder
+      - name: Copy LICENSE to docs
+        run: cp LICENSE docs/LICENSE.md
+      # Copy CHANGELOG.md to docs folder
+      - name: Copy CHANGELOG to docs
+        run: cp CHANGELOG.md docs/CHANGELOG.md
+
       # Generate the documentation files
       - name: Generate the documentation'
         run: dotnet fsdocs build --properties Configuration=Release

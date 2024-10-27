@@ -2,6 +2,9 @@
 # Str
 
 [![Str on nuget.org](https://img.shields.io/nuget/v/Str)](https://www.nuget.org/packages/Str/)
+[![Build Status](https://github.com/goswinr/Str/actions/workflows/docs.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/docs.yml)
+[![Test Status](https://github.com/goswinr/Str/actions/workflows/test.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/test.yml)
+
 [![license](https://img.shields.io/github/license/goswinr/Str)](LICENSE.md)
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 
@@ -15,7 +18,7 @@ It also works with [Fable](https://fable.io/).
 - Extension members on `Str` like `.Get` `.First` `.Last` `.SecondLast` and more.
 With nicer IndexOutOfRangeExceptions that include the bad index and the actual size.
 
-- Extensive Tests
+- Extensive Tests running on both .NET and JS
 
 ### Usage
 Just open the module
@@ -42,9 +45,9 @@ let hello = // "Hello, World !!!"
     }
 ```
 
-### Full Documentation
+### Full API Documentation
 
-[https://goswinr.github.io/Str](https://goswinr.github.io/Str)
+[https://goswinr.github.io/Str](https://goswinr.github.io/Str/reference/str.html)
 
 
 ### Test
@@ -68,7 +71,7 @@ npm test
 ```
 
 ### License
-[MIT](https://raw.githubusercontent.com/goswinr/Str/main/LICENSE.md)
+[MIT](https://github.com/goswinr/Str/blob/main/LICENSE.md)
 
 ### Changelog
-see [CHANGELOG.md](https://raw.githubusercontent.com/goswinr/Str/main/CHANGELOG.md)
+see [CHANGELOG.md](https://github.com/goswinr/Str/blob/main/CHANGELOG.md)
