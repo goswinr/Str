@@ -45,8 +45,8 @@
     <DebugType>embedded</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <RepositoryUrl>https://github.com/goswinr/Str</RepositoryUrl>
-    <FsDocsLicenseLink>https://goswinr.github.io/Str/LICENSE.html</FsDocsLicenseLink>
-    <FsDocsReleaseNotesLink>https://goswinr.github.io/Str/CHANGELOG.html</FsDocsReleaseNotesLink>
+    <FsDocsLicenseLink>https://github.com/goswinr/Str/LICENSE.md</FsDocsLicenseLink>
+    <FsDocsReleaseNotesLink>https://github.com/goswinr/Str/CHANGELOG.md</FsDocsReleaseNotesLink>
     <PackageProjectUrl>https://goswinr.github.io/Str</PackageProjectUrl>
   </PropertyGroup>
 

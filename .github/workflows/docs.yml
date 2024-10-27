@@ -1,6 +1,6 @@
 name: Docs
 
-# copied from https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Ship-it
+# copied and adapted from https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Ship-it
 
 # Trigger this Action when new code is pushed to the main branch
 on:
@@ -36,12 +36,12 @@ jobs:
       # Copy README.md to docs folder as index.md //adde by Goswin
       - name: make README the index
         run: cp README.md docs/index.md
-      # Copy LICENSE to docs folder
-      - name: Copy LICENSE to docs
-        run: cp LICENSE.md docs/LICENSE.md
-      # Copy CHANGELOG.md to docs folder
-      - name: Copy CHANGELOG to docs
-        run: cp CHANGELOG.md docs/CHANGELOG.md
+      # # Copy LICENSE to docs folder
+      # - name: Copy LICENSE to docs
+      #   run: cp LICENSE.md docs/LICENSE.md
+      # # Copy CHANGELOG.md to docs folder
+      # - name: Copy CHANGELOG to docs
+      #   run: cp CHANGELOG.md docs/CHANGELOG.md
 
       # Generate the documentation files
       - name: Generate the documentation'
