@@ -23,6 +23,9 @@ jobs:
       # Setup dotnet, please use a global.json to ensure the right SDK is used!
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x' # Adjust the version as needed
+
       # Restore the local tools
       - name: Restore tools
         run: dotnet tool restore
