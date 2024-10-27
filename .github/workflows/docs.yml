@@ -38,7 +38,7 @@ jobs:
         run: cp README.md docs/index.md
       # Copy LICENSE to docs folder
       - name: Copy LICENSE to docs
-        run: cp LICENSE docs/LICENSE.md
+        run: cp LICENSE.md docs/LICENSE.md
       # Copy CHANGELOG.md to docs folder
       - name: Copy CHANGELOG to docs
         run: cp CHANGELOG.md docs/CHANGELOG.md

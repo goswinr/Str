@@ -24,8 +24,11 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+    #   - name: Build solution
+    #     run: dotnet build --configuration Release --no-restore
+
+    #   - name: Run tests
+    #     run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet run --project ./Tests/Tests.fsproj
