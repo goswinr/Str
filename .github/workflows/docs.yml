@@ -45,7 +45,7 @@ jobs:
         run: dotnet fsdocs build --properties Configuration=Release
       # Upload the static files
       - name: Upload documentation
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./output
 
