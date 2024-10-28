@@ -49,8 +49,8 @@
     <FsDocsReleaseNotesLink>https://github.com/goswinr/Str/blob/main/CHANGELOG.md</FsDocsReleaseNotesLink>
     <PackageProjectUrl>https://goswinr.github.io/Str</PackageProjectUrl>
     <!-- <FsDocsLogoLink>https://github.com/goswinr/Str</FsDocsLogoLink>
-    <FsDocsLogoSource>../Docs/img/logo128.png</FsDocsLogoSource> -->
-    <FsDocsFaviconSource>https://raw.githubusercontent.com/goswinr/Str/refs/heads/main/Docs/img/favicon.ico</FsDocsFaviconSource>
+    <FsDocsLogoSource>img/logo128.png</FsDocsLogoSource> -->
+    <FsDocsFaviconSource>img/favicon.ico</FsDocsFaviconSource>
     <FsDocsWarnOnMissingDocs>true</FsDocsWarnOnMissingDocs>
 
     <ChangelogFile>../CHANGELOG.md</ChangelogFile>
