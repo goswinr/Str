@@ -70,7 +70,10 @@ module ComputationalExpressions =
 
 
 #nowarn "44" //for opening the hidden but not Obsolete module
-
+/// <summary>
+/// This module is automatically opened when the namespace Str is opened.
+/// It provides a computational expression for building strings called <c>str</c>.
+/// </summary>
 [<AutoOpen>]
 module AutoOpenComputationalExpression  =
 
