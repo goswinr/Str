@@ -48,6 +48,10 @@
     <FsDocsLicenseLink>https://github.com/goswinr/Str/blob/main//LICENSE.md</FsDocsLicenseLink>
     <FsDocsReleaseNotesLink>https://github.com/goswinr/Str/blob/main/CHANGELOG.md</FsDocsReleaseNotesLink>
     <PackageProjectUrl>https://goswinr.github.io/Str</PackageProjectUrl>
+    <!-- <FsDocsLogoLink>https://github.com/goswinr/Str</FsDocsLogoLink>
+    <FsDocsLogoSource>../Docs/img/logo128.png</FsDocsLogoSource> -->
+    <FsDocsFaviconSource>../Docs/img/favicon.ico</FsDocsFaviconSource>
+    <FsDocsWarnOnMissingDocs>true</FsDocsWarnOnMissingDocs>
 
     <ChangelogFile>../CHANGELOG.md</ChangelogFile>
   </PropertyGroup>
