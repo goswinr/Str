@@ -28,6 +28,10 @@ jobs:
         run: dotnet run
         working-directory: ./Tests
 
+      # run JS tests:
+
+      - name: Restore .NET tools (Fable)
+        run: dotnet tool restore
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
