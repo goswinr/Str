@@ -1,10 +1,12 @@
+.vs/
 bin/
 obj/
 fable_modules/
 node_modules/
-.vs/
-*.js
-*.ts
+js/
+ts/
+# *.js
+# *.ts
 
 # FSharp.Formatting
 .fsdocs/

@@ -1,4 +1,4 @@
-name: Docs
+name: Generate Html Docs
 
 # copied and adapted from https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Ship-it
 
@@ -18,39 +18,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the source code
-      - uses: actions/checkout@v4
-      # Setup dotnet, please use a global.json to ensure the right SDK is used!
+      - name: Git Checkout source code
+        uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x' # Adjust the version as needed
 
-      # Restore the local tools
-      - name: Restore tools
+
+      - name: Restore dotnet tools
         run: dotnet tool restore
-      # Build the code for the API documentation
-      - name: Build code
-        run: dotnet build -c Release Str.sln
 
-      # Copy README.md to docs folder as index.md //adde by Goswin
-      - name: make README the index
-        run: cp README.md docs/index.md
-      # # Copy LICENSE to docs folder
-      # - name: Copy LICENSE to docs
-      #   run: cp LICENSE.md docs/LICENSE.md
-      # # Copy CHANGELOG.md to docs folder
-      # - name: Copy CHANGELOG to docs
-      #   run: cp CHANGELOG.md docs/CHANGELOG.md
+      - name: Build code to make xml file
+        run: dotnet build -c Release Str.sln # see required xml tags: https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Generating-API-documentation
 
-      # Generate the documentation files
-      - name: Generate the documentation'
-        run: dotnet fsdocs build --properties Configuration=Release
-      # Upload the static files
-      - name: Upload documentation
+      - name: copy README.md to Docs/index.md
+        run: cp README.md Docs/index.md
+
+      - name: Generate the documentation html
+        run: dotnet fsdocs build --properties Configuration=Release --input Docs --output DocsGenerated
+
+      - name: Upload documentation html files
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./output
+          path: ./DocsGenerated
 
   # GitHub Actions recommends deploying in a separate job.
   deploy:

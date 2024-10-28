@@ -2,24 +2,24 @@
 
 open System
 
-
-/// Extensions for StringBuilder
-// like indexOf(str), append which returns unit, ..
+/// Extension methods for StringBuilder.
+/// Like IndexOf(str), append which returns unit,
+/// This module is automatically opened when the namespace Str is opened.
 [<AutoOpen>]
 module AutoOpenExtensionsStringBuilder =
     type Text.StringBuilder with
 
         /// Like .Append(string) but returning unit
-        member inline sb.append (s:string) = sb.Append(s) |> ignore
+        member inline sb.Add (s:string) = sb.Append(s) |> ignore
 
         /// Like .Append(char) but returning unit
-        member inline sb.append (c:char) = sb.Append(c) |> ignore
+        member inline sb.Add (c:char) = sb.Append(c) |> ignore
 
         /// Like .AppendLine(string) but returning unit
-        member inline sb.appendLine (s:string) = sb.AppendLine(s) |> ignore
+        member inline sb.AddLine (s:string) = sb.AppendLine(s) |> ignore
 
         /// Like .AppendLine() but returning unit
-        member inline sb.appendLine() = sb.AppendLine() |> ignore
+        member inline sb.AddLine() = sb.AppendLine() |> ignore
 
         // TODO: add overload with length: sb.IndexOf (c:char, from:int, length:int )
 

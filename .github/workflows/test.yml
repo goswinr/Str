@@ -24,11 +24,20 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-    #   - name: Build solution
-    #     run: dotnet build --configuration Release --no-restore
+      - name: Run tests .NET
+        run: dotnet run
+        working-directory: ./Tests
 
-    #   - name: Run tests
-    #     run: dotnet test --configuration Release --no-build --verbosity normal
 
-      - name: Run tests
-        run: dotnet run --project ./Tests/Tests.fsproj
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x' # Adjust the version as needed
+
+      - name: Clean Install npm dependencies
+        run: npm ci
+        working-directory: ./Tests
+
+      - name: Run tests JS
+        run: npm test
+        working-directory: ./Tests

@@ -8,13 +8,13 @@ updates:
 
   # Update to newer NuGet dependencies
   - package-ecosystem: "nuget"
-    directory: "/"
+    directory: "/Src/"
     schedule:
       interval: "daily"
     ignore:
       - dependency-name: "FSharp.Core"
 
   - package-ecosystem: "nuget"
-    directory: "/Tests"
+    directory: "/Tests/"
     schedule:
       interval: "daily"
