@@ -9,9 +9,12 @@ open Fable.Core
 open Fable.Core.JsInterop
 #endif
 
-
-/// A module with functions for transforming strings
-type Str private () = // using a type not a module prevents the bug where 'open Str' in scripts opens first the namespace and on second run the module.
+/// <summary>The main module with functions for transforming strings. </summary>
+/// <remarks>
+/// It is implemented as a static class with only static methods.
+/// This is not a module so that only the namespace gets opened with <c>open Str</c> and not the module of the same name.
+/// </remarks>
+type Str private () =
 
     /// For string formatting in exceptions. Including surrounding quotes
     static let exnf s = ExtensionsString.exnf s
@@ -488,7 +491,7 @@ type Str private () = // using a type not a module prevents the bug where 'open 
     /// Joins multiple whitespaces into one.
     /// If string is null returns *null string*
     /// Does not include surrounding quotes.
-    static member inline formatInOneLine (s:string) =
+    static member formatInOneLine (s:string) =
         Format.inOneLine(s)
 
     /// Reduces a string length for display to a maximum Length.
@@ -497,13 +500,13 @@ type Str private () = // using a type not a module prevents the bug where 'open 
     /// maxCharCount will be set to be minimum 6.
     /// Returned strings are enclosed in quotation marks: '"'.
     /// If input is null it returns *null string*
-    static member inline formatTruncated (maxCharCount:int) (s:string) =
+    static member formatTruncated (maxCharCount:int) (s:string) =
         Format.truncated(maxCharCount)(s)
 
     /// Adds a note about trimmed line count if there are more ( ... and %d more lines.).
     /// Returned strings are enclosed in quotation marks: '"'.
     /// If string is null returns *null string*.
-    static member inline formatTruncatedToMaxLines (maxLineCount:int) (s:string) =
+    static member formatTruncatedToMaxLines (maxLineCount:int) (s:string) =
         Format.truncatedToMaxLines(maxLineCount)(s)
 
     //-------------------------------------------------------------------------
@@ -940,3 +943,25 @@ type Str private () = // using a type not a module prevents the bug where 'open 
                 |> fun s -> s.Normalize(NormalizationForm.FormC)
             #endif
         #endif
+
+
+
+    /// Checks if the string is NOT null, empty nor just white space.
+    /// Uses String.IsNullOrWhiteSpace |> not
+    static member inline isNotWhite (txt:string) =
+        String.IsNullOrWhiteSpace(txt) |> not
+
+    /// Checks if the string is null, empty or just white space.
+    /// Uses String.IsNullOrWhiteSpace
+    static member inline isWhite (txt:string) =
+        String.IsNullOrWhiteSpace(txt)
+
+    /// Checks if the string is NOT null nor empty.
+    /// Uses String.IsNullOrEmpty |> not
+    static member inline isNotEmpty (txt:string) =
+        String.IsNullOrEmpty(txt)  |> not
+
+    /// Checks if the string is null or empty.
+    /// Uses String.IsNullOrEmpty
+    static member inline isEmpty (txt:string) =
+        String.IsNullOrEmpty(txt)

@@ -1,8 +1,12 @@
 ﻿namespace Str
 open System
 
+
+
+/// This module provides utilities for trimming strings.
+/// mostly for internal error messages
 [<RequireQualifiedAccess>]
-module Format =
+module internal Format =
     open System.Text
 
     /// Joins string into one line.
@@ -96,9 +100,9 @@ module Format =
 
 
 
-
-/// AutoOpen Extensions for String,
-/// provides DoesNotContain methods
+/// Extension methods for System.String.
+/// Like DoesNotContain(str),..,
+/// This module is automatically opened when the namespace Str is opened.
 [<AutoOpen>]
 module AutoOpenExtensionsString =
 
@@ -107,7 +111,7 @@ module AutoOpenExtensionsString =
 
         /// s.IndexOf(subString,StringComparison.Ordinal) = -1
         member inline s.DoesNotContain(subString:string) =
-            s.IndexOf(subString,StringComparison.Ordinal) = -1 // in Fable the StringComparison ar is ignored. Fable should issue a warning for that !
+            s.IndexOf(subString,StringComparison.Ordinal) = -1 // in Fable the StringComparison ar is ignored. TODO Fable should issue a warning for that !
 
         /// s.IndexOf(chr) = -1
         member inline s.DoesNotContain(chr:char) =
@@ -121,7 +125,6 @@ module AutoOpenExtensionsString =
         /// Splits a string into substrings.
         /// Empty entries are included.
         /// s.Split( [|chr|] )
-
         member inline s.Split(chr:char) =  // this overload does not exist by default
             s.Split([|chr|])
 
@@ -130,9 +133,23 @@ module AutoOpenExtensionsString =
         member inline s.IsNotWhite =
             not(String.IsNullOrWhiteSpace s )
 
-/// Adds extension members on System.String
-/// for getting first, second, last and similar indices.
+        /// Calls String.IsNullOrWhiteSpace(str)
+        member inline s.IsWhite =
+            String.IsNullOrWhiteSpace s
+
+        /// Calls not(String.IsNullOrEmpty(str))
+        member inline s.IsNotEmpty =
+            not(String.IsNullOrEmpty s )
+
+        /// Calls String.IsNullOrEmpty(str)
+        member inline s.IsEmpty =
+            String.IsNullOrEmpty s
+
+/// Extension methods for System.String.
+/// Adds extension members on System.String.
+/// E.G. .First, .Second, .Last and similar indices.
 /// Also adds functionality for negative indices and s.Slice(startIdx:int , endIdx: int) that works with negative numbers.
+/// This module is NOT automatically opened when the namespace Str is opened.
 module ExtensionsString =
 
     /// For string formatting in exceptions. Including surrounding quotes
@@ -186,7 +203,6 @@ module ExtensionsString =
         member inline str.ThirdLast =
             if str.Length < 3 then StrException.Raise "Str.ExtensionsString: str.ThirdLast: Failed to get third last character of '%s'" (exnf str)
             str.[str.Length - 3]
-
 
         /// Returns the last x(int) characters of the string
         /// same as string.LastN
