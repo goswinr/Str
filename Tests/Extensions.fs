@@ -4,6 +4,7 @@ module Extensions =
 
     open Str
     open Str.ExtensionsString
+    open System
 
     #if FABLE_COMPILER
     open Fable.Mocha
@@ -97,5 +98,26 @@ module Extensions =
             let s = "Hello, world!"
             let result = s.Slice(-6, -1)
             Expect.equal result "world!" "Expected slice from index -6 to -1 to be 'world'"
+
+        testCase "ReplaceFirst" <| fun _ ->
+            let s = "Hello-XT-world-XT!"
+            let result = s.ReplaceFirst("XT", "000")
+            Expect.equal result "Hello-000-world-XT!" "Expected first occurrence of 'XT' to be replaced with '000'"
+
+        testCase "ReplaceFirst ignore case" <| fun _ ->
+            let s = "Hello-XT-world-XT!"
+            let result = s.ReplaceFirst("xt", "000", StringComparison.OrdinalIgnoreCase)
+            Expect.equal result "Hello-000-world-XT!" "Expected first occurrence of 'xt' to be replaced with '000'"
+
+        testCase "ReplaceLast" <| fun _ ->
+            let s = "Hello-XT-world-XT!"
+            let result = s.ReplaceLast("XT", "000")
+            Expect.equal result "Hello-XT-world-000!" "Expected last occurrence of 'XT' to be replaced with '000'"
+
+        testCase "ReplaceLast ignore case" <| fun _ ->
+            let s = "Hello-XT-world-XT!"
+            let result = s.ReplaceLast("xt", "000", StringComparison.OrdinalIgnoreCase)
+            Expect.equal result "Hello-XT-world-000!" "Expected last occurrence of 'xt' to be replaced with '000'"
+
 
         ]

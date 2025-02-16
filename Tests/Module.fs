@@ -877,6 +877,23 @@ module Module =
             let result = Str.replace "es" "ar" "test"
             Expect.equal result "tart" "Should be 'tart'"
 
+        testCase "Test replacefirst function" <| fun _ ->
+            let result = Str.replaceFirst "es" "ar" "testes"
+            Expect.equal result "tartes" "Should be 'tartes'"
+
+        testCase "Test replacefirst function bad case " <| fun _ ->
+            let result = Str.replaceFirst "eS" "ar" "testes"
+            Expect.equal result "testes" "Should be still be 'testes'"
+
+        testCase "Test replaceLast function" <| fun _ ->
+            let result = Str.replaceLast "es" "ar" "testes"
+            Expect.equal result "testar" "Should be 'testar'"
+
+        testCase "Test replaceLast function bad case " <| fun _ ->
+            let result = Str.replaceLast "eS" "ar" "testes"
+            Expect.equal result "testes" "Should be still be 'testes'"
+
+
         testCase "Test concat function" <| fun _ ->
             let result = Str.concat "$" ["line1"; "line2"; "line3"]
             Expect.equal result "line1$line2$line3"    "Should be 'line1$line2$line3'"

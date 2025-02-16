@@ -105,7 +105,7 @@ type Str private () =
     /// Str.Format.stringTruncatedToMaxLines
     static member (*inline*) truncate (truncateLength:int) (fromString:string) :string =
         if isNull fromString   then StrException.Raise "Str.truncate: fromString is null (truncateLength:%d)" truncateLength
-        if truncateLength < 0  then StrException.Raise "Str.truncate: truncateLength:%d cant be negative(for %s)" truncateLength (exnf fromString)
+        if truncateLength < 0  then StrException.Raise "Str.truncate: truncateLength:%d can't be negative (for %s)" truncateLength (exnf fromString)
         if truncateLength >= fromString.Length then fromString
         else fromString.Substring(0,truncateLength)
 
@@ -116,7 +116,7 @@ type Str private () =
     static member (*inline*) skip (skipLength:int) (fromString:string) :string =
         if isNull fromString  then StrException.Raise "Str.skip: fromString is null (skipLength:%d)" skipLength
         if skipLength > fromString.Length then StrException.Raise "Str.skip: skipLength:%d is longer than string %s" skipLength (exnf fromString)
-        if skipLength < 0 then StrException.Raise "Str.skip: skipLength:%d cant be negative(for  %s)" skipLength (exnf fromString)
+        if skipLength < 0 then StrException.Raise "Str.skip: skipLength:%d can't be negative (for  %s)" skipLength (exnf fromString)
         fromString.Substring(skipLength)
 
     /// Takes a given amount of chars from string.
@@ -125,7 +125,7 @@ type Str private () =
     static member (*inline*) take (takeLength:int) (fromString:string) :string =
         if isNull fromString  then StrException.Raise "Str.take: fromString is null (takeLength:%d)" takeLength
         if takeLength > fromString.Length then StrException.Raise "Str.take: takeLength:%d is longer than string %s. Use String.truncate instead!" takeLength (exnf fromString)
-        if takeLength < 0 then StrException.Raise "Str.take: takeLength:%d cant be negative(for  %s)" takeLength (exnf fromString)
+        if takeLength < 0 then StrException.Raise "Str.take: takeLength:%d can't be negative (for  %s)" takeLength (exnf fromString)
         fromString.Substring(0,takeLength)
 
 
@@ -779,6 +779,27 @@ type Str private () =
         if isNull newValue then StrException.Raise "Str.replace: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
         if isNull txt then StrException.Raise "Str.replace: txt is null. (oldValue:%s)  (newValue:%s) " (exnf oldValue) (exnf newValue)
         txt.Replace(oldValue, newValue) // will return the same instance if text to replace is not found
+
+
+    /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
+    /// (Will return the same instance if text to replace is not found)
+    static member (*inline*) replaceFirst (oldValue:string) (newValue:string) (txt:string)  =
+        if isNull oldValue then StrException.Raise "Str.replaceFirst: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
+        if isNull newValue then StrException.Raise "Str.replaceFirst: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
+        if isNull txt then StrException.Raise "Str.replaceFirst: txt is null. (oldValue:%s)  (newValue:%s) " (exnf oldValue) (exnf newValue)
+        let idx = txt.IndexOf(oldValue)
+        if idx < 0 then txt
+        else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
+
+    /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
+    /// (Will return the same instance if text to replace is not found)
+    static member (*inline*) replaceLast (oldValue:string) (newValue:string) (txt:string)  =
+        if isNull oldValue then StrException.Raise "Str.replaceLast: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
+        if isNull newValue then StrException.Raise "Str.replaceLast: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
+        if isNull txt then StrException.Raise "Str.replaceLast: txt is null. (oldValue:%s)  (newValue:%s) " (exnf oldValue) (exnf newValue)
+        let idx = txt.LastIndexOf(oldValue)
+        if idx < 0 then txt
+        else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
 
     /// Concatenates string with Environment.NewLine
     static member inline concatLines  (lines:string seq) =

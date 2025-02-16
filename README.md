@@ -5,11 +5,12 @@
 [![Build Status](https://github.com/goswinr/Str/actions/workflows/build.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/build.yml)
 [![Docs Build Status](https://github.com/goswinr/Str/actions/workflows/docs.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/docs.yml)
 [![Test Status](https://github.com/goswinr/Str/actions/workflows/test.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/test.yml)
+[![Check dotnet tools](https://github.com/goswinr/Str/actions/workflows/outdatedDotnetTool.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/outdatedDotnetTool.yml)
 [![license](https://img.shields.io/github/license/goswinr/Str)](LICENSE.md)
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 
 Str is an F# extension and module library for `System.String`
-It also works with [Fable](https://fable.io/).
+It also works JS and TS with [Fable](https://fable.io/).
 
 ### It Includes:
 
@@ -47,12 +48,13 @@ let hello = // "Hello, World !!!"
 
 ### Full API Documentation
 
-[https://goswinr.github.io/Str](https://goswinr.github.io/Str/reference/str.html)
+[goswinr.github.io/Str](https://goswinr.github.io/Str/reference/str.html)
 
 
-### Test
+### Tests
 All Tests run in both javascript and dotnet.
-go to the tests folder
+Successful Fable compilation to typescript is verified too.
+Go to the tests folder:
 
 ```bash
 cd Tests
@@ -64,7 +66,7 @@ For testing with .NET using Expecto:
 dotnet run
 ```
 
-for testing with Fable.Mocha:
+for JS testing with Fable.Mocha and TS verification:
 
 ```bash
 npm test

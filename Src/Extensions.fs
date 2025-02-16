@@ -271,3 +271,37 @@ module ExtensionsString =
 
             str.Substring(st,len)
 
+
+        /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
+        /// (Will return the same instance if text to replace is not found)
+        member txt.ReplaceFirst (oldValue:string, newValue:string, comp:StringComparison)  =
+            if isNull oldValue then StrException.Raise "str.ReplaceFirst: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
+            if isNull newValue then StrException.Raise "str.ReplaceFirst: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
+            let idx = txt.IndexOf(oldValue,comp)
+            if idx < 0 then txt
+            else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
+
+        /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
+        /// Using StringComparison.Ordinal
+        /// (Will return the same instance if text to replace is not found)
+        member inline txt.ReplaceFirst (oldValue:string, newValue:string)  =
+            txt.ReplaceFirst(oldValue,newValue,StringComparison.Ordinal)
+
+        /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
+        /// (Will return the same instance if text to replace is not found)
+        member txt.ReplaceLast (oldValue:string, newValue:string, comp:StringComparison)  =
+            if isNull oldValue then StrException.Raise "str.ReplaceLast: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
+            if isNull newValue then StrException.Raise "str.ReplaceLast: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
+            let idx = txt.LastIndexOf(oldValue,comp)
+            if idx < 0 then txt
+            else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
+
+
+        /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
+        /// Using StringComparison.Ordinal
+        /// (Will return the same instance if text to replace is not found)
+        member inline txt.ReplaceLast (oldValue:string, newValue:string)  =
+            txt.ReplaceLast(oldValue,newValue,StringComparison.Ordinal)
+
+
+

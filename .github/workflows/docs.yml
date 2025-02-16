@@ -24,14 +24,14 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x' # Adjust the version as needed
+          dotnet-version: '9.0.x' # Adjust the version as needed
 
 
       - name: Restore dotnet tools
         run: dotnet tool restore
 
       - name: Build code to make xml file
-        run: dotnet build -c Release Str.sln # see required xml tags: https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Generating-API-documentation
+        run: dotnet build -c Release # see required xml tags: https://fsprojects.github.io/FSharp.Formatting/zero-to-hero.html#Generating-API-documentation
 
       - name: copy README.md to Docs/index.md
         run: cp README.md Docs/index.md
