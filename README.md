@@ -10,7 +10,7 @@
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 
 Str is an F# extension and module library for `System.String`
-It also works JS and TS with [Fable](https://fable.io/).
+It compiles to Javascript and Typescript with [Fable](https://fable.io/).
 
 ### It Includes:
 
