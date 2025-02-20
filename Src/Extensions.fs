@@ -111,7 +111,7 @@ module AutoOpenExtensionsString =
 
         /// s.IndexOf(subString,StringComparison.Ordinal) = -1
         member inline s.DoesNotContain(subString:string) =
-            s.IndexOf(subString,StringComparison.Ordinal) = -1 // in Fable the StringComparison ar is ignored. TODO Fable should issue a warning for that !
+            s.IndexOf(subString, StringComparison.Ordinal) = -1 // in Fable the StringComparison ar is ignored. TODO Fable should issue a warning for that !
 
         /// s.IndexOf(chr) = -1
         member inline s.DoesNotContain(chr:char) =
@@ -274,34 +274,21 @@ module ExtensionsString =
 
         /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
-        member txt.ReplaceFirst (oldValue:string, newValue:string, comp:StringComparison)  =
+        member txt.ReplaceFirst (oldValue:string, newValue:string)  =
             if isNull oldValue then StrException.Raise "str.ReplaceFirst: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
             if isNull newValue then StrException.Raise "str.ReplaceFirst: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
-            let idx = txt.IndexOf(oldValue,comp)
+            let idx = txt.IndexOf(oldValue, StringComparison.Ordinal)
             if idx < 0 then txt
             else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
 
-        /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
-        /// Using StringComparison.Ordinal
-        /// (Will return the same instance if text to replace is not found)
-        member inline txt.ReplaceFirst (oldValue:string, newValue:string)  =
-            txt.ReplaceFirst(oldValue,newValue,StringComparison.Ordinal)
 
         /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
-        member txt.ReplaceLast (oldValue:string, newValue:string, comp:StringComparison)  =
+        member txt.ReplaceLast (oldValue:string, newValue:string)  =
             if isNull oldValue then StrException.Raise "str.ReplaceLast: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
             if isNull newValue then StrException.Raise "str.ReplaceLast: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
-            let idx = txt.LastIndexOf(oldValue,comp)
+            let idx = txt.LastIndexOf(oldValue, StringComparison.Ordinal)
             if idx < 0 then txt
             else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
-
-
-        /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
-        /// Using StringComparison.Ordinal
-        /// (Will return the same instance if text to replace is not found)
-        member inline txt.ReplaceLast (oldValue:string, newValue:string)  =
-            txt.ReplaceLast(oldValue,newValue,StringComparison.Ordinal)
-
 
 

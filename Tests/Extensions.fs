@@ -104,20 +104,13 @@ module Extensions =
             let result = s.ReplaceFirst("XT", "000")
             Expect.equal result "Hello-000-world-XT!" "Expected first occurrence of 'XT' to be replaced with '000'"
 
-        testCase "ReplaceFirst ignore case" <| fun _ ->
-            let s = "Hello-XT-world-XT!"
-            let result = s.ReplaceFirst("xt", "000", StringComparison.OrdinalIgnoreCase)
-            Expect.equal result "Hello-000-world-XT!" "Expected first occurrence of 'xt' to be replaced with '000'"
-
         testCase "ReplaceLast" <| fun _ ->
             let s = "Hello-XT-world-XT!"
             let result = s.ReplaceLast("XT", "000")
             Expect.equal result "Hello-XT-world-000!" "Expected last occurrence of 'XT' to be replaced with '000'"
 
-        testCase "ReplaceLast ignore case" <| fun _ ->
-            let s = "Hello-XT-world-XT!"
-            let result = s.ReplaceLast("xt", "000", StringComparison.OrdinalIgnoreCase)
-            Expect.equal result "Hello-XT-world-000!" "Expected last occurrence of 'xt' to be replaced with '000'"
-
-
+        testCase "ReplaceLast casing" <| fun _ ->
+            let s = "Hello-xT-world-Xt!"
+            let result = s.ReplaceLast("XT", "000")
+            Expect.equal result "Hello-xT-world-Xt!" "Expected no occurrence of 'XT' to be replaced with '000'"
         ]
