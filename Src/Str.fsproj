@@ -71,4 +71,9 @@
     <Compile Include="Extensions.fs" />
     <Compile Include="Module.fs" />
   </ItemGroup>
+
+  <Target Name="WriteChangelogVersion" AfterTargets="AfterBuild"><!-- for version checks in github tag based actions -->
+    <WriteLinesToFile File="./bin/ChangelogVersion.txt" Lines="@(CurrentReleaseChangelog)" Overwrite="true" ContinueOnError="false" />
+  </Target>
+
 </Project>
