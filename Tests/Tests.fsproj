@@ -6,7 +6,7 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fable.Core" Version="4.3.0" />
+    <PackageReference Include="Fable.Core" Version="4.4.0" />
     <PackageReference Include="Fable.Mocha" Version="2.17.0" />
     <PackageReference Include="Expecto" Version="10.2.1" />
     <ProjectReference Include="../Src/Str.fsproj" />
