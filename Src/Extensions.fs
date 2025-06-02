@@ -168,16 +168,16 @@ module ExtensionsString =
         /// Throws a descriptive Exception if the index is out of range.
         /// (Use this.GetNeg(i) member if you want to use negative indices too)
         member inline str.Get index =
-            if index < 0 then StrException.Raise "Str.ExtensionsString: str.Get(%d) failed for string of %d chars, use str.GetNeg method if you want negative indices too:\r\n%s" index str.Length (exnf str)
-            if index >= str.Length then StrException.Raise "Str.ExtensionsString: str.Get(%d) failed for string of %d chars:\r\n%s" index str.Length (exnf str)
+            if index < 0 then StrException.Raise $"Str.ExtensionsString: str.Get({index}) failed for string of {str.Length} chars, use str.GetNeg method if you want negative indices too:{Environment.NewLine}{exnf str}"
+            if index >= str.Length then StrException.Raise $"Str.ExtensionsString: str.Get({index}) failed for string of {str.Length} chars:{Environment.NewLine}{exnf str}"
             str.[index]
 
         /// Gets an character at index, same as this.[index] or this.Get(index)
         /// Throws a descriptive Exception if the index is out of range.
         /// (Use this.GetNeg(i) member if you want to use negative indices too)
         member inline str.Idx index =
-            if index < 0 then StrException.Raise "Str.ExtensionsString: str.Idx(%d) failed for string of %d chars, use str.GetNeg method if you want negative indices too:\r\n%s" index str.Length (exnf str)
-            if index >= str.Length then StrException.Raise "Str.ExtensionsString: str.Idx(%d) failed for string of %d chars:\r\n%s" index str.Length (exnf str)
+            if index < 0 then StrException.Raise $"Str.ExtensionsString: str.Idx({index}) failed for string of {str.Length} chars, use str.GetNeg method if you want negative indices too:{Environment.NewLine}{exnf str}"
+            if index >= str.Length then StrException.Raise $"Str.ExtensionsString: str.Idx({index}) failed for string of {str.Length} chars:{Environment.NewLine}{exnf str}"
             str.[index]
 
 
