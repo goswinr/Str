@@ -1,4 +1,4 @@
-namespace Str
+﻿namespace Str
 
 open System
 open System.Text
@@ -508,6 +508,66 @@ type Str private () =
     /// If string is null returns *null string*.
     static member formatTruncatedToMaxLines (maxLineCount:int) (s:string) =
         Format.truncatedToMaxLines(maxLineCount)(s)
+
+
+    /// Insert thousand separators into a string representing a float or int.
+    /// Before and after the decimal point.
+    /// Assumes a string that represent a float or int with '.' as decimal separator and no other input formatting.
+    /// Same as Str.formatLargeNumber but allows to specify the separator character.
+    static member addThousandSeparators (thousandSeparator:char) (number:string) =
+        // copied from https://github.com/goswinr/Euclid/blob/main/Src/Format.fs
+
+        let b = Text.StringBuilder(number.Length + number.Length / 3 + 1)
+        let inline add (c:char) = b.Append(c) |> ignore
+
+        let inline doBeforeComma st en =
+            for i=st to en-1 do // don't go to last one because it shall never get a separator
+                let rest = en-i
+                add number.[i]
+                if rest % 3 = 0 then add thousandSeparator
+            add number.[en] //add last (never with sep)
+
+        let inline doAfterComma st en =
+            add number.[st] //add first (never with sep)
+            for i=st+1 to en do // don't go to last one because it shall never get a separator
+                let pos = i-st
+                if pos % 3 = 0 then add thousandSeparator
+                add number.[i]
+
+        let start =
+            if number.[0] = '-' then  add '-'; 1 // add minus if present and move start location
+            else 0
+
+        match number.IndexOf('.') with
+        | -1 ->
+            match max (number.IndexOf 'e') (number.IndexOf 'E') with //, StringComparison.OrdinalIgnoreCase) // not supported by Fable compiler
+            |  -1  -> doBeforeComma start (number.Length-1)
+            | eIdx -> // if float is in scientific notation don't insert comas into it too:
+                doBeforeComma start (eIdx-1)
+                for e = eIdx to number.Length-1 do
+                    add number.[e]
+        | periodIdx ->
+            if periodIdx>start then
+                doBeforeComma start (periodIdx-1)
+            add '.'
+            if periodIdx < number.Length then
+                match max (number.IndexOf 'e') (number.IndexOf 'E') with //, StringComparison.OrdinalIgnoreCase) with // not supported by Fable compiler
+                |  -1  -> doAfterComma (periodIdx+1) (number.Length-1)
+                | eIdx -> // if float is in scientific notation don't insert comas into it too:
+                    doAfterComma (periodIdx+1) (eIdx-1)
+                    for e = eIdx to number.Length-1 do
+                        add number.[e]
+
+        b.ToString()
+
+    /// Insert thousand separators into a string representing a float or int.
+    /// Before and after the decimal point.
+    /// Assumes a string that represent a float or int with '.' as decimal separator and no other input formatting.
+    /// Uses ' as thousand separator.
+    /// Use Str.addThousandSeparators if you want to specify a different separator.
+    static member formatLargeNumber (number:string) =
+        Str.addThousandSeparators '\'' number
+
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
