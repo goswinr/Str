@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.0] - 2025-10-11
+### Changed
+- BREAKING CHANGE: Change `Str.get` to have index as first parameter and string as second parameter.
+
 ## [0.19.0] - 2025-02-20
 ### Added
 - Add replaceLast and replaceFirst
-
 
 ## [0.18.0] - 2024-10-28
 ### Changed
@@ -41,7 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added more tests
 
 
-[Unreleased]: https://github.com/goswinr/Str/compare/0.19.0...HEAD
+[Unreleased]: https://github.com/goswinr/Str/compare/0.20.0...HEAD
+[0.20.0]: https://github.com/goswinr/Str/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/goswinr/Str/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/goswinr/Str/compare/0.17.2...0.18.0
 [0.17.2]: https://github.com/goswinr/Str/compare/0.17.0...0.17.2

@@ -1,4 +1,4 @@
-﻿namespace Str
+namespace Str
 
 open System
 open System.Text
@@ -21,11 +21,11 @@ type Str private () =
 
 
     /// <summary>Gets an element from an string. (Use string.getNeg(i) function if you want to use negative indices too.)</summary>
-    /// <param name="str">The input string.</param>
     /// <param name="index">The input index.</param>
+    /// <param name="str">The input string.</param>
     /// <returns>The value of the string at the given index.</returns>
     /// <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the index is negative or the input string does not contain enough elements.</exception>
-    static member inline get (str:string) index =
+    static member inline get index (str:string)  =
         if isNull str then StrException.Raise "Str.get: str is null"
         str.Get index
 
