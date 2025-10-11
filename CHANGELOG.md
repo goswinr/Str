@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.20.0] - 2025-10-11
 ### Changed
 - BREAKING CHANGE: Change `Str.get` to have index as first parameter and string as second parameter.
+### Added
+- Str.addThousandSeparators function.
+- Str.formatLargeNumber function.
 
 ## [0.19.0] - 2025-02-20
 ### Added

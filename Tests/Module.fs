@@ -1053,29 +1053,83 @@ module Module =
 
 
 
+        // addThousandSeparators tests
+        testCase "addThousandSeparators should format integer with apostrophe separator" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "1234567"
+            Expect.equal result "1'234'567" "Should be '1'234'567'"
+
+        testCase "addThousandSeparators should format integer with comma separator" <| fun _ ->
+            let result = Str.addThousandSeparators ',' "1234567"
+            Expect.equal result "1,234,567" "Should be '1,234,567'"
+
+        testCase "addThousandSeparators should format small integer without separator" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "123"
+            Expect.equal result "123" "Should be '123'"
+
+        testCase "addThousandSeparators should format negative integer" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "-1234567"
+            Expect.equal result "-1'234'567" "Should be '-1'234'567'"
+
+        testCase "addThousandSeparators should format float with decimal part" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "1234567.89"
+            Expect.equal result "1'234'567.89" "Should be '1'234'567.89'"
+
+        testCase "addThousandSeparators should format float with long decimal part" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "1234.5678901234"
+            Expect.equal result "1'234.567'890'123'4" "Should be '1'234.567'890'123'4'"
+
+        testCase "addThousandSeparators should format negative float" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "-9876543.21"
+            Expect.equal result "-9'876'543.21" "Should be '-9'876'543.21'"
+
+        testCase "addThousandSeparators should handle single digit" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "5"
+            Expect.equal result "5" "Should be '5'"
+
+        testCase "addThousandSeparators should handle zero" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "0"
+            Expect.equal result "0" "Should be '0'"
+
+        testCase "addThousandSeparators should format exactly 1000" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "1000"
+            Expect.equal result "1'000" "Should be '1'000'"
+
+        testCase "addThousandSeparators should format exactly 1 million" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "1000000"
+            Expect.equal result "1'000'000" "Should be '1'000'000'"
+
+        testCase "addThousandSeparators should handle decimal only number" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "0.123456789"
+            Expect.equal result "0.123'456'789" "Should be '0.123'456'789'"
+
+        testCase "addThousandSeparators should format negative with scientific notation" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "-123456.789e-5"
+            Expect.equal result "-123'456.789e-5" "Should be '-123'456.789e-5'"
+
+        testCase "addThousandSeparators should  format negative with scientific notation" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "-1.23456789e-5"
+            Expect.equal result "-1.234'567'89e-5" "Should be '-1.234'567'89e-5'"
+
+        testCase "addThousandSeparators should work with underscore separator" <| fun _ ->
+            let result = Str.addThousandSeparators '_' "123456789"
+            Expect.equal result "123_456_789" "Should be '123_456_789'"
+
+        testCase "addThousandSeparators should work with space separator" <| fun _ ->
+            let result = Str.addThousandSeparators ' ' "123456789"
+            Expect.equal result "123 456 789" "Should be '123 456 789'"
+
+        testCase "addThousandSeparators should work after decimal point" <| fun _ ->
+            let result = Str.addThousandSeparators '_' "12345.6789"
+            Expect.equal result "12_345.678_9" "Should be '12_345.678_9'"
 
 
+        testCase "addThousandSeparators should format with scientific notation" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "1234567e10"
+            Expect.equal result "1'234'567e10" "Should be '1234567e10'"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        testCase "addThousandSeparators should format with scientific notation neg" <| fun _ ->
+            let result = Str.addThousandSeparators '\'' "-1234567e10"
+            Expect.equal result "-1'234'567e10" "Should be '-1234567e10'"
     ]
 
 
