@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.20.0] - 2025-10-11
-### Changed
-- BREAKING CHANGE: Change `Str.get` to have index as first parameter and string as second parameter.
+## [0.21.0] - 2025-12-01
 ### Added
 - Str.addThousandSeparators function.
 - Str.formatLargeNumber function.
+
+## [0.20.0] - 2025-10-11
+### Changed
+- BREAKING CHANGE: Change `Str.get` to have index as first parameter and string as second parameter.
+
 
 ## [0.19.0] - 2025-02-20
 ### Added
@@ -46,8 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation ported from [FsEx](https://github.com/goswinr/FsEx/blob/main/Src/StringModule.fs)
 - Added more tests
 
-
-[Unreleased]: https://github.com/goswinr/Str/compare/0.20.0...HEAD
+[Unreleased]: https://github.com/goswinr/Str/compare/0.21.0...HEAD
+[0.21.0]: https://github.com/goswinr/Str/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/goswinr/Str/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/goswinr/Str/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/goswinr/Str/compare/0.17.2...0.18.0
