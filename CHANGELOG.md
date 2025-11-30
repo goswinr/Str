@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.21.0] - 2025-12-01
 ### Added
 - Str.addThousandSeparators function.
-- Str.formatLargeNumber function.
 
 ## [0.20.0] - 2025-10-11
 ### Changed

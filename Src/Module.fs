@@ -512,10 +512,9 @@ type Str private () =
 
     /// Insert thousand separators into a string representing a float or int.
     /// Before and after the decimal point.
-    /// Assumes a string that represent a float or int with '.' as decimal separator and no other input formatting.
-    /// Same as Str.formatLargeNumber but allows to specify the separator character.
+    /// Assumes a string that represent a float or int
+    /// with '.' as decimal separator and no other input formatting.
     static member addThousandSeparators (thousandSeparator:char) (number:string) =
-        // copied from https://github.com/goswinr/Euclid/blob/main/Src/Format.fs
 
         let b = Text.StringBuilder(number.Length + number.Length / 3 + 1)
         let inline add (c:char) = b.Append(c) |> ignore
@@ -560,13 +559,6 @@ type Str private () =
 
         b.ToString()
 
-    /// Insert thousand separators into a string representing a float or int.
-    /// Before and after the decimal point.
-    /// Assumes a string that represent a float or int with '.' as decimal separator and no other input formatting.
-    /// Uses ' as thousand separator.
-    /// Use Str.addThousandSeparators if you want to specify a different separator.
-    static member formatLargeNumber (number:string) =
-        Str.addThousandSeparators '\'' number
 
 
     //-------------------------------------------------------------------------
