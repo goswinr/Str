@@ -5,7 +5,8 @@
 
     "buildTS": "dotnet fable --outDir ts --noCache  --lang typescript ../Src/Str.fsproj --silent --run npx tsc" ,
     "pretest": "dotnet fable --outDir js --noCache ",
-    "test": "mocha js && npm run buildTS"
+    "test": "mocha js",
+    "testTS": "mocha js && npm run buildTS"
   },
   "dependencies": {
     "mocha": "^11.7.5"
