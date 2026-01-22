@@ -15,7 +15,7 @@ module internal Format =
     /// Joins multiple whitespaces into one.
     /// If string is null returns *null string*
     /// Does not include surrounding quotes.
-    let inOneLine (s:string) =
+    let inOneLine (s:string) : string =
         if isNull s then
             "*null string*"
         else
@@ -68,7 +68,7 @@ module internal Format =
     /// Adds a note about trimmed line count if there are more ( ... and %d more lines.).
     /// Returned strings are enclosed in quotation marks: '"'.
     /// If string is null returns *null string*.
-    let truncatedToMaxLines (maxLineCount:int) (s:string) =
+    let truncatedToMaxLines (maxLineCount:int) (s:string) : string =
         let maxLines = max 1 maxLineCount
         if isNull s then
             "*null string*"
@@ -110,39 +110,39 @@ module AutoOpenExtensionsString =
     type System.String with
 
         /// s.IndexOf(subString,StringComparison.Ordinal) = -1
-        member inline s.DoesNotContain(subString:string) =
+        member inline s.DoesNotContain(subString:string) : bool =
             s.IndexOf(subString, StringComparison.Ordinal) = -1 // in Fable the StringComparison ar is ignored. TODO Fable should issue a warning for that !
 
         /// s.IndexOf(chr) = -1
-        member inline s.DoesNotContain(chr:char) =
+        member inline s.DoesNotContain(chr:char) : bool =
             s.IndexOf(chr) = -1
 
         /// s.IndexOf(char) <> -1
 
-        member inline s.Contains(chr:char) =  // this overload does not exist by default
+        member inline s.Contains(chr:char) : bool =  // this overload does not exist by default
             s.IndexOf(chr) <> -1
 
         /// Splits a string into substrings.
         /// Empty entries are included.
         /// s.Split( [|chr|] )
-        member inline s.Split(chr:char) =  // this overload does not exist by default
+        member inline s.Split(chr:char) : string[] =  // this overload does not exist by default
             s.Split([|chr|])
 
 
         /// Calls not(String.IsNullOrWhiteSpace(str))
-        member inline s.IsNotWhite =
+        member inline s.IsNotWhite : bool =
             not(String.IsNullOrWhiteSpace s )
 
         /// Calls String.IsNullOrWhiteSpace(str)
-        member inline s.IsWhite =
+        member inline s.IsWhite : bool =
             String.IsNullOrWhiteSpace s
 
         /// Calls not(String.IsNullOrEmpty(str))
-        member inline s.IsNotEmpty =
+        member inline s.IsNotEmpty : bool =
             not(String.IsNullOrEmpty s )
 
         /// Calls String.IsNullOrEmpty(str)
-        member inline s.IsEmpty =
+        member inline s.IsEmpty : bool =
             String.IsNullOrEmpty s
 
 /// Extension methods for System.String.
@@ -153,7 +153,7 @@ module AutoOpenExtensionsString =
 module ExtensionsString =
 
     /// For string formatting in exceptions. Including surrounding quotes
-    let exnf s  = s |> Format.truncated 100
+    let exnf s : string = s |> Format.truncated 100
 
     /// An Exception for the string functions defined in Str
     type StrException(txt:string)=
@@ -167,7 +167,7 @@ module ExtensionsString =
         /// Gets an character at index, same as this.[index] or this.Idx(index)
         /// Throws a descriptive Exception if the index is out of range.
         /// (Use this.GetNeg(i) member if you want to use negative indices too)
-        member inline str.Get index =
+        member inline str.Get index : char =
             if index < 0 then StrException.Raise $"Str.ExtensionsString: str.Get({index}) failed for string of {str.Length} chars, use str.GetNeg method if you want negative indices too:{Environment.NewLine}{exnf str}"
             if index >= str.Length then StrException.Raise $"Str.ExtensionsString: str.Get({index}) failed for string of {str.Length} chars:{Environment.NewLine}{exnf str}"
             str.[index]
@@ -175,7 +175,7 @@ module ExtensionsString =
         /// Gets an character at index, same as this.[index] or this.Get(index)
         /// Throws a descriptive Exception if the index is out of range.
         /// (Use this.GetNeg(i) member if you want to use negative indices too)
-        member inline str.Idx index =
+        member inline str.Idx index : char =
             if index < 0 then StrException.Raise $"Str.ExtensionsString: str.Idx({index}) failed for string of {str.Length} chars, use str.GetNeg method if you want negative indices too:{Environment.NewLine}{exnf str}"
             if index >= str.Length then StrException.Raise $"Str.ExtensionsString: str.Idx({index}) failed for string of {str.Length} chars:{Environment.NewLine}{exnf str}"
             str.[index]
@@ -183,48 +183,48 @@ module ExtensionsString =
 
         /// Returns the last valid index in the string
         /// same as: s.Length - 1
-        member inline str.LastIndex =
+        member inline str.LastIndex : int =
             str.Length - 1
 
         /// Returns the last character of the string
         /// fails if string is empty
-        member inline str.Last =
+        member inline str.Last : char =
             if str.Length = 0 then StrException.Raise "Str.ExtensionsString: str.Last: Failed to get last character of empty String"
             str.[str.Length - 1]
 
         /// Returns the second last character of the string
         /// fails if string has less than two characters
-        member inline str.SecondLast =
+        member inline str.SecondLast : char =
             if str.Length < 2 then StrException.Raise "Str.ExtensionsString: str.SecondLast: Failed to get second last character of '%s'" (exnf str)
             str.[str.Length - 2]
 
         /// Returns the third last character of the string
         /// fails if string has less than three characters
-        member inline str.ThirdLast =
+        member inline str.ThirdLast : char =
             if str.Length < 3 then StrException.Raise "Str.ExtensionsString: str.ThirdLast: Failed to get third last character of '%s'" (exnf str)
             str.[str.Length - 3]
 
         /// Returns the last x(int) characters of the string
         /// same as string.LastN
-        member inline str.LastX x =
+        member inline str.LastX x : string =
             if str.Length < x then StrException.Raise "Str.ExtensionsString: str.LastX: Failed to get last %d character of too short String '%s' " x (exnf str)
             str.Substring(str.Length-x,x)
 
         /// Returns then first character of the string
         /// fails if string is empty
-        member inline str.First =
+        member inline str.First : char =
             if str.Length = 0 then StrException.Raise "Str.ExtensionsString: str.First: Failed to get first character of empty String"
             str.[0]
 
         /// Returns the second character of the string
         /// fails if string has less than two characters
-        member inline str.Second =
+        member inline str.Second : char =
             if str.Length < 2 then StrException.Raise "Str.ExtensionsString: str.Second: Failed to get second character of '%s'" (exnf str)
             str.[1]
 
         /// Returns the third character of the string
         /// fails if string has less than three characters
-        member inline str.Third =
+        member inline str.Third : char =
             if str.Length < 3 then StrException.Raise "Str.ExtensionsString: str.Third: Failed to get third character of '%s'" (exnf str)
             str.[2]
 
@@ -232,7 +232,7 @@ module ExtensionsString =
         /// Gets an item in the string by index.
         /// Allows for negative index too ( -1 is last item,  like Python)
         /// (from the release of F# 5 on a negative index can also be done with '^' prefix. E.g. ^0 for the last item)
-        member str.GetNeg index =
+        member str.GetNeg index : char =
             let len = str.Length
             let ii =  if index < 0 then len + index else index
             if ii<0 || ii >= len then StrException.Raise "Str.ExtensionsString: str.GetNeg: Failed to get character at index %d from string of %d items: %s" index str.Length (exnf str)
@@ -240,7 +240,7 @@ module ExtensionsString =
 
         /// Any index will return a value.
         /// Rarr is treated as an endless loop in positive and negative direction
-        member str.GetLooped index =
+        member str.GetLooped index : char =
             let len = str.Length
             if len=0 then StrException.Raise "Str.ExtensionsString: str.GetLooped: Failed to get character at index %d from string of 0 items" index
             let t = index % len
@@ -274,7 +274,7 @@ module ExtensionsString =
 
         /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
-        member txt.ReplaceFirst (oldValue:string, newValue:string)  =
+        member txt.ReplaceFirst (oldValue:string, newValue:string) : string =
             if isNull oldValue then StrException.Raise "str.ReplaceFirst: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
             if isNull newValue then StrException.Raise "str.ReplaceFirst: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
             let idx = txt.IndexOf(oldValue, StringComparison.Ordinal)
@@ -284,7 +284,7 @@ module ExtensionsString =
 
         /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
-        member txt.ReplaceLast (oldValue:string, newValue:string)  =
+        member txt.ReplaceLast (oldValue:string, newValue:string) : string =
             if isNull oldValue then StrException.Raise "str.ReplaceLast: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
             if isNull newValue then StrException.Raise "str.ReplaceLast: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
             let idx = txt.LastIndexOf(oldValue, StringComparison.Ordinal)
