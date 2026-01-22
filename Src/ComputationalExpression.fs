@@ -70,6 +70,7 @@ module ComputationalExpressions =
 
 
 #nowarn "44" //for opening the hidden but not Obsolete module
+
 /// <summary>
 /// This module is automatically opened when the namespace Str is opened.
 /// It provides a computational expression for building strings called <c>str</c>.
@@ -81,7 +82,8 @@ module AutoOpenComputationalExpression  =
     /// use 'yield' to append text, or seq of strings separated by a new line
     /// and 'yield!' (with an exclamation mark)  to append text followed by a new line character.
     /// accepts ints, guids and chars  too.
-    let str : ComputationalExpressions.StringBufferBuilder = ComputationalExpressions.StringBufferBuilder ()
+    let str  =
+        ComputationalExpressions.StringBufferBuilder ()
 
 
 

@@ -57,9 +57,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.17.0]: https://github.com/goswinr/Str/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/goswinr/Str/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/goswinr/Str/releases/tag/0.15.0
-
-<!--
-use to get tag dates:
-git log --tags --simplify-by-decoration --pretty="format:%ci %d"
-
--->
