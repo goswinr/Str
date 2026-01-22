@@ -17,7 +17,7 @@ open Fable.Core.JsInterop
 type Str private () =
 
     /// For string formatting in exceptions. Including surrounding quotes
-    static let exnf s = ExtensionsString.exnf s
+    static let exnf s : string = ExtensionsString.exnf s
 
 
     /// <summary>Gets an element from an string. (Use string.getNeg(i) function if you want to use negative indices too.)</summary>
@@ -25,7 +25,7 @@ type Str private () =
     /// <param name="str">The input string.</param>
     /// <returns>The value of the string at the given index.</returns>
     /// <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the index is negative or the input string does not contain enough elements.</exception>
-    static member inline get index (str:string)  =
+    static member inline get index (str:string) : char =
         if isNull str then StrException.Raise "Str.get: str is null"
         str.Get index
 
@@ -150,14 +150,14 @@ type Str private () =
 
     /// Ensures all lines end on System.Environment.NewLine
     /// Code: StringBuilder(s).Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Environment.NewLine).ToString()
-    static member (*inline*) unifyLineEndings (txt:string) =
+    static member (*inline*) unifyLineEndings (txt:string) : string =
         if isNull txt then StrException.Raise "Str.unifyLineEndings: input is null"
         StringBuilder(txt).Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Environment.NewLine).ToString() // TODO correct but not performance optimized
 
     /// Returns everything before first occurrence of a given splitting string.
     /// Or fails if splitter is not found.
     /// Uses StringComparison.Ordinal
-    static member (*inline*) before (splitter:string) (stringToSearchIn:string) :string =
+    static member (*inline*) before (splitter:string) (stringToSearchIn:string) : string =
         if isNull stringToSearchIn then StrException.Raise "Str.before: stringToSearchIn is null (splitter:%s)" (exnf splitter)
         if isNull splitter         then StrException.Raise "Str.before: splitter is null (stringToSearchIn:%s)" (exnf stringToSearchIn)
         let start = stringToSearchIn.IndexOf(splitter, StringComparison.Ordinal)
@@ -413,14 +413,14 @@ type Str private () =
 
 
     /// Makes First letter of string to Uppercase if possible.
-    static member (*inline*) up1 (txt:string)  =
+    static member (*inline*) up1 (txt:string) : string =
         if isNull txt then StrException.Raise "Str.up1: string is null"
         if txt="" || Char.IsUpper txt.[0] then txt
         elif Char.IsLetter txt.[0] then  String(Char.ToUpper(txt.[0]),1) + txt.Substring(1)
         else txt
 
     /// Makes First letter of string to Lowercase if possible.
-    static member (*inline*) low1 (txt:string) =
+    static member (*inline*) low1 (txt:string) : string =
         if isNull txt then StrException.Raise "Str.low1: string is null"
         if txt="" || Char.IsLower txt.[0] then txt
         elif Char.IsLetter txt.[0] then  String(Char.ToLower(txt.[0]),1) + txt.Substring(1)
@@ -428,7 +428,7 @@ type Str private () =
 
     /// Allows for negative indices too. -1 is last character
     /// The resulting string includes the end index.
-    static member (*inline*) slice startIdx endIdx (txt:string) =
+    static member (*inline*) slice startIdx endIdx (txt:string) : string =
         if isNull txt then StrException.Raise "Str.slice: string is null! startIdx: %d endIdx: %d" startIdx  endIdx
         let count = txt.Length
         let st  = if startIdx<0 then count+startIdx    else startIdx
@@ -445,7 +445,7 @@ type Str private () =
 
     /// Counts how often a substring appears in a string
     /// Uses StringComparison.Ordinal
-    static member (*inline*) countSubString (subString:string) (textToSearch:string) =
+    static member (*inline*) countSubString (subString:string) (textToSearch:string) : int =
         if isNull textToSearch then StrException.Raise "Str.countSubString: textToSearch is null, subString: %s" (exnf subString)
         if isNull subString    then StrException.Raise "Str.countSubString: subString is null, textToSearch: %s" (exnf textToSearch)
         let rec find (fromIdx:int) k =
@@ -455,7 +455,7 @@ type Str private () =
         find 0 0
 
     /// Counts how often a character appears in a string
-    static member (*inline*) countChar (chr:char) (textToSearch:string) =
+    static member (*inline*) countChar (chr:char) (textToSearch:string) : int =
         if isNull textToSearch then StrException.Raise "Str.countChar: textToSearch is null, chr: '%c'" chr
         let rec find (fromIdx:int) k =
             let r = textToSearch.IndexOf(chr, fromIdx)
@@ -465,23 +465,23 @@ type Str private () =
 
 
     /// Add a suffix to string
-    static member (*inline*) addSuffix (suffix:string) (txt:string) =
+    static member (*inline*) addSuffix (suffix:string) (txt:string) : string =
         if isNull txt then StrException.Raise "Str.addSuffix: txt is null"
         txt+suffix
 
 
     /// Add a prefix to string
-    static member (*inline*) addPrefix (prefix:string) (txt:string) =
+    static member (*inline*) addPrefix (prefix:string) (txt:string) : string =
         if isNull txt then StrException.Raise "Str.addPrefix: txt is null"
         prefix+txt
 
     /// Add a double quote (") at start and end.
-    static member (*inline*) inQuotes (txt:string) =
+    static member (*inline*) inQuotes (txt:string) : string =
         if isNull txt then StrException.Raise "Str.inQuotes: txt is null"
         "\"" + txt + "\""
 
     /// Add a single quote (') at start and end.
-    static member (*inline*) inSingleQuotes (txt:string) =
+    static member (*inline*) inSingleQuotes (txt:string) : string =
         if isNull txt then StrException.Raise "Str.inSingleQuotes: txt is null"
         "'" + txt + "'"
 
@@ -491,7 +491,7 @@ type Str private () =
     /// Joins multiple whitespaces into one.
     /// If string is null returns *null string*
     /// Does not include surrounding quotes.
-    static member formatInOneLine (s:string) =
+    static member formatInOneLine (s:string) : string =
         Format.inOneLine(s)
 
     /// Reduces a string length for display to a maximum Length.
@@ -500,13 +500,13 @@ type Str private () =
     /// maxCharCount will be set to be minimum 6.
     /// Returned strings are enclosed in quotation marks: '"'.
     /// If input is null it returns *null string*
-    static member formatTruncated (maxCharCount:int) (s:string) =
+    static member formatTruncated (maxCharCount:int) (s:string) : string =
         Format.truncated(maxCharCount)(s)
 
     /// Adds a note about trimmed line count if there are more ( ... and %d more lines.).
     /// Returned strings are enclosed in quotation marks: '"'.
     /// If string is null returns *null string*.
-    static member formatTruncatedToMaxLines (maxLineCount:int) (s:string) =
+    static member formatTruncatedToMaxLines (maxLineCount:int) (s:string) : string =
         Format.truncatedToMaxLines(maxLineCount)(s)
 
 
@@ -514,7 +514,7 @@ type Str private () =
     /// Before and after the decimal point.
     /// Assumes a string that represent a float or int
     /// with '.' as decimal separator and no other input formatting.
-    static member addThousandSeparators (thousandSeparator:char) (number:string) =
+    static member addThousandSeparators (thousandSeparator:char) (number:string) : string =
 
         let b = Text.StringBuilder(number.Length + number.Length / 3 + 1)
         let inline add (c:char) = b.Append(c) |> ignore
@@ -997,7 +997,7 @@ type Str private () =
     /// and then removes all non-spacing marks
     /// eventually returns string.Normalize(NormalizationForm.FormC)
     /// (in Fable this just call txt.normalize("NFKD") instead)
-    static member normalize (txt:string ) =
+    static member normalize (txt:string ) : string =
                 if isNull txt then StrException.Raise "Str.normalize: txt is null"
 
         #if FABLE_COMPILER_JAVASCRIPT
