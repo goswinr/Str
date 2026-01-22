@@ -5,7 +5,6 @@
 [![Build Status](https://github.com/goswinr/Str/actions/workflows/build.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/build.yml)
 [![Docs Build Status](https://github.com/goswinr/Str/actions/workflows/docs.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/docs.yml)
 [![Test Status](https://github.com/goswinr/Str/actions/workflows/test.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/test.yml)
-[![Check dotnet tools](https://github.com/goswinr/Str/actions/workflows/outdatedDotnetTool.yml/badge.svg)](https://github.com/goswinr/Str/actions/workflows/outdatedDotnetTool.yml)
 [![license](https://img.shields.io/github/license/goswinr/Str)](LICENSE.md)
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 
