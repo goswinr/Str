@@ -12,7 +12,7 @@
 Str is an F# extension and module library for `System.String`
 It compiles to Javascript and Typescript with [Fable](https://fable.io/).
 
-### It Includes:
+## It Includes
 
 - A `Str` module that has all methods from the String type as functions, and more. Adapted and extended from [FSharpX](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/String.fs)
 - A  Computational Expressions `str` that can be used build up strings ( using a StringBuilder internally).
@@ -50,6 +50,10 @@ let hello = // "Hello, World !!!"
 
 [goswinr.github.io/Str](https://goswinr.github.io/Str/reference/str.html)
 
+### Use of AI and LLMs
+All core function are are written by hand to ensure performance and correctness.<br>
+However, AI tools have been used for code review, typo and grammar checking in documentation<br>
+and to generate not all but many of the tests.
 
 ### Tests
 All Tests run in both javascript and dotnet.
