@@ -210,7 +210,7 @@ module ExtensionsString =
             if str.Length < x then StrException.Raise "Str.ExtensionsString: str.LastX: Failed to get last %d character of too short String '%s' " x (exnf str)
             str.Substring(str.Length-x,x)
 
-        /// Returns then first character of the string
+        /// Returns the first character of the string
         /// fails if string is empty
         member inline str.First : char =
             if str.Length = 0 then StrException.Raise "Str.ExtensionsString: str.First: Failed to get first character of empty String"
@@ -250,7 +250,7 @@ module ExtensionsString =
 
         /// Allows for negative indices too. -1 is last character
         /// Includes end index in string
-        /// for example str.Slice(0,-3) will trim off the last two character from the string
+        /// for example str.Slice(0,-3) will trim off the last two characters from the string
         member str.Slice(startIdx:int , endIdx:int):string =
              // overrides of existing methods are unfortunately silently ignored and not possible. see https://github.com/dotnet/fsharp/issues/3692#issuecomment-334297164
             let count = str.Length

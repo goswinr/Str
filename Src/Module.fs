@@ -20,7 +20,7 @@ type Str private () =
     static let exnf s : string = ExtensionsString.exnf s
 
 
-    /// <summary>Gets an element from an string. (Use string.getNeg(i) function if you want to use negative indices too.)</summary>
+    /// <summary>Gets an element from a string. (Use string.GetNeg(i) method if you want to use negative indices too.)</summary>
     /// <param name="index">The input index.</param>
     /// <param name="str">The input string.</param>
     /// <returns>The value of the string at the given index.</returns>
@@ -38,7 +38,7 @@ type Str private () =
     /// <param name="searchFromIdx">The index to start searching from</param>
     /// <param name="searchLength">The length of the text to search in</param>
     /// <param name="findNoMoreThan">The maximum number of occurrences to find</param>
-    /// <returns>Return s list of the indices of the occurrences of the pattern in the text.
+    /// <returns>Returns a list of the indices of the occurrences of the pattern in the text.
     /// The distance between these indices may be less than the pattern length
     /// Overlapping patterns are returned each time. e.g "abab" in "abababab" will return [0;2;4]</returns>
     static member indicesOf (text:string, pattern:string, searchFromIdx:int,  searchLength:int, findNoMoreThan:int): ResizeArray<int> =
@@ -99,10 +99,10 @@ type Str private () =
 
     /// Takes at most a given amount of chars from string.
     /// If input is shorter than truncateLength returns input string unchanged.
-    /// Alternatively use the functions that include formatting:
-    /// Str.Format.stringTruncated and
-    /// Str.Format.stringInOneLine
-    /// Str.Format.stringTruncatedToMaxLines
+    /// Alternatively use the methods that include formatting:
+    /// Str.formatTruncated and
+    /// Str.formatInOneLine
+    /// Str.formatTruncatedToMaxLines
     static member (*inline*) truncate (truncateLength:int) (fromString:string) :string =
         if isNull fromString   then StrException.Raise "Str.truncate: fromString is null (truncateLength:%d)" truncateLength
         if truncateLength < 0  then StrException.Raise "Str.truncate: truncateLength:%d can't be negative (for %s)" truncateLength (exnf fromString)
@@ -111,7 +111,7 @@ type Str private () =
 
 
 
-    /// Remove characters from the starts.
+    /// Remove characters from the start.
     /// fromString.Substring(skipLength)
     static member (*inline*) skip (skipLength:int) (fromString:string) :string =
         if isNull fromString  then StrException.Raise "Str.skip: fromString is null (skipLength:%d)" skipLength
@@ -120,11 +120,11 @@ type Str private () =
         fromString.Substring(skipLength)
 
     /// Takes a given amount of chars from string.
-    /// Fails if input is shorter than takeLength. Use String.truncate instead if you want to avoid failing in that case.
+    /// Fails if input is shorter than takeLength. Use Str.truncate instead if you want to avoid failing in that case.
     /// Code: fromString.Substring(0,takeLength)
     static member (*inline*) take (takeLength:int) (fromString:string) :string =
         if isNull fromString  then StrException.Raise "Str.take: fromString is null (takeLength:%d)" takeLength
-        if takeLength > fromString.Length then StrException.Raise "Str.take: takeLength:%d is longer than string %s. Use String.truncate instead!" takeLength (exnf fromString)
+        if takeLength > fromString.Length then StrException.Raise "Str.take: takeLength:%d is longer than string %s. Use Str.truncate instead!" takeLength (exnf fromString)
         if takeLength < 0 then StrException.Raise "Str.take: takeLength:%d can't be negative (for  %s)" takeLength (exnf fromString)
         fromString.Substring(0,takeLength)
 
@@ -899,13 +899,13 @@ type Str private () =
         if isNull stringToSplit then StrException.Raise "Str.splitByChars: stringToSplit is null. (separators:%A)  " separators
         stringToSplit.Split(separators, StringSplitOptions.RemoveEmptyEntries)
 
-    /// Split string by any of multiple Chars, Keep Empty Entries
+    /// Split string by a Char, Keep Empty Entries
     /// Like : string.Split([| splitter |], StringSplitOptions.None)
     static member (*inline*) splitCharKeep (separator:char) (stringToSplit:string)  =
         if isNull stringToSplit then StrException.Raise "Str.splitCharKeep: stringToSplit is null. (separator:'%c') " separator
         stringToSplit.Split(separator)
 
-    /// Split string by a Char, Keep Empty Entries
+    /// Split string by any of multiple Chars, Keep Empty Entries
     /// Like : string.Split([| splitter |], StringSplitOptions.None)
     static member (*inline*) splitCharsKeep (separators:char[]) (stringToSplit:string)  =
         if isNull stringToSplit then StrException.Raise "Str.splitCharsKeep: stringToSplit is null. (separators:%A)" separators
