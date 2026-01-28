@@ -13,25 +13,31 @@ Str is an F# extension and module library for `System.String` that compiles to b
 dotnet build Src/Str.fsproj
 
 # Build in release mode
-dotnet build --configuration Release
+dotnet build Src/Str.fsproj --configuration Release
+
+# Build entire solution
+dotnet build Str.sln
 ```
 
 ## Testing
 
-Tests run on both .NET and JavaScript platforms:
+Tests must be run from the Tests directory. Both .NET and JavaScript tests share the same test definitions.
 
 ```bash
 # Run .NET tests (using Expecto)
-cd Tests
-dotnet run
+cd Tests && dotnet run
+
+# Run .NET tests with filter (Expecto supports --filter)
+cd Tests && dotnet run -- --filter "test name pattern"
 
 # Run JavaScript tests (using Fable.Mocha)
-cd Tests
-npm test
+cd Tests && npm test
 
 # Run JS tests + verify TypeScript compilation
-cd Tests
-npm run testTS
+cd Tests && npm run testTS
+
+# Watch mode for TypeScript development
+cd Tests && npm run watchTS
 ```
 
 ## Architecture
@@ -40,7 +46,10 @@ The library is structured in a specific compilation order (defined in `Src/Str.f
 
 1. **StringBuilder.fs** - Extension methods for `System.Text.StringBuilder` (IndexOf, Contains, Add methods)
 2. **ComputationalExpression.fs** - The `str` computation expression builder using StringBuilder internally
-3. **Extensions.fs** - Extension methods for `System.String` (Get, First, Last, Slice, negative indexing, etc.)
+3. **Extensions.fs** - Contains:
+   - `Format` internal module for truncating strings in error messages
+   - `AutoOpenExtensionsString` module with basic string extensions (DoesNotContain, IsWhite, etc.)
+   - `ExtensionsString` module with `StrException` type and advanced extensions (Get, First, Last, Slice, negative indexing)
 4. **Module.fs** - The main `Str` static class with all string manipulation functions
 
 ### Key Design Patterns
@@ -50,7 +59,7 @@ The library is structured in a specific compilation order (defined in `Src/Str.f
   - A computation expression `str` for building strings
   - Auto-opened extension members on `System.String` and `StringBuilder`
 
-- **Fable Compatibility**: Uses `#if FABLE_COMPILER` directives for JavaScript-specific implementations (e.g., the Knuth-Morris-Pratt algorithm in `Str.indicesOf` replaces .NET's `IndexOf` with count parameter)
+- **Fable Compatibility**: Uses `#if FABLE_COMPILER` directives for JavaScript-specific implementations (e.g., the Knuth-Morris-Pratt algorithm in `Str.indicesOf` replaces .NET's `IndexOf` with count parameter, `Str.normalize` uses JS-specific diacritic removal)
 
 - **Error Handling**: Custom `StrException` type with descriptive messages including truncated string values via `Format.truncated`
 
