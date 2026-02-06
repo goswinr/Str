@@ -32,7 +32,9 @@ this module contains:
 - a Computational Expressions called `str`
 - this will also auto open the extension members on `System.String`
 
-then you can do:
+### The `str` Computation Expression
+
+Build strings using a StringBuilder internally, with support for `string`, `char`, `int`, loops, and sequences:
 
 ```fsharp
 let hello = // "Hello, World !!!"
@@ -43,6 +45,241 @@ let hello = // "Hello, World !!!"
         for i in 1..3 do
             "!"
     }
+```
+
+Use `yield!` to append with a trailing newline:
+
+```fsharp
+let lines = // "line one\nline two\nline three\n"
+    str {
+        yield! "line one"
+        yield! "line two"
+        yield! "line three"
+    }
+```
+
+You can also yield a sequence of strings (each gets a newline):
+
+```fsharp
+let fromSeq = // "a\nb\nc\n"
+    str {
+        ["a"; "b"; "c"]
+    }
+```
+
+### Before / After / Between
+
+Extract parts of a string relative to a delimiter. Each operation comes in three variants:
+- **throws** if not found (e.g. `before`)
+- **try** returns `Option` (e.g. `tryBefore`)
+- **orInput** returns the full input string if not found (e.g. `beforeOrInput`)
+
+```fsharp
+Str.before  "/"  "hello/world"         // "hello"
+Str.after   "/"  "hello/world"         // "world"
+Str.between "("  ")" "say (hi) now"    // "hi"
+
+Str.tryBefore "?" "no-question"        // None
+Str.tryAfter  "/" "hello/world"        // Some "world"
+
+Str.beforeOrInput "?" "no-question"    // "no-question"
+```
+
+Character versions are available too:
+
+```fsharp
+Str.beforeChar '/' "hello/world"       // "hello"
+Str.afterChar  '/' "hello/world"       // "world"
+Str.betweenChars '(' ')' "say (hi) now" // "hi"
+```
+
+### Splitting
+
+```fsharp
+Str.splitOnce ":"  "key:value"                // ("key", "value")
+Str.splitTwice "(" ")" "before(inside)after"  // ("before", "inside", "after")
+
+// Option variants for safe splitting
+Str.trySplitOnce ":" "no-colon"               // None
+
+// Split into array (removes empty entries by default)
+Str.split "," "a,,b,c"                        // [|"a"; "b"; "c"|]
+Str.splitKeep "," "a,,b,c"                    // [|"a"; ""; "b"; "c"|]
+
+// Split by characters
+Str.splitChar ',' "a,b,c"                     // [|"a"; "b"; "c"|]
+Str.splitChars [|',';';'|] "a,b;c"            // [|"a"; "b"; "c"|]
+
+// Split by line endings (\r\n, \r, \n)
+Str.splitLines "line1\nline2\r\nline3"        // [|"line1"; "line2"; "line3"|]
+```
+
+### Slicing with Negative Indices
+
+Negative indices count from the end (`-1` is the last character). The end index is **inclusive**.
+
+```fsharp
+Str.slice  0   4  "Hello, World!"    // "Hello"
+Str.slice  7  11  "Hello, World!"    // "World"
+Str.slice  0  -1  "Hello, World!"    // "Hello, World!"
+Str.slice -6  -2  "Hello, World!"    // "orld"
+```
+
+### Truncate, Skip, and Take
+
+```fsharp
+Str.truncate 5 "Hello, World!"    // "Hello"  (safe, returns input if shorter)
+Str.take     5 "Hello, World!"    // "Hello"  (fails if input is shorter)
+Str.skip     7 "Hello, World!"    // "World!"
+```
+
+### Replace Variants
+
+```fsharp
+Str.replace      "o" "0" "foo boo"  // "f00 b00"  (all occurrences)
+Str.replaceFirst "o" "0" "foo boo"  // "f0o boo"  (first only)
+Str.replaceLast  "o" "0" "foo boo"  // "foo bo0"  (last only)
+Str.replaceChar  'o' '0' "foo boo"  // "f00 b00"  (all char occurrences)
+```
+
+### Delete
+
+```fsharp
+Str.delete     "World" "Hello World"  // "Hello "
+Str.deleteChar '!'     "Hi!!!"        // "Hi"
+```
+
+### Case Functions
+
+```fsharp
+Str.up1    "hello"  // "Hello"  (capitalize first letter)
+Str.low1   "Hello"  // "hello"  (lowercase first letter)
+Str.toUpper "hi"    // "HI"
+Str.toLower "HI"    // "hi"
+```
+
+### Contains and Comparison
+
+```fsharp
+Str.contains           "world" "hello world"  // true
+Str.containsIgnoreCase "WORLD" "hello world"  // true
+Str.notContains        "xyz"   "hello world"  // true
+
+Str.startsWith  "hello" "hello world"   // true
+Str.endsWith    "world" "hello world"   // true
+Str.equals      "abc"   "abc"           // true  (ordinal)
+Str.equalsIgnoreCase "ABC" "abc"        // true
+```
+
+### Counting
+
+```fsharp
+Str.countSubString "ab" "ababab"  // 3
+Str.countChar      'a'  "banana"  // 3
+```
+
+### Whitespace and Emptiness Checks
+
+```fsharp
+Str.isWhite    "  \t "   // true
+Str.isNotWhite "hello"   // true
+Str.isEmpty    ""         // true
+Str.isNotEmpty "hello"   // true
+```
+
+### Padding, Quoting, and Affixes
+
+```fsharp
+Str.padLeft      10 "hi"         // "        hi"
+Str.padRightWith 10 '.' "hi"    // "hi........"
+Str.addPrefix "pre-"  "fix"     // "pre-fix"
+Str.addSuffix "-end"  "start"   // "start-end"
+Str.inQuotes       "hi"         // "\"hi\""
+Str.inSingleQuotes "hi"         // "'hi'"
+```
+
+### Number Formatting
+
+```fsharp
+Str.addThousandSeparators '\'' "1234567"       // "1'234'567"
+Str.addThousandSeparators ','  "1234567.1234"  // "1,234,567.123,4"
+```
+
+### Normalize (Remove Diacritics)
+
+```fsharp
+Str.normalize "cafe\u0301"  // "cafe"  (removes combining accent)
+Str.normalize "Zurich"      // "Zurich"
+```
+
+### Display Formatting
+
+```fsharp
+Str.formatInOneLine "hello\n  world"            // "hello world"
+Str.formatTruncated 10 "a long string here"     // "\"a lon(..)\"" (truncated with placeholder)
+Str.formatTruncatedToMaxLines 2 "a\nb\nc\nd"    // shows first 2 lines + note
+```
+
+### Joining
+
+```fsharp
+Str.concat ", " ["a"; "b"; "c"]   // "a, b, c"
+Str.concatLines  ["a"; "b"; "c"]  // "a\nb\nc" (joined with Environment.NewLine)
+```
+
+### Extension Members (auto-opened)
+
+These are available on any `string` as soon as you `open Str`:
+
+```fsharp
+let s = "Hello, World!"
+
+s.Contains('W')              // true  (char overload)
+s.DoesNotContain("xyz")     // true
+s.IsWhite                   // false
+s.IsNotEmpty                // true
+```
+
+### Extension Members (from ExtensionsString module)
+
+For richer indexing and slicing, also open the `ExtensionsString` module:
+
+```fsharp
+open Str.ExtensionsString
+
+let s = "Hello"
+s.First        // 'H'
+s.Last         // 'o'
+s.Second       // 'e'
+s.SecondLast   // 'l'
+s.ThirdLast    // 'l'
+s.LastX 3      // "llo"
+s.LastIndex    // 4
+
+s.Get 0        // 'H'  (with descriptive errors on out-of-range)
+s.GetNeg(-1)   // 'o'  (negative index, -1 = last)
+s.GetLooped 7  // 'e'  (wraps around: 7 % 5 = 2)
+
+s.Slice(0, 2)    // "Hel"  (inclusive end index)
+s.Slice(-3, -1)  // "llo"
+
+s.ReplaceFirst("l", "L")  // "HeLlo"  (only first match)
+s.ReplaceLast ("l", "L")  // "HelLo"  (only last match)
+```
+
+### StringBuilder Extensions (auto-opened)
+
+`open Str` also adds convenience methods to `System.Text.StringBuilder`:
+
+```fsharp
+open System.Text
+
+let sb = StringBuilder()
+sb.Add "hello"       // Append returning unit (instead of StringBuilder)
+sb.Add ','           // Append char returning unit
+sb.AddLine " world"  // AppendLine returning unit
+sb.Contains "hello"  // true
+sb.IndexOf ","       // 5
 ```
 
 ### Full API Documentation
