@@ -15,7 +15,7 @@ It compiles to Javascript and Typescript with [Fable](https://fable.io/).
 
 - A `Str` module that has all methods from the String type as functions, and more. Adapted and extended from [FSharpX](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/String.fs)
 - A  Computational Expressions `str` that can be used build up strings ( using a StringBuilder internally).
-- Extension members on `Str` like `.Get` `.First` `.Last` `.SecondLast` and more.
+- Extension members on `System.String` like `.Get` `.First` `.Last` `.SecondLast` and more.
 With nicer IndexOutOfRangeExceptions that include the bad index and the actual size.
 
 - Extensive Tests running on both .NET and JS
