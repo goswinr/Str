@@ -20,6 +20,17 @@ With nicer IndexOutOfRangeExceptions that include the bad index and the actual s
 
 - Extensive Tests running on both .NET and JS
 
+
+### Full API Documentation
+
+[goswinr.github.io/Str](https://goswinr.github.io/Str/reference/str.html)
+
+### Use of AI and LLMs in the project
+All core function are are written by hand to ensure performance and correctness.<br>
+However, AI tools have been used for code review, typo and grammar checking in documentation<br>
+and to generate not all but many of the tests.
+
+
 ### Usage
 Just open the module
 
@@ -281,15 +292,6 @@ sb.AddLine " world"  // AppendLine returning unit
 sb.Contains "hello"  // true
 sb.IndexOf ","       // 5
 ```
-
-### Full API Documentation
-
-[goswinr.github.io/Str](https://goswinr.github.io/Str/reference/str.html)
-
-### Use of AI and LLMs
-All core function are are written by hand to ensure performance and correctness.<br>
-However, AI tools have been used for code review, typo and grammar checking in documentation<br>
-and to generate not all but many of the tests.
 
 ### Tests
 All Tests run in both javascript and dotnet.
