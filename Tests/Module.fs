@@ -1020,6 +1020,80 @@ module Module =
                 }
             Expect.equal result "Hello World" "Should be 'Hello World'"
 
+        // ============ str computation expression comprehensive tests ============
+        testCase "str builder with char yield" <| fun _ ->
+            let result = str { 'H'; 'i' }
+            Expect.equal result "Hi" "Should be 'Hi'"
+
+        testCase "str builder with int yield" <| fun _ ->
+            let result = str { 42 }
+            Expect.equal result "42" "Should be '42'"
+
+        testCase "str builder with Guid yield" <| fun _ ->
+            let g = System.Guid.Empty
+            let result = str { g }
+            Expect.equal result "00000000-0000-0000-0000-000000000000" "Should be empty guid"
+
+        testCase "str builder with yield! for string (with newline)" <| fun _ ->
+            let result = str { yield! "Hello" ; "World" }
+            Expect.isTrue (result.Contains("Hello")) "Should contain Hello"
+            Expect.isTrue (result.Contains("World")) "Should contain World"
+            Expect.isTrue (result.Contains("\n") || result.Contains("\r")) "Should contain newline"
+
+        testCase "str builder with yield! for char (with newline)" <| fun _ ->
+            let result = str { yield! 'A' ; 'B' }
+            Expect.isTrue (result.Contains("A")) "Should contain A"
+            Expect.isTrue (result.Contains("B")) "Should contain B"
+
+        testCase "str builder with yield! for int (with newline)" <| fun _ ->
+            let result = str { yield! 1 ; 2 }
+            Expect.isTrue (result.Contains("1")) "Should contain 1"
+            Expect.isTrue (result.Contains("2")) "Should contain 2"
+
+        testCase "str builder with seq of strings" <| fun _ ->
+            let lines = ["Line1"; "Line2"; "Line3"]
+            let result = str { yield lines }
+            Expect.isTrue (result.Contains("Line1")) "Should contain Line1"
+            Expect.isTrue (result.Contains("Line2")) "Should contain Line2"
+            Expect.isTrue (result.Contains("Line3")) "Should contain Line3"
+
+        testCase "str builder with for loop" <| fun _ ->
+            let result = str {
+                for i in 1..3 do
+                    yield i.ToString()
+            }
+            Expect.equal result "123" "Should be '123'"
+
+        testCase "str builder with for loop and strings" <| fun _ ->
+            let items = ["A"; "B"; "C"]
+            let result = str {
+                for item in items do
+                    yield item
+            }
+            Expect.equal result "ABC" "Should be 'ABC'"
+
+        testCase "str builder with while loop" <| fun _ ->
+            let mutable count = 0
+            let result = str {
+                while count < 3 do
+                    yield "X"
+                    count <- count + 1
+            }
+            Expect.equal result "XXX" "Should be 'XXX'"
+
+        testCase "str builder empty" <| fun _ ->
+            let result = str { () }
+            Expect.equal result "" "Should be empty string"
+
+        testCase "str builder mixed types" <| fun _ ->
+            let result = str {
+                "Count: "
+                42
+                ", Char: "
+                'X'
+            }
+            Expect.equal result "Count: 42, Char: X" "Should combine different types"
+
 
 
         // normalize
@@ -1130,6 +1204,111 @@ module Module =
         testCase "addThousandSeparators should format with scientific notation neg" <| fun _ ->
             let result = Str.addThousandSeparators '\'' "-1234567e10"
             Expect.equal result "-1'234'567e10" "Should be '-1234567e10'"
+
+        // ============ Str.get tests ============
+        testCase "Str.get should return character at index" <| fun _ ->
+            let result = Str.get 0 "Hello"
+            Expect.equal result 'H' "Should be 'H'"
+
+        testCase "Str.get should return character at middle index" <| fun _ ->
+            let result = Str.get 2 "Hello"
+            Expect.equal result 'l' "Should be 'l'"
+
+        testCase "Str.get should return character at last index" <| fun _ ->
+            let result = Str.get 4 "Hello"
+            Expect.equal result 'o' "Should be 'o'"
+
+        testCase "Str.get should throw for null string" <| fun _ ->
+            Expect.throws (fun _ -> Str.get 0 null |> ignore) "Should throw for null"
+
+        testCase "Str.get should throw for negative index" <| fun _ ->
+            Expect.throws (fun _ -> Str.get -1 "Hello" |> ignore) "Should throw for negative index"
+
+        testCase "Str.get should throw for index out of range" <| fun _ ->
+            Expect.throws (fun _ -> Str.get 10 "Hello" |> ignore) "Should throw for out of range"
+
+        testCase "Str.get should throw for empty string" <| fun _ ->
+            Expect.throws (fun _ -> Str.get 0 "" |> ignore) "Should throw for empty string"
+
+        // ============ Str.isWhite tests ============
+        testCase "Str.isWhite should return true for null" <| fun _ ->
+            let result = Str.isWhite null
+            Expect.isTrue result "Should be true for null"
+
+        testCase "Str.isWhite should return true for empty string" <| fun _ ->
+            let result = Str.isWhite ""
+            Expect.isTrue result "Should be true for empty"
+
+        testCase "Str.isWhite should return true for whitespace only" <| fun _ ->
+            let result = Str.isWhite "   "
+            Expect.isTrue result "Should be true for whitespace"
+
+        testCase "Str.isWhite should return true for tabs and newlines" <| fun _ ->
+            let result = Str.isWhite "\t\n\r"
+            Expect.isTrue result "Should be true for tabs/newlines"
+
+        testCase "Str.isWhite should return false for non-whitespace" <| fun _ ->
+            let result = Str.isWhite "Hello"
+            Expect.isFalse result "Should be false for text"
+
+        testCase "Str.isWhite should return false for whitespace with text" <| fun _ ->
+            let result = Str.isWhite "  Hello  "
+            Expect.isFalse result "Should be false for text with whitespace"
+
+        // ============ Str.isNotWhite tests ============
+        testCase "Str.isNotWhite should return false for null" <| fun _ ->
+            let result = Str.isNotWhite null
+            Expect.isFalse result "Should be false for null"
+
+        testCase "Str.isNotWhite should return false for empty string" <| fun _ ->
+            let result = Str.isNotWhite ""
+            Expect.isFalse result "Should be false for empty"
+
+        testCase "Str.isNotWhite should return false for whitespace only" <| fun _ ->
+            let result = Str.isNotWhite "   "
+            Expect.isFalse result "Should be false for whitespace"
+
+        testCase "Str.isNotWhite should return true for non-whitespace" <| fun _ ->
+            let result = Str.isNotWhite "Hello"
+            Expect.isTrue result "Should be true for text"
+
+        testCase "Str.isNotWhite should return true for whitespace with text" <| fun _ ->
+            let result = Str.isNotWhite "  Hello  "
+            Expect.isTrue result "Should be true for text with whitespace"
+
+        // ============ Str.isEmpty tests ============
+        testCase "Str.isEmpty should return true for null" <| fun _ ->
+            let result = Str.isEmpty null
+            Expect.isTrue result "Should be true for null"
+
+        testCase "Str.isEmpty should return true for empty string" <| fun _ ->
+            let result = Str.isEmpty ""
+            Expect.isTrue result "Should be true for empty"
+
+        testCase "Str.isEmpty should return false for whitespace" <| fun _ ->
+            let result = Str.isEmpty "   "
+            Expect.isFalse result "Should be false for whitespace (not empty)"
+
+        testCase "Str.isEmpty should return false for non-empty string" <| fun _ ->
+            let result = Str.isEmpty "Hello"
+            Expect.isFalse result "Should be false for text"
+
+        // ============ Str.isNotEmpty tests ============
+        testCase "Str.isNotEmpty should return false for null" <| fun _ ->
+            let result = Str.isNotEmpty null
+            Expect.isFalse result "Should be false for null"
+
+        testCase "Str.isNotEmpty should return false for empty string" <| fun _ ->
+            let result = Str.isNotEmpty ""
+            Expect.isFalse result "Should be false for empty"
+
+        testCase "Str.isNotEmpty should return true for whitespace" <| fun _ ->
+            let result = Str.isNotEmpty "   "
+            Expect.isTrue result "Should be true for whitespace (not empty)"
+
+        testCase "Str.isNotEmpty should return true for non-empty string" <| fun _ ->
+            let result = Str.isNotEmpty "Hello"
+            Expect.isTrue result "Should be true for text"
     ]
 
 

@@ -16,6 +16,7 @@
     <ProjectReference Include="../Src/Str.fsproj" />
     <Compile Include="Module.fs" />
     <Compile Include="Extensions.fs" />
+    <Compile Include="StringBuilder.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 </Project>
