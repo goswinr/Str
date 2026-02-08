@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-02-08
+### Fixed
+- fixed Stringbuilder.Chars in JS by using Fabel 5.0.alpha 23
+
 ## [0.21.0] - 2025-12-01
 ### Added
 - Str.addThousandSeparators function.
@@ -24,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Rename extension methods on StringBuilder from `.append` to `.Add`
 ### Added
--  better documentation
+- better documentation
 - .IsEmpty extension method
 - .IsNotEmpty extension method
 - .IsWhite extension method
@@ -48,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation ported from [FsEx](https://github.com/goswinr/FsEx/blob/main/Src/StringModule.fs)
 - Added more tests
 
-[Unreleased]: https://github.com/goswinr/Str/compare/0.21.0...HEAD
+[Unreleased]: https://github.com/goswinr/Str/compare/0.22.0...HEAD
+[0.22.0]: https://github.com/goswinr/Str/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/goswinr/Str/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/goswinr/Str/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/goswinr/Str/compare/0.18.0...0.19.0
