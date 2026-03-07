@@ -4,7 +4,7 @@ open System
 open System.Text
 open ExtensionsString // for StrException
 
-#if FABLE_COMPILER_JAVASCRIPT
+#if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT_JAVASCRIPT
 open Fable.Core
 open Fable.Core.JsInterop
 #endif
@@ -580,11 +580,11 @@ type Str private () =
         // TODO for JS: use toLowerCase or regex: https://stackoverflow.com/questions/60634324/check-whether-string-contains-substring-non-case-sensitive
         if isNull stringToSearchIn then StrException.Raise "Str.containsIgnoreCase: stringToSearchIn is null, stringToFind: %s"     (exnf stringToFind)
         if isNull stringToFind     then StrException.Raise "Str.containsIgnoreCase: stringToFind     is null, stringToSearchIn: %s" (exnf stringToSearchIn)
-        #if FABLE_COMPILER
+      #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
         stringToSearchIn.ToLower().Contains(stringToFind.ToLower())
-        #else
+      #else
         stringToSearchIn.IndexOf(stringToFind, StringComparison.OrdinalIgnoreCase) <> -1
-        #endif
+      #endif
 
 
     /// Returns true if a specified substring does NOT occurs within this string.
@@ -621,7 +621,7 @@ type Str private () =
     static member (*inline*) endsWith (stringToFindAtEnd : string) (stringSearchInAtEnd:string)  =
         if isNull stringToFindAtEnd then StrException.Raise "Str.endsWith: stringToFindAtEnd is null. (stringSearchInAtEnd:%s) " (exnf stringSearchInAtEnd)
         if isNull stringSearchInAtEnd then StrException.Raise "Str.endsWith: stringSearchInAtEnd is null. (stringToFindAtEnd:%s) " (exnf stringToFindAtEnd)
-        // #if FABLE_COMPILER // fixed in Fable 4.21.0
+        // #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // fixed in Fable 4.21.0
         // stringSearchInAtEnd.EndsWith(stringToFindAtEnd)
         // #else
         stringSearchInAtEnd.EndsWith(stringToFindAtEnd, StringComparison.Ordinal)
@@ -631,7 +631,7 @@ type Str private () =
     static member (*inline*) endsWithIgnoreCase (stringToFindAtEnd : string) (stringSearchInAtEnd:string)  =
         if isNull stringToFindAtEnd then StrException.Raise "Str.endsWithIgnoreCase: stringToFindAtEnd is null. (stringSearchInAtEnd:%s) " (exnf stringSearchInAtEnd)
         if isNull stringSearchInAtEnd then StrException.Raise "Str.endsWithIgnoreCase: stringSearchInAtEnd is null. (stringToFindAtEnd:%s) " (exnf stringToFindAtEnd)
-        // #if FABLE_COMPILER // fixed in Fable 4.21.0
+        // #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // fixed in Fable 4.21.0
         // stringSearchInAtEnd.ToLower().EndsWith(stringToFindAtEnd.ToLower())
         // #else
         stringSearchInAtEnd.EndsWith(stringToFindAtEnd, StringComparison.OrdinalIgnoreCase)
@@ -677,12 +677,13 @@ type Str private () =
     /// The search starts at a specified character position and examines a specified number of character positions.
     /// When used in Fable this use the Knuth-Morris-Pratt algorithm via Str.indicesOf
     static member (*inline*) indexOfCharFromFor (charToFind:char) startIndex count (stringToSearchIn:string)  =
-        if isNull stringToSearchIn then StrException.Raise "Str.indexOfCharFromFor : stringToSearchIn is null. (charToFind:'%c')  (startIndex:%d)  (count:%d) " charToFind startIndex count
-        #if FABLE_COMPILER // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
-        let f = Str.indicesOf (stringToSearchIn, string charToFind, startIndex, count, 1)
-        if f.Count = 0 then -1 else f.[0]
+        #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
+            if isNull stringToSearchIn then StrException.Raise "Str.indexOfCharFromFor : stringToSearchIn is null. (charToFind:'%c')  (startIndex:%d)  (count:%d) " charToFind startIndex count
+            let f = Str.indicesOf (stringToSearchIn, string charToFind, startIndex, count, 1)
+            if f.Count = 0 then -1 else f.[0]
         #else
-        stringToSearchIn.IndexOf(charToFind, startIndex, count)
+            if isNull stringToSearchIn then StrException.Raise "Str.indexOfCharFromFor : stringToSearchIn is null. (charToFind:'%c')  (startIndex:%d)  (count:%d) " charToFind startIndex count
+            stringToSearchIn.IndexOf(charToFind, startIndex, count)
         #endif
 
     /// Reports the zero-based index of the first occurrence of the specified string in this instance, using StringComparison.Ordinal.
@@ -702,14 +703,19 @@ type Str private () =
     /// The search starts at a specified character position and examines a specified number of character positions, using StringComparison.Ordinal.
     /// When used in Fable this use the Knuth-Morris-Pratt algorithm via Str.indicesOf
     static member (*inline*) indexOfStringFromFor (stringToFind:string) (startIndex:int) (count:int) (stringToSearchIn:string)  =
-        if isNull stringToFind then StrException.Raise "Str.indexOfStringFromFor: stringToFind is null. (startIndex:%d)  (count:%d)  (stringToSearchIn:%s) " startIndex count (exnf stringToSearchIn)
-        if isNull stringToSearchIn then StrException.Raise "Str.indexOfStringFromFor: stringToSearchIn is null. (stringToFind:%s)  (startIndex:%d)  (count:%d) " (exnf stringToFind) startIndex count
-        //TODO add check that Count and start Index is withIn string
-        #if FABLE_COMPILER // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
-        let f = Str.indicesOf (stringToSearchIn, stringToFind, startIndex, count, 1)
-        if f.Count = 0 then -1 else f.[0]
+        #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
+            if isNull stringToFind then StrException.Raise "Str.indexOfStringFromFor: stringToFind is null. (startIndex:%d)  (count:%d)  (stringToSearchIn:%s) " startIndex count (exnf stringToSearchIn)
+            if isNull stringToSearchIn then StrException.Raise "Str.indexOfStringFromFor: stringToSearchIn is null. (stringToFind:%s)  (startIndex:%d)  (count:%d) " (exnf stringToFind) startIndex count
+            //TODO add check that Count and start Index is withIn string
+            if stringToFind.Length = 0 then
+                startIndex // match .NET behavior: empty string is found at startIndex
+            else
+                let f = Str.indicesOf (stringToSearchIn, stringToFind, startIndex, count, 1)
+                if f.Count = 0 then -1 else f.[0]
         #else
-        stringToSearchIn.IndexOf(stringToFind, startIndex, count, StringComparison.Ordinal)
+            if isNull stringToFind then StrException.Raise "Str.indexOfStringFromFor: stringToFind is null. (startIndex:%d)  (count:%d)  (stringToSearchIn:%s) " startIndex count (exnf stringToSearchIn)
+            if isNull stringToSearchIn then StrException.Raise "Str.indexOfStringFromFor: stringToSearchIn is null. (stringToFind:%s)  (startIndex:%d)  (count:%d) " (exnf stringToFind) startIndex count
+            stringToSearchIn.IndexOf(stringToFind, startIndex, count, StringComparison.Ordinal)
         #endif
 
     /// Reports the zero-based index of the first occurrence in this instance of any character in a specified array of Unicode characters.
@@ -1000,12 +1006,12 @@ type Str private () =
     static member normalize (txt:string ) : string =
                 if isNull txt then StrException.Raise "Str.normalize: txt is null"
 
-        #if FABLE_COMPILER_JAVASCRIPT
+        #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT_JAVASCRIPT
                 //https://stackoverflow.com/a/37511463/969070:
                 let n :string = txt?normalize("NFD")
-                emitJsExpr n """$0.replace(/\p{Diacritic}/gu, "")"""
+                emitJsExpr n """$0.replace(/\p{Mn}/gu, "")"""
         #else
-            #if FABLE_COMPILER // Fail for all other Fable targets ( eg, Rust, Python)
+            #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // Fail for all other Fable targets ( eg, Rust, Python)
                 failwith "Str.normalize: not implemented for Fable targets other than JS"
             #else
                 // better: https://github.com/apache/lucenenet/blob/master/src/Lucene.Net.Analysis.Common/Analysis/Miscellaneous/ASCIIFoldingFilter.cs

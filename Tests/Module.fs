@@ -2,7 +2,7 @@ namespace Tests
 
 open Str
 
-#if FABLE_COMPILER
+#if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
 open Fable.Mocha
 #else
 open Expecto
@@ -1116,7 +1116,7 @@ module Module =
             Expect.equal result "cremeo brulee" "Should be equal"
 
 
-        #if FABLE_COMPILER
+        #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
         // error FABLE: Microsoft.FSharp.Core.Operators.ArrayExtensions.String.GetReverseIndex is not supported by Fable
         #else
         // slice
@@ -1309,6 +1309,507 @@ module Module =
         testCase "Str.isNotEmpty should return true for non-empty string" <| fun _ ->
             let result = Str.isNotEmpty "Hello"
             Expect.isTrue result "Should be true for text"
+
+        // ============================================================
+        // Extensive tests for functions with FABLE_COMPILER directives
+        // to ensure JS and .NET runtimes behave the same way
+        // ============================================================
+
+        // ============ containsIgnoreCase - extensive tests ============
+
+        testCase "containsIgnoreCase: exact match same case" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "Hello" "Hello") "exact match"
+
+        testCase "containsIgnoreCase: all uppercase needle in lowercase haystack" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "HELLO" "hello world") "upper in lower"
+
+        testCase "containsIgnoreCase: all lowercase needle in uppercase haystack" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "hello" "HELLO WORLD") "lower in upper"
+
+        testCase "containsIgnoreCase: mixed case needle" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "hElLo" "Hello World") "mixed case"
+
+        testCase "containsIgnoreCase: empty needle in non-empty haystack" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "" "Hello") "empty needle always found"
+
+        testCase "containsIgnoreCase: empty needle in empty haystack" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "" "") "empty in empty"
+
+        testCase "containsIgnoreCase: non-empty needle in empty haystack" <| fun _ ->
+            Expect.isFalse (Str.containsIgnoreCase "x" "") "can't find in empty"
+
+        testCase "containsIgnoreCase: needle longer than haystack" <| fun _ ->
+            Expect.isFalse (Str.containsIgnoreCase "Hello World!" "Hello") "needle longer"
+
+        testCase "containsIgnoreCase: single char match" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "a" "A") "single char case insensitive"
+
+        testCase "containsIgnoreCase: single char no match" <| fun _ ->
+            Expect.isFalse (Str.containsIgnoreCase "z" "A") "single char no match"
+
+        testCase "containsIgnoreCase: substring at start" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "hel" "Hello") "at start"
+
+        testCase "containsIgnoreCase: substring at end" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "LLO" "Hello") "at end"
+
+        testCase "containsIgnoreCase: substring in middle" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "LL" "Hello") "in middle"
+
+        testCase "containsIgnoreCase: with digits" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "abc123" "xABC123y") "digits are case insensitive irrelevant"
+
+        testCase "containsIgnoreCase: with special characters" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "!@#" "hello!@#world") "special chars"
+
+        testCase "containsIgnoreCase: whitespace matters" <| fun _ ->
+            Expect.isFalse (Str.containsIgnoreCase "hello world" "helloworld") "whitespace matters"
+
+        testCase "containsIgnoreCase: repeated pattern" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "aa" "AAA") "repeated pattern"
+
+        testCase "containsIgnoreCase: null haystack throws" <| fun _ ->
+            Expect.throws (fun _ -> Str.containsIgnoreCase "x" null |> ignore<bool>) "null haystack"
+
+        testCase "containsIgnoreCase: null needle throws" <| fun _ ->
+            Expect.throws (fun _ -> Str.containsIgnoreCase null "hello" |> ignore<bool>) "null needle"
+
+        testCase "containsIgnoreCase: both null throws" <| fun _ ->
+            Expect.throws (fun _ -> Str.containsIgnoreCase null null |> ignore<bool>) "both null"
+
+        testCase "containsIgnoreCase: unicode letters" <| fun _ ->
+            Expect.isTrue (Str.containsIgnoreCase "über" "ÜBER cool") "unicode case"
+
+        testCase "containsIgnoreCase: very long string" <| fun _ ->
+            let haystack = String.replicate 1000 "ab" + "XY" + String.replicate 1000 "cd"
+            Expect.isTrue (Str.containsIgnoreCase "xy" haystack) "find in long string"
+
+        testCase "containsIgnoreCase: near miss" <| fun _ ->
+            Expect.isFalse (Str.containsIgnoreCase "abd" "abc") "near miss"
+
+
+        // ============ indexOfCharFromFor - extensive tests ============
+
+        testCase "indexOfCharFromFor: find char at start of search range" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'a' 0 3 "abc"
+            Expect.equal result 0 "char at start"
+
+        testCase "indexOfCharFromFor: find char at end of search range" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'c' 0 3 "abc"
+            Expect.equal result 2 "char at end of range"
+
+        testCase "indexOfCharFromFor: char outside search range returns -1" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'c' 0 2 "abc"
+            Expect.equal result -1 "char outside range"
+
+        testCase "indexOfCharFromFor: search from middle" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'b' 1 2 "abc"
+            Expect.equal result 1 "find from middle"
+
+        testCase "indexOfCharFromFor: char not present returns -1" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'z' 0 3 "abc"
+            Expect.equal result -1 "char not present"
+
+        testCase "indexOfCharFromFor: duplicate chars finds first in range" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'a' 0 5 "abaca"
+            Expect.equal result 0 "first occurrence"
+
+        testCase "indexOfCharFromFor: duplicate chars finds first in range starting later" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'a' 1 4 "abaca"
+            Expect.equal result 2 "first occurrence after start"
+
+        testCase "indexOfCharFromFor: count of 1" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'a' 0 1 "abc"
+            Expect.equal result 0 "count 1 found"
+
+        testCase "indexOfCharFromFor: count of 1 not found" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'b' 0 1 "abc"
+            Expect.equal result -1 "count 1 not found"
+
+        testCase "indexOfCharFromFor: search entire string" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'o' 0 13 "Hello, World!"
+            Expect.equal result 4 "search entire string"
+
+        testCase "indexOfCharFromFor: search with startIndex past char" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'H' 1 5 "Hello, World!"
+            Expect.equal result -1 "start past the char"
+
+        testCase "indexOfCharFromFor: find second occurrence" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'l' 3 3 "Hello, World!"
+            Expect.equal result 3 "second l"
+
+        testCase "indexOfCharFromFor: null input throws" <| fun _ ->
+            Expect.throws (fun _ -> Str.indexOfCharFromFor 'a' 0 1 null |> ignore) "null throws"
+
+        testCase "indexOfCharFromFor: space character" <| fun _ ->
+            let result = Str.indexOfCharFromFor ' ' 0 7 "Hello, World!"
+            Expect.equal result 6 "find space"
+
+        testCase "indexOfCharFromFor: search in single char string found" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'x' 0 1 "x"
+            Expect.equal result 0 "single char found"
+
+        testCase "indexOfCharFromFor: search in single char string not found" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'y' 0 1 "x"
+            Expect.equal result -1 "single char not found"
+
+        testCase "indexOfCharFromFor: multiple identical chars" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'a' 2 3 "aaaaa"
+            Expect.equal result 2 "finds at start of range in repeated chars"
+
+        testCase "indexOfCharFromFor: last position in range" <| fun _ ->
+            let result = Str.indexOfCharFromFor 'c' 0 3 "xxc"
+            Expect.equal result 2 "last position in range"
+
+        testCase "indexOfCharFromFor: newline character" <| fun _ ->
+            let result = Str.indexOfCharFromFor '\n' 0 6 "ab\ncd\n"
+            Expect.equal result 2 "find newline"
+
+        testCase "indexOfCharFromFor: tab character" <| fun _ ->
+            let result = Str.indexOfCharFromFor '\t' 0 4 "a\tb\t"
+            Expect.equal result 1 "find tab"
+
+
+        // ============ indexOfStringFromFor - extensive tests ============
+
+        testCase "indexOfStringFromFor: find at start of range" <| fun _ ->
+            let result = Str.indexOfStringFromFor "ab" 0 3 "abc"
+            Expect.equal result 0 "at start"
+
+        testCase "indexOfStringFromFor: find at end of range" <| fun _ ->
+            let result = Str.indexOfStringFromFor "cd" 1 4 "abcde"
+            Expect.equal result 2 "at end of range"
+
+        testCase "indexOfStringFromFor: not found in range" <| fun _ ->
+            let result = Str.indexOfStringFromFor "de" 0 3 "abcde"
+            Expect.equal result -1 "not in range"
+
+        testCase "indexOfStringFromFor: empty search string" <| fun _ ->
+            let result = Str.indexOfStringFromFor "" 0 3 "abc"
+            Expect.equal result 0 "empty string found at startIndex"
+
+        testCase "indexOfStringFromFor: exact match whole range" <| fun _ ->
+            let result = Str.indexOfStringFromFor "abc" 0 3 "abc"
+            Expect.equal result 0 "exact match"
+
+        testCase "indexOfStringFromFor: pattern longer than search range" <| fun _ ->
+            let result = Str.indexOfStringFromFor "abcd" 0 3 "abcde"
+            Expect.equal result -1 "pattern longer than range"
+
+        testCase "indexOfStringFromFor: single char pattern" <| fun _ ->
+            let result = Str.indexOfStringFromFor "c" 0 3 "abc"
+            Expect.equal result 2 "single char"
+
+        testCase "indexOfStringFromFor: duplicate patterns finds first in range" <| fun _ ->
+            let result = Str.indexOfStringFromFor "ab" 0 6 "ababab"
+            Expect.equal result 0 "first occurrence"
+
+        testCase "indexOfStringFromFor: duplicate patterns from offset" <| fun _ ->
+            let result = Str.indexOfStringFromFor "ab" 1 5 "ababab"
+            Expect.equal result 2 "first after offset"
+
+        testCase "indexOfStringFromFor: overlapping pattern" <| fun _ ->
+            let result = Str.indexOfStringFromFor "aba" 0 5 "ababa"
+            Expect.equal result 0 "overlapping"
+
+        testCase "indexOfStringFromFor: overlapping pattern from offset" <| fun _ ->
+            let result = Str.indexOfStringFromFor "aba" 1 4 "ababa"
+            Expect.equal result 2 "overlapping from offset"
+
+        testCase "indexOfStringFromFor: null needle throws" <| fun _ ->
+            Expect.throws (fun _ -> Str.indexOfStringFromFor null 0 3 "abc" |> ignore) "null needle"
+
+        testCase "indexOfStringFromFor: null haystack throws" <| fun _ ->
+            Expect.throws (fun _ -> Str.indexOfStringFromFor "ab" 0 3 null |> ignore) "null haystack"
+
+        testCase "indexOfStringFromFor: search in single char string" <| fun _ ->
+            let result = Str.indexOfStringFromFor "x" 0 1 "x"
+            Expect.equal result 0 "single char string found"
+
+        testCase "indexOfStringFromFor: search in single char string not found" <| fun _ ->
+            let result = Str.indexOfStringFromFor "y" 0 1 "x"
+            Expect.equal result -1 "single char string not found"
+
+        testCase "indexOfStringFromFor: with special characters" <| fun _ ->
+            let result = Str.indexOfStringFromFor "!@" 0 5 "hi!@#"
+            Expect.equal result 2 "special chars"
+
+        testCase "indexOfStringFromFor: with whitespace pattern" <| fun _ ->
+            let result = Str.indexOfStringFromFor " " 0 6 "a b c "
+            Expect.equal result 1 "whitespace pattern"
+
+        testCase "indexOfStringFromFor: case sensitive" <| fun _ ->
+            let result = Str.indexOfStringFromFor "AB" 0 3 "abc"
+            Expect.equal result -1 "case sensitive"
+
+        testCase "indexOfStringFromFor: pattern at exact boundary" <| fun _ ->
+            let result = Str.indexOfStringFromFor "cd" 2 2 "abcde"
+            Expect.equal result 2 "at boundary"
+
+        testCase "indexOfStringFromFor: start at last position count 1" <| fun _ ->
+            let result = Str.indexOfStringFromFor "e" 4 1 "abcde"
+            Expect.equal result 4 "last position"
+
+        testCase "indexOfStringFromFor: long pattern in long string" <| fun _ ->
+            let s = String.replicate 100 "ab" + "XYZ" + String.replicate 100 "cd"
+            let result = Str.indexOfStringFromFor "XYZ" 0 s.Length s
+            Expect.equal result 200 "long string"
+
+        testCase "indexOfStringFromFor: long pattern only in narrow range" <| fun _ ->
+            let s = String.replicate 100 "ab" + "XYZ" + String.replicate 100 "cd"
+            let result = Str.indexOfStringFromFor "XYZ" 0 200 s
+            Expect.equal result -1 "not in narrow range"
+
+        testCase "indexOfStringFromFor: repeated single char" <| fun _ ->
+            let result = Str.indexOfStringFromFor "a" 3 2 "aaaaa"
+            Expect.equal result 3 "repeated single"
+
+
+        // ============ normalize - extensive tests ============
+
+        testCase "normalize: null throws" <| fun _ ->
+            Expect.throws (fun _ -> Str.normalize null |> ignore<string>) "null throws"
+
+        testCase "normalize: empty string" <| fun _ ->
+            let result = Str.normalize ""
+            Expect.equal result "" "empty stays empty"
+
+        testCase "normalize: plain ASCII unchanged" <| fun _ ->
+            let result = Str.normalize "Hello World"
+            Expect.equal result "Hello World" "ASCII unchanged"
+
+        testCase "normalize: digits and punctuation unchanged" <| fun _ ->
+            let result = Str.normalize "123!@#$%^&*()"
+            Expect.equal result "123!@#$%^&*()" "digits and punctuation"
+
+        testCase "normalize: acute accent e" <| fun _ ->
+            let result = Str.normalize "é"
+            Expect.equal result "e" "acute e"
+
+        testCase "normalize: grave accent e" <| fun _ ->
+            let result = Str.normalize "è"
+            Expect.equal result "e" "grave e"
+
+        testCase "normalize: circumflex accent e" <| fun _ ->
+            let result = Str.normalize "ê"
+            Expect.equal result "e" "circumflex e"
+
+        testCase "normalize: diaeresis accent e" <| fun _ ->
+            let result = Str.normalize "ë"
+            Expect.equal result "e" "diaeresis e"
+
+        testCase "normalize: tilde n" <| fun _ ->
+            let result = Str.normalize "ñ"
+            Expect.equal result "n" "tilde n"
+
+        testCase "normalize: umlaut characters" <| fun _ ->
+            let result = Str.normalize "äöü"
+            Expect.equal result "aou" "umlauts"
+
+        testCase "normalize: uppercase accented" <| fun _ ->
+            let result = Str.normalize "ÀÁÂÃÄÅ"
+            Expect.equal result "AAAAAA" "uppercase accented A variants"
+
+        testCase "normalize: cedilla" <| fun _ ->
+            let result = Str.normalize "ç"
+            Expect.equal result "c" "cedilla"
+
+        testCase "normalize: uppercase cedilla" <| fun _ ->
+            let result = Str.normalize "Ç"
+            Expect.equal result "C" "uppercase cedilla"
+
+        testCase "normalize: mixed accented and plain" <| fun _ ->
+            let result = Str.normalize "café"
+            Expect.equal result "cafe" "mixed"
+
+        testCase "normalize: full sentence with accents" <| fun _ ->
+            let result = Str.normalize "Les élèves français"
+            Expect.equal result "Les eleves francais" "full sentence"
+
+        testCase "normalize: crème brûlée" <| fun _ ->
+            let result = Str.normalize "crème brûlée"
+            Expect.equal result "creme brulee" "creme brulee"
+
+        testCase "normalize: whitespace preserved" <| fun _ ->
+            let result = Str.normalize "  \t\n  "
+            Expect.equal result "  \t\n  " "whitespace preserved"
+
+        testCase "normalize: single accented character" <| fun _ ->
+            let result = Str.normalize "ö"
+            Expect.equal result "o" "single accented"
+
+        testCase "normalize: multiple accents on same base (precomposed)" <| fun _ ->
+            // Vietnamese: ồ = o + combining breve + combining grave
+            let result = Str.normalize "ồ"
+            // Should at least remove diacritics, result should be plain o
+            Expect.equal result "o" "multiple accents"
+
+        testCase "normalize: string with no accents is idempotent" <| fun _ ->
+            let input = "The quick brown fox jumps over the lazy dog 1234567890"
+            let result = Str.normalize input
+            Expect.equal result input "no change for plain ASCII"
+
+        testCase "normalize: accented string normalized twice is same as once" <| fun _ ->
+            let input = "crème brûlée"
+            let once = Str.normalize input
+            let twice = Str.normalize once
+            Expect.equal twice once "idempotent"
+
+        testCase "normalize: Scandinavian characters" <| fun _ ->
+            let result = Str.normalize "Ångström"
+            Expect.equal result "Angstrom" "Scandinavian"
+
+        testCase "normalize: Spanish text" <| fun _ ->
+            let result = Str.normalize "El niño está aquí"
+            Expect.equal result "El nino esta aqui" "Spanish"
+
+        testCase "normalize: German text" <| fun _ ->
+            let result = Str.normalize "Ärger über böse Füße"
+            Expect.equal result "Arger uber bose Fuße" "German - sharp s preserved"
+
+        testCase "normalize: only accents (combining characters)" <| fun _ ->
+            // standalone combining acute accent
+            let result = Str.normalize "\u0301"
+            Expect.equal result "" "standalone combining accent removed"
+
+        testCase "normalize: preserves non-Latin scripts without accents" <| fun _ ->
+            // CJK and numbers should pass through
+            let result = Str.normalize "abc123"
+            Expect.equal result "abc123" "basic latin+digits"
+
+        // --- additional normalize tests ---
+
+        testCase "normalize: brackets and special symbols preserved" <| fun _ ->
+            let input = "[]{}()<>|\\~`_-+=/"
+            Expect.equal (Str.normalize input) input "brackets and symbols"
+
+        testCase "normalize: quotes preserved" <| fun _ ->
+            let input = "\"hello\" 'world'"
+            Expect.equal (Str.normalize input) input "quotes"
+
+        testCase "normalize: decomposed form (NFD) e + combining acute" <| fun _ ->
+            // e (U+0065) + combining acute (U+0301) = é in NFD
+            let input = "e\u0301"
+            let result = Str.normalize input
+            Expect.equal result "e" "decomposed acute removed"
+
+        testCase "normalize: decomposed form a + combining ring above" <| fun _ ->
+            // a (U+0061) + combining ring above (U+030A) = å in NFD
+            let input = "a\u030A"
+            let result = Str.normalize input
+            Expect.equal result "a" "decomposed ring removed"
+
+        testCase "normalize: multiple combining marks on one base" <| fun _ ->
+            // a + combining acute + combining tilde
+            let input = "a\u0301\u0303"
+            let result = Str.normalize input
+            Expect.equal result "a" "multiple combining marks removed"
+
+        testCase "normalize: precomposed vs decomposed same result" <| fun _ ->
+            let precomposed = Str.normalize "é"      // U+00E9
+            let decomposed = Str.normalize "e\u0301" // e + combining acute
+            Expect.equal precomposed decomposed "precomposed and decomposed yield same result"
+
+        testCase "normalize: CJK characters preserved" <| fun _ ->
+            let input = "\u4F60\u597D\u4E16\u754C" // 你好世界
+            Expect.equal (Str.normalize input) input "CJK unchanged"
+
+        testCase "normalize: Cyrillic without accents preserved" <| fun _ ->
+            let input = "\u041F\u0440\u0438\u0432\u0435\u0442" // Привет
+            Expect.equal (Str.normalize input) input "Cyrillic preserved"
+
+        testCase "normalize: Cyrillic with combining accent" <| fun _ ->
+            // и (U+0438) + combining acute (U+0301) → и
+            let input = "\u0438\u0301"
+            let result = Str.normalize input
+            Expect.equal result "\u0438" "Cyrillic accent removed"
+
+        testCase "normalize: Greek without accents preserved" <| fun _ ->
+            let input = "\u03B1\u03B2\u03B3" // αβγ
+            Expect.equal (Str.normalize input) input "Greek preserved"
+
+        testCase "normalize: Greek with tonos" <| fun _ ->
+            // ά (U+03AC, alpha with tonos) → α
+            let result = Str.normalize "\u03AC"
+            Expect.equal result "\u03B1" "Greek tonos removed"
+
+        testCase "normalize: Polish text" <| fun _ ->
+            let result = Str.normalize "\u0179\u00F3\u0142\u0107"  // Źółć
+            // ł (U+0142) is a distinct letter, not a base + combining mark, so it stays
+            Expect.equal result "Zo\u0142c" "Polish diacritics removed, ł preserved"
+
+        testCase "normalize: Czech text" <| fun _ ->
+            let result = Str.normalize "\u0159\u00E1\u010D\u0161\u0165" // řáčšť
+            Expect.equal result "racst" "Czech diacritics removed"
+
+        testCase "normalize: Turkish dotted and dotless i" <| fun _ ->
+            // İ (U+0130, capital I with dot) should lose the dot
+            let result = Str.normalize "\u0130"
+            Expect.equal result "I" "Turkish capital dotted I"
+
+        testCase "normalize: Vietnamese text" <| fun _ ->
+            let result = Str.normalize "\u1ED3\u1EA5\u1EBF"  // ồấế
+            Expect.equal result "oae" "Vietnamese diacritics removed"
+
+        testCase "normalize: single char string" <| fun _ ->
+            Expect.equal (Str.normalize "a") "a" "single plain char"
+
+        testCase "normalize: string of only combining marks" <| fun _ ->
+            // two standalone combining marks (acute + grave)
+            let result = Str.normalize "\u0301\u0300"
+            Expect.equal result "" "only combining marks → empty"
+
+        testCase "normalize: accented chars interspersed with numbers" <| fun _ ->
+            let result = Str.normalize "\u00E91\u00E82\u00F63"  // é1è2ö3
+            Expect.equal result "e1e2o3" "accents removed, digits kept"
+
+        testCase "normalize: tabs and newlines with accents" <| fun _ ->
+            let result = Str.normalize "\u00E9\t\u00E8\n\u00F6"  // é\tè\nö
+            Expect.equal result "e\te\no" "whitespace preserved with accents"
+
+        testCase "normalize: long string performance" <| fun _ ->
+            let input = String.replicate 1000 "\u00E9"  // 1000 × é
+            let result = Str.normalize input
+            Expect.equal result (String.replicate 1000 "e") "long accented string"
+
+        testCase "normalize: mixed scripts in one string" <| fun _ ->
+            // Latin accented + CJK + Cyrillic + digits
+            let input = "caf\u00E9\u4F60\u597D\u041F\u0440\u0438\u0432\u0435\u044242"
+            let result = Str.normalize input
+            Expect.equal result "cafe\u4F60\u597D\u041F\u0440\u0438\u0432\u0435\u044242" "mixed scripts"
+
+        testCase "normalize: sharp s (ß) preserved" <| fun _ ->
+            // ß (U+00DF) is not a diacritic, should stay
+            let result = Str.normalize "\u00DF"
+            Expect.equal result "\u00DF" "sharp s unchanged"
+
+        testCase "normalize: eth (ð) preserved" <| fun _ ->
+            let result = Str.normalize "\u00F0"
+            Expect.equal result "\u00F0" "eth unchanged"
+
+        testCase "normalize: thorn (þ) preserved" <| fun _ ->
+            let result = Str.normalize "\u00FE"
+            Expect.equal result "\u00FE" "thorn unchanged"
+
+        testCase "normalize: copyright and trademark symbols preserved" <| fun _ ->
+            let input = "\u00A9\u00AE\u2122"  // ©®™
+            Expect.equal (Str.normalize input) input "symbols preserved"
+
+        testCase "normalize: currency symbols preserved" <| fun _ ->
+            let input = "$\u20AC\u00A3\u00A5"  // $€£¥
+            Expect.equal (Str.normalize input) input "currency symbols"
+
+        testCase "normalize: result length <= input length" <| fun _ ->
+            let input = "\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00C7\u00C8\u00C9\u00CA"  // ÀÁÂÃÄÅÇÈÉÊ
+            let result = Str.normalize input
+            Expect.isTrue (result.Length <= input.Length) "result not longer than input"
+
+        testCase "normalize: triple application is same as single" <| fun _ ->
+            let input = "\u00C4rger \u00FCber b\u00F6se F\u00FC\u00DFe"  // Ärger über böse Füße
+            let once = Str.normalize input
+            let triple = Str.normalize (Str.normalize (Str.normalize input))
+            Expect.equal triple once "triple application idempotent"
+
     ]
 
 

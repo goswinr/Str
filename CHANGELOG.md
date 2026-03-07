@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-03-07
+### Fixed
+- normalize in JS
+- indexOfStringFromFor with empty string in JS
+
 ## [0.22.0] - 2026-02-08
 ### Fixed
 - fixed Stringbuilder.Chars in JS by using Fabel 5.0.alpha 23
@@ -53,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added more tests
 
 [Unreleased]: https://github.com/goswinr/Str/compare/0.22.0...HEAD
+[0.23.0]: https://github.com/goswinr/Str/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/goswinr/Str/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/goswinr/Str/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/goswinr/Str/compare/0.19.0...0.20.0

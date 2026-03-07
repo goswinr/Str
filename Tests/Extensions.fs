@@ -6,7 +6,7 @@ module Extensions =
     open Str.ExtensionsString
     open System
 
-    #if FABLE_COMPILER
+    #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
     open Fable.Mocha
     #else
     open Expecto

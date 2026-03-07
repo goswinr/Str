@@ -1,17 +1,16 @@
 {
   "type": "module",
   "scripts": {
-    "watchTS": "dotnet fable watch --outDir ts --lang typescript ../Src/Str.fsproj --run npx tsc" ,
+    "watchTS": "dotnet fable watch --outDir ts --lang typescript ../Src/Str.fsproj --run tsc" ,
 
-    "buildTS": "dotnet fable --outDir ts --noCache  --lang typescript ../Src/Str.fsproj --silent --run npx tsc" ,
+    "buildTS": "dotnet fable --outDir ts --noCache  --lang typescript ../Src/Str.fsproj --silent --run tsc" ,
     "pretest": "dotnet fable --outDir js --noCache ",
     "test": "mocha js",
     "testTS": "mocha js && npm run buildTS"
   },
-  "dependencies": {
-    "mocha": "^11.7.5"
-  },
+
   "devDependencies": {
+    "mocha": "^11.7.5",
     "typescript": "^5.9.3"
   }
 }
