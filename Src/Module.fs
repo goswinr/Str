@@ -169,7 +169,7 @@ type Str private () =
     static member (*inline*) beforeChar (splitter:char) (stringToSearchIn:string) :string =
         if isNull stringToSearchIn then StrException.Raise "Str.beforeChar: stringToSearchIn is null (splitter:'%c')" (splitter)
         let start = stringToSearchIn.IndexOf(splitter)
-        if start = -1 then StrException.Raise "Str.before: splitter '%c' not found in stringToSearchIn:%s" splitter (exnf stringToSearchIn)
+        if start = -1 then StrException.Raise "Str.beforeChar: splitter '%c' not found in stringToSearchIn:%s" splitter (exnf stringToSearchIn)
         else stringToSearchIn.Substring(0, start)
 
     /// Returns everything before first occurrence of a given splitting string.
@@ -223,7 +223,7 @@ type Str private () =
     static member (*inline*) afterChar (splitter:char) (stringToSearchIn:string) :string  =
         if isNull stringToSearchIn then StrException.Raise "Str.afterChar: stringToSearchIn is null (splitter:'%c')" (splitter)
         let start = stringToSearchIn.IndexOf(splitter)
-        if start = -1 then StrException.Raise "Str.after: splitter '%c' not found in stringToSearchIn:%s" splitter (exnf stringToSearchIn)
+        if start = -1 then StrException.Raise "Str.afterChar: splitter '%c' not found in stringToSearchIn:%s" splitter (exnf stringToSearchIn)
         else stringToSearchIn.Substring(start+1)//cant be out of bounds!
 
     /// Returns everything after first occurrence of a given splitting string.
