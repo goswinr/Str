@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-07-12
+### Fixed
+- Correct typos and wording in the API documentation.
+- Correct edge-case behavior for bounded substring searches, substring counts, ordinal replacements, string-builder searches, line truncation, and numeric grouping.
+- Align whitespace handling and Unicode normalization across .NET and Fable.
+- Document null handling, exception behavior, truncation limits, and computation-expression line endings.
+- Add regression coverage for .NET, JavaScript, TypeScript, and generated API documentation.
+
 ## [0.23.0] - 2026-03-07
 ### Fixed
 - normalize in JS
@@ -14,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.22.0] - 2026-02-08
 ### Fixed
-- fixed Stringbuilder.Chars in JS by using Fabel 5.0.alpha 23
+- fixed Stringbuilder.Chars in JS by using Fable 5.0.alpha 23
 
 ## [0.21.0] - 2025-12-01
 ### Added
@@ -57,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation ported from [FsEx](https://github.com/goswinr/FsEx/blob/main/Src/StringModule.fs)
 - Added more tests
 
-[Unreleased]: https://github.com/goswinr/Str/compare/0.22.0...HEAD
+[Unreleased]: https://github.com/goswinr/Str/compare/0.24.0...HEAD
+[0.24.0]: https://github.com/goswinr/Str/compare/0.23.0...0.24.0
 [0.23.0]: https://github.com/goswinr/Str/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/goswinr/Str/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/goswinr/Str/compare/0.20.0...0.21.0

@@ -11,6 +11,10 @@ open Expecto
 
 module StringBuilder =
 
+    #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
+    #else
+    [<Tests>]
+    #endif
     let tests = testList "StringBuilder extensions tests" [
 
         // ============ sb.Add(string) tests ============
@@ -79,6 +83,11 @@ module StringBuilder =
             let sb = StringBuilder("Hello")
             Expect.equal (sb.IndexOf('H', 1)) -1 "Should return -1 when 'H' is before start"
 
+        testCase "sb.IndexOf(char, from) accepts Length and rejects larger values" <| fun _ ->
+            let sb = StringBuilder("Hello")
+            Expect.equal (sb.IndexOf('x', sb.Length)) -1 "Searching from Length should return -1"
+            Expect.throws (fun () -> sb.IndexOf('x', sb.Length + 1) |> ignore) "Searching beyond Length should throw"
+
         // ============ sb.IndexOf(string) tests ============
         testCase "sb.IndexOf(string) should find substring" <| fun _ ->
             let sb = StringBuilder("Hello World")
@@ -113,6 +122,17 @@ module StringBuilder =
             let sb = StringBuilder("Hello World")
             Expect.equal (sb.IndexOf("Hello", 1)) -1 "Should return -1 when 'Hello' starts before search start"
 
+        testCase "sb.IndexOf(string, from) handles an empty search string" <| fun _ ->
+            let sb = StringBuilder("Hello")
+            Expect.equal (sb.IndexOf("", 0)) 0 "An empty string should be found at zero"
+            Expect.equal (sb.IndexOf("", 3)) 3 "An empty string should be found at the starting index"
+            Expect.equal (sb.IndexOf("", sb.Length)) sb.Length "An empty string should be found at Length"
+
+        testCase "sb.IndexOf(string, from) validates its arguments" <| fun _ ->
+            let sb = StringBuilder("Hello")
+            Expect.throws (fun () -> sb.IndexOf("x", sb.Length + 1) |> ignore) "Searching beyond Length should throw"
+            Expect.throws (fun () -> sb.IndexOf(null, 0) |> ignore) "A null search string should throw"
+
         // ============ sb.Contains(char) tests ============
         testCase "sb.Contains(char) should return true when char exists" <| fun _ ->
             let sb = StringBuilder("Hello")
@@ -143,4 +163,8 @@ module StringBuilder =
             let sb = StringBuilder("Hello")
             Expect.isTrue (sb.Contains("ell")) "Should contain 'ell'"
             Expect.isFalse (sb.Contains("ellx")) "Should not contain 'ellx'"
+
+        testCase "sb.Contains(string) should return true for an empty search string" <| fun _ ->
+            let sb = StringBuilder("Hello")
+            Expect.isTrue (sb.Contains("")) "Every StringBuilder should contain the empty string"
         ]

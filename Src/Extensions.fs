@@ -1,4 +1,4 @@
-﻿namespace Str
+namespace Str
 open System
 
 
@@ -12,7 +12,7 @@ module internal Format =
     /// Joins string into one line.
     /// Replaces line break with a space character.
     /// Skips leading whitespace on each line.
-    /// Joins multiple whitespaces into one.
+    /// Collapses consecutive whitespace into a single space.
     /// If string is null returns *null string*
     /// Does not include surrounding quotes.
     let inOneLine (s:string) : string =
@@ -22,23 +22,21 @@ module internal Format =
             let sb = StringBuilder(s.Length)
             let rec loop addNextWhite i =
                 if i<s.Length then
-                    match s.[i] with
-                    |'\r'|'\n' | ' ' | '\t'->
+                    let c = s.[i]
+                    if Char.IsWhiteSpace c then
                         if addNextWhite then sb.Append(' ') |> ignore<StringBuilder> // to have at least on space separating new lines
                         loop false (i+1)
-                    | c  ->
+                    else
                         sb.Append(c) |> ignore<StringBuilder>
                         loop true (i+1)
             loop false 0
             // TODO delete trailing space if there is one??
             sb.ToString()
 
-    /// Reduces a string length for display to a maximum Length.
-    /// Shows (..) as placeholder for skipped characters if string is longer than maxCharCount.
-    /// If maxChars is bigger than 35 the placeholder will include the count of skipped characters: e.g. ( ... and 123 more chars.).
-    /// maxCharCount will be set to be minimum 6.
-    /// Returned strings are enclosed in quotation marks: '"'.
-    /// If input is null it returns *null string*
+    /// Formats a string for display using at most maxCharCount content characters, with a minimum of 8.
+    /// Surrounding quotation marks add two characters to the returned string.
+    /// Depending on maxCharCount, skipped characters are represented by (..), (...), or a message such as ( ... and 123 more chars.).
+    /// If input is null, returns *null* when maxCharCount is below 15 and *null string* otherwise.
     let truncated (maxCharCount:int) (s:string) : string =
         let maxChar = max 8 maxCharCount
         if isNull s then
@@ -65,35 +63,41 @@ module internal Format =
                     }
 
 
-    /// Adds a note about trimmed line count if there are more ( ... and %d more lines.).
-    /// Returned strings are enclosed in quotation marks: '"'.
-    /// If string is null returns *null string*.
+    /// Limits a string to maxLineCount logical lines and adds a note such as (... and 3 more lines.) when truncated.
+    /// Recognizes CR, LF, and CRLF line endings. Truncated results are enclosed in quotation marks; unchanged results are not.
+    /// maxLineCount is treated as at least 1. If the string is null, returns *null string*.
     let truncatedToMaxLines (maxLineCount:int) (s:string) : string =
         let maxLines = max 1 maxLineCount
         if isNull s then
             "*null string*"
-        elif s.Length < 2 then
-            s
         else
-            let mutable found = if s.[0]= '\n' then 1 else 0
+            let lineBreakStarts = ResizeArray<int>()
             let mutable i = 0
-            let mutable stopPos = 0
-            while i >= 0 do
-                if i+1=s.Length then // end of string reached with a '\n'
-                    i<- -1
+            while i < s.Length do
+                if s.[i] = '\r' then
+                    lineBreakStarts.Add i
+                    if i+1 < s.Length && s.[i+1] = '\n' then
+                        i <- i + 2
+                    else
+                        i <- i + 1
+                elif s.[i] = '\n' then
+                    lineBreakStarts.Add i
+                    i <- i + 1
                 else
-                    i <- s.IndexOf('\n', i+1)
-                    found <- found + 1
-                    if found = maxLines then
-                        stopPos <- i
+                    i <- i + 1
 
-            if stopPos > 0  && found - maxLines > 1 then // if there is just one more line print it instead of the note
+            let lineCount = lineBreakStarts.Count + 1
+            if lineCount > maxLines then
+                let stopPos = lineBreakStarts.[maxLines-1]
+                let trimmedLineCount = lineCount - maxLines
+                let lineWord = if trimmedLineCount = 1 then " line.)\"" else " lines.)\""
                 str{
                     "\""
-                    s.Substring(0,stopPos+1)
+                    s.Substring(0,stopPos)
                     "(... and "
-                    found - maxLines
-                    " more lines.)\""
+                    trimmedLineCount
+                    " more"
+                    lineWord
                     }
             else
                 s
@@ -164,7 +168,7 @@ module ExtensionsString =
 
     type System.String with
 
-        /// Gets an character at index, same as this.[index] or this.Idx(index)
+        /// Gets a character at an index, the same as this.[index] or this.Idx(index).
         /// Throws a descriptive Exception if the index is out of range.
         /// (Use this.GetNeg(i) member if you want to use negative indices too)
         member inline str.Get index : char =
@@ -172,7 +176,7 @@ module ExtensionsString =
             if index >= str.Length then StrException.Raise $"Str.ExtensionsString: str.Get({index}) failed for string of {str.Length} chars:{Environment.NewLine}{exnf str}"
             str.[index]
 
-        /// Gets an character at index, same as this.[index] or this.Get(index)
+        /// Gets a character at an index, the same as this.[index] or this.Get(index).
         /// Throws a descriptive Exception if the index is out of range.
         /// (Use this.GetNeg(i) member if you want to use negative indices too)
         member inline str.Idx index : char =
@@ -187,59 +191,61 @@ module ExtensionsString =
             str.Length - 1
 
         /// Returns the last character of the string
-        /// fails if string is empty
+        /// Fails if the string is empty.
         member inline str.Last : char =
             if str.Length = 0 then StrException.Raise "Str.ExtensionsString: str.Last: Failed to get last character of empty String"
             str.[str.Length - 1]
 
         /// Returns the second last character of the string
-        /// fails if string has less than two characters
+        /// Fails if the string has fewer than two characters.
         member inline str.SecondLast : char =
             if str.Length < 2 then StrException.Raise "Str.ExtensionsString: str.SecondLast: Failed to get second last character of '%s'" (exnf str)
             str.[str.Length - 2]
 
         /// Returns the third last character of the string
-        /// fails if string has less than three characters
+        /// Fails if the string has fewer than three characters.
         member inline str.ThirdLast : char =
             if str.Length < 3 then StrException.Raise "Str.ExtensionsString: str.ThirdLast: Failed to get third last character of '%s'" (exnf str)
             str.[str.Length - 3]
 
-        /// Returns the last x(int) characters of the string
-        /// same as string.LastN
+        /// Returns the last x characters of the string.
+        /// x must be between zero and the string length.
         member inline str.LastX x : string =
+            if x < 0 then StrException.Raise "Str.ExtensionsString: str.LastX: x can't be negative: %d" x
             if str.Length < x then StrException.Raise "Str.ExtensionsString: str.LastX: Failed to get last %d character of too short String '%s' " x (exnf str)
             str.Substring(str.Length-x,x)
 
         /// Returns the first character of the string
-        /// fails if string is empty
+        /// Fails if the string is empty.
         member inline str.First : char =
             if str.Length = 0 then StrException.Raise "Str.ExtensionsString: str.First: Failed to get first character of empty String"
             str.[0]
 
         /// Returns the second character of the string
-        /// fails if string has less than two characters
+        /// Fails if the string has fewer than two characters.
         member inline str.Second : char =
             if str.Length < 2 then StrException.Raise "Str.ExtensionsString: str.Second: Failed to get second character of '%s'" (exnf str)
             str.[1]
 
         /// Returns the third character of the string
-        /// fails if string has less than three characters
+        /// Fails if the string has fewer than three characters.
         member inline str.Third : char =
             if str.Length < 3 then StrException.Raise "Str.ExtensionsString: str.Third: Failed to get third character of '%s'" (exnf str)
             str.[2]
 
 
         /// Gets an item in the string by index.
-        /// Allows for negative index too ( -1 is last item,  like Python)
-        /// (from the release of F# 5 on a negative index can also be done with '^' prefix. E.g. ^0 for the last item)
+        /// Allows negative indexes too (-1 is the last item, as in Python).
+        /// (Since F# 5, from-end indexes can also use the '^' prefix in index expressions, e.g. str.[^0] for the last item.)
         member str.GetNeg index : char =
             let len = str.Length
             let ii =  if index < 0 then len + index else index
             if ii<0 || ii >= len then StrException.Raise "Str.ExtensionsString: str.GetNeg: Failed to get character at index %d from string of %d items: %s" index str.Length (exnf str)
             str.[ii]
 
-        /// Any index will return a value.
-        /// Rarr is treated as an endless loop in positive and negative direction
+        /// Any index returns a value for a non-empty string.
+        /// The string is treated as an endless loop in both positive and negative directions.
+        /// Throws StrException if the string is empty.
         member str.GetLooped index : char =
             let len = str.Length
             if len=0 then StrException.Raise "Str.ExtensionsString: str.GetLooped: Failed to get character at index %d from string of 0 items" index
@@ -250,7 +256,7 @@ module ExtensionsString =
 
         /// Allows for negative indices too. -1 is last character
         /// Includes end index in string
-        /// for example str.Slice(0,-3) will trim off the last two characters from the string
+        /// For example, str.Slice(0,-3) trims the last two characters from the string.
         member str.Slice(startIdx:int , endIdx:int):string =
              // overrides of existing methods are unfortunately silently ignored and not possible. see https://github.com/dotnet/fsharp/issues/3692#issuecomment-334297164
             let count = str.Length
@@ -272,7 +278,7 @@ module ExtensionsString =
             str.Substring(st,len)
 
 
-        /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
+        /// Returns a new string in which only the first occurrence of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
         member txt.ReplaceFirst (oldValue:string, newValue:string) : string =
             if isNull oldValue then StrException.Raise "str.ReplaceFirst: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
@@ -282,7 +288,7 @@ module ExtensionsString =
             else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
 
 
-        /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
+        /// Returns a new string in which only the last occurrence of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
         member txt.ReplaceLast (oldValue:string, newValue:string) : string =
             if isNull oldValue then StrException.Raise "str.ReplaceLast: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)

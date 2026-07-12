@@ -13,6 +13,10 @@ open System
 module Module =
 
 
+ #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
+ #else
+ [<Tests>]
+ #endif
  let tests =
   testList "Module.fs Tests" [
 
@@ -61,6 +65,17 @@ module Module =
             let pattern = "Hello"
             let testFunc = fun () -> Str.indicesOf (text, pattern, 0, text.Length + 1, 10) |> ignore
             Expect.throws testFunc "Expected an exception when searchFromIdx + searchLength > text.Length"
+
+        testCase "Str.indicesOf respects a restricted range for a full-text pattern" <| fun _ ->
+            let result = Str.indicesOf ("abc", "abc", 1, 2, 10) |> Array.ofSeq
+            Expect.equal result [||] "Index 0 is outside the requested range"
+
+        testCase "Str.indicesOf returns no matches for a zero-length search range" <| fun _ ->
+            let result = Str.indicesOf ("abc", "a", 0, 0, 10) |> Array.ofSeq
+            Expect.equal result [||] "A zero-length range cannot contain a non-empty pattern"
+
+        testCase "Str.indicesOf rejects a negative match limit" <| fun _ ->
+            Expect.throws (fun () -> Str.indicesOf ("abc", "a", 0, 3, -1) |> ignore) "Expected a negative match limit to throw"
 
         testCase "truncate should return the truncated string" <| fun _ ->
             let result = Str.truncate 5 "Hello, World!"
@@ -391,6 +406,13 @@ module Module =
         testCase "countSubString should return the number of occurrences of the substring" <| fun _ ->
             let result = Str.countSubString "l" "Hello, World!"
             Expect.equal result 3 "Should be equal"
+
+        testCase "countSubString counts non-overlapping occurrences" <| fun _ ->
+            let result = Str.countSubString "aa" "aaaaa"
+            Expect.equal result 2 "Expected two non-overlapping occurrences"
+
+        testCase "countSubString rejects an empty substring" <| fun _ ->
+            Expect.throws (fun () -> Str.countSubString "" "abc" |> ignore) "Expected an empty substring to throw"
 
         // countChar
         testCase "countChar should return the number of occurrences of the character" <| fun _ ->
@@ -893,6 +915,11 @@ module Module =
             let result = Str.replaceLast "eS" "ar" "testes"
             Expect.equal result "testes" "Should be still be 'testes'"
 
+        testCase "replaceFirst and replaceLast use ordinal matching" <| fun _ ->
+            let decomposed = "e\u0301"
+            Expect.equal (Str.replaceFirst "\u00E9" "X" decomposed) decomposed "replaceFirst should not use linguistic equivalence"
+            Expect.equal (Str.replaceLast "\u00E9" "X" decomposed) decomposed "replaceLast should not use linguistic equivalence"
+
 
         testCase "Test concat function" <| fun _ ->
             let result = Str.concat "$" ["line1"; "line2"; "line3"]
@@ -1001,13 +1028,29 @@ module Module =
             let result = Str.formatInOneLine "line1\nline2\nline3"
             Expect.equal result "line1 line2 line3" "Should be 'line1 line2 line3'"
 
+        testCase "formatInOneLine collapses Unicode whitespace" <| fun _ ->
+            let result = Str.formatInOneLine "a\u00A0\u00A0b"
+            Expect.equal result "a b" "Non-breaking spaces should be collapsed"
+
         testCase "Test formatTruncated function" <| fun _ ->
             let result = Str.formatTruncated 26 "This is a very long string that should be truncated"
             Expect.equal result "\"This is a very long(...)ed\"" "Should be '\"This is a very long(...)ed\"'"
 
         testCase "Test formatTruncatedToMaxLines function" <| fun _ ->
             let result = Str.formatTruncatedToMaxLines 2 "line1\r\nline2\r\nline3\r\nline4\r\nline5"
-            Expect.equal result "\"line1\r\nline2\r\n(... and 3 more lines.)\"" "Should be '\"line1\nline2\n... and 3 more lines.\"'"
+            Expect.equal result "\"line1\r\nline2(... and 3 more lines.)\"" "The result should contain no more than two lines"
+
+        testCase "formatTruncatedToMaxLines truncates exactly one additional line" <| fun _ ->
+            let result = Str.formatTruncatedToMaxLines 1 "line1\nline2"
+            Expect.equal result "\"line1(... and 1 more line.)\"" "The note should remain on the final allowed line"
+
+        testCase "formatTruncatedToMaxLines recognizes standalone CR line endings" <| fun _ ->
+            let result = Str.formatTruncatedToMaxLines 2 "a\rb\rc"
+            Expect.equal result "\"a\rb(... and 1 more line.)\"" "Standalone CR should delimit lines without adding an extra output line"
+
+        testCase "formatTruncatedToMaxLines leaves an in-range string unchanged" <| fun _ ->
+            let input = "line1\nline2"
+            Expect.equal (Str.formatTruncatedToMaxLines 2 input) input "Unchanged results should not be quoted"
 
 
 
@@ -1028,6 +1071,11 @@ module Module =
         testCase "str builder with int yield" <| fun _ ->
             let result = str { 42 }
             Expect.equal result "42" "Should be '42'"
+
+        testCase "str builder appends a newline after every sequence item" <| fun _ ->
+            let result = str { ["a"; "b"] }
+            let expected = "a" + Environment.NewLine + "b" + Environment.NewLine
+            Expect.equal result expected "A yielded string sequence should include a trailing newline"
 
         testCase "str builder with Guid yield" <| fun _ ->
             let g = System.Guid.Empty
@@ -1204,6 +1252,19 @@ module Module =
         testCase "addThousandSeparators should format with scientific notation neg" <| fun _ ->
             let result = Str.addThousandSeparators '\'' "-1234567e10"
             Expect.equal result "-1'234'567e10" "Should be '-1234567e10'"
+
+        testCase "addThousandSeparators handles a trailing decimal point" <| fun _ ->
+            Expect.equal (Str.addThousandSeparators '\'' "1.") "1." "A trailing decimal point should be preserved"
+
+        testCase "addThousandSeparators handles a leading decimal point" <| fun _ ->
+            Expect.equal (Str.addThousandSeparators '\'' ".5") ".5" "A leading decimal point should be preserved"
+
+        testCase "addThousandSeparators handles a decimal point before an exponent" <| fun _ ->
+            Expect.equal (Str.addThousandSeparators '\'' "1.e3") "1.e3" "A decimal point before an exponent should be preserved"
+
+        testCase "addThousandSeparators rejects empty and null input" <| fun _ ->
+            Expect.throws (fun () -> Str.addThousandSeparators '\'' "" |> ignore) "Expected empty input to throw"
+            Expect.throws (fun () -> Str.addThousandSeparators '\'' null |> ignore) "Expected null input to throw"
 
         // ============ Str.get tests ============
         testCase "Str.get should return character at index" <| fun _ ->

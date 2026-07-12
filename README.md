@@ -297,22 +297,19 @@ sb.IndexOf ","       // 5
 ### Tests
 All Tests run in both javascript and dotnet.
 Successful Fable compilation to typescript is verified too.
-Go to the tests folder:
-
-```bash
-cd Tests
-```
 
 For testing with .NET using Expecto:
 
 ```bash
-dotnet run
+dotnet run --project ./Tests/Tests.fsproj
 ```
 
 for JS testing with Fable.Mocha and TS verification:
 
 ```bash
+cd Tests
 npm test
+npm run buildTS
 ```
 
 ### License

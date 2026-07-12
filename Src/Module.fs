@@ -1,10 +1,10 @@
-﻿namespace Str
+namespace Str
 
 open System
 open System.Text
 open ExtensionsString // for StrException
 
-#if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT_JAVASCRIPT
+#if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
 open Fable.Core
 open Fable.Core.JsInterop
 #endif
@@ -24,7 +24,7 @@ type Str private () =
     /// <param name="index">The input index.</param>
     /// <param name="str">The input string.</param>
     /// <returns>The value of the string at the given index.</returns>
-    /// <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the index is negative or the input string does not contain enough elements.</exception>
+    /// <exception cref="T:Str.ExtensionsString.StrException">Thrown when the string is null, the index is negative, or the string does not contain enough elements.</exception>
     static member inline get index (str:string) : char =
         if isNull str then StrException.Raise "Str.get: str is null"
         str.Get index
@@ -47,14 +47,11 @@ type Str private () =
         if pattern.Length = 0 then StrException.Raise "Str.indicesOf: pattern string is empty"
         if searchFromIdx < 0 then StrException.Raise "Str.indicesOf: searchFromIdx:%d can't be negative. looking for %s in %s" searchFromIdx (exnf pattern) (exnf text)
         if searchLength  < 0 then StrException.Raise "Str.indicesOf: searchLength:%d can't be negative. looking for %s in %s" searchLength (exnf pattern) (exnf text)
+        if findNoMoreThan < 0 then StrException.Raise "Str.indicesOf: findNoMoreThan:%d can't be negative. looking for %s in %s" findNoMoreThan (exnf pattern) (exnf text)
         if searchFromIdx + searchLength > text.Length then StrException.Raise "Str.indicesOf: searchFromIdx:%d + searchLength:%d can't be longer than text:%d. looking for %s in %s" searchFromIdx searchLength text.Length (exnf pattern) (exnf text)
 
-        if pattern.Length > text.Length || findNoMoreThan = 0 then
+        if pattern.Length > searchLength || findNoMoreThan = 0 then
             ResizeArray()
-        elif pattern.Length = text.Length && pattern = text then
-            let r = ResizeArray(1)
-            r.Add(0)
-            r
         else
             //adapted from https://gist.github.com/Nabid/fde41e7c2b0b681ac674ccc93c1daeb1
             let M  = pattern.Length
@@ -129,7 +126,8 @@ type Str private () =
         fromString.Substring(0,takeLength)
 
 
-    /// Removes all occurrences of a substring from a string if it exists. same as:
+    /// Removes all occurrences of a substring from a string if it exists.
+    /// An empty substring is treated as a no-op.
     /// (Will return the same string instance, if text to remove is not found)
     /// Code:fromString.Replace(textToRemove, "")
     static member (*inline*) delete (textToRemove:string) (fromString:string) :string =
@@ -175,6 +173,7 @@ type Str private () =
     /// Returns everything before first occurrence of a given splitting string.
     /// Or None if splitter is not found.
     /// Uses StringComparison.Ordinal
+    /// Throws StrException if the splitter or input string is null.
     static member (*inline*) tryBefore (splitter:string) (stringToSearchIn:string): option<string> =
         if isNull stringToSearchIn then StrException.Raise "Str.tryBefore: stringToSearchIn is null (splitter:%s)" (exnf splitter)
         if isNull splitter         then StrException.Raise "Str.tryBefore: splitter is null (stringToSearchIn:%s)" (exnf stringToSearchIn)
@@ -184,6 +183,7 @@ type Str private () =
 
     /// Returns everything before first occurrence of a given splitting character.
     /// Or None if splitter is not found.
+    /// Throws StrException if the input string is null.
     static member (*inline*) tryBeforeChar (splitter:char) (stringToSearchIn:string): option<string>  =
         if isNull stringToSearchIn then StrException.Raise "Str.tryBeforeChar: stringToSearchIn is null (splitter:'%c')" (splitter)
         let start = stringToSearchIn.IndexOf(splitter)
@@ -229,6 +229,7 @@ type Str private () =
     /// Returns everything after first occurrence of a given splitting string.
     /// Or None if splitter is not found
     /// Uses StringComparison.Ordinal
+    /// Throws StrException if the splitter or input string is null.
     static member (*inline*) tryAfter (splitter:string) (stringToSearchIn:string): option<string>  =
         if isNull stringToSearchIn then StrException.Raise "Str.tryAfter: stringToSearchIn is null (splitter:%s)" (exnf splitter)
         if isNull splitter         then StrException.Raise "Str.tryAfter: splitter is null (stringToSearchIn:%s)" (exnf stringToSearchIn)
@@ -238,6 +239,7 @@ type Str private () =
 
     /// Returns everything after first occurrence of a given splitting character.
     /// Or None if splitter is not found
+    /// Throws StrException if the input string is null.
     static member (*inline*) tryAfterChar (splitter:char) (stringToSearchIn:string) : option<string> =
         if isNull stringToSearchIn then StrException.Raise "Str.tryAfterChar: stringToSearchIn is null (splitter:'%c')" (splitter)
         let start = stringToSearchIn.IndexOf(splitter)
@@ -262,10 +264,10 @@ type Str private () =
         if start = -1 then stringToSearchIn
         else stringToSearchIn.Substring(start+1)
 
-    /// Finds text between two strings
+    /// Finds text between two strings.
     /// e.g.: between "X" "T" "cXabTk" =  "ab"
-    /// Fails if not both splitters are found.
-    /// Delimiters are excluded in the returned strings
+    /// Fails unless both splitters are found.
+    /// Delimiters are excluded from the returned string.
     static member (*inline*) between (firstSplitter:string) (secondSplitter:string) (stringToSplit:string) :string =
         if isNull stringToSplit  then StrException.Raise "Str.between: stringToSplit is null (firstSplitter:%s, secondSplitter:%s) " (exnf firstSplitter) (exnf secondSplitter)
         if isNull firstSplitter  then StrException.Raise "Str.between: firstSplitter is null (stringToSplit:%s, secondSplitter:%s)" (exnf stringToSplit) (exnf secondSplitter)
@@ -278,10 +280,11 @@ type Str private () =
             else
                 stringToSplit.Substring(start + firstSplitter.Length, ende - start - firstSplitter.Length)// finds text between two chars
 
-    /// Finds text between two strings
+    /// Finds text between two strings.
     /// e.g.: between "X" "T" "cXabTk" =  "ab"
-    /// Returns None if not both splitters are found.
-    /// Delimiters are excluded in the returned strings
+    /// Returns None unless both splitters are found.
+    /// Delimiters are excluded from the returned string.
+    /// Throws StrException if a splitter or the input string is null.
     static member (*inline*) tryBetween (firstSplitter:string) (secondSplitter:string) (stringToSplit:string): option<string>  =
         if isNull stringToSplit  then StrException.Raise "Str.tryBetween: stringToSplit is null (firstSplitter:%s, secondSplitter:%s) " (exnf firstSplitter) (exnf secondSplitter)
         if isNull firstSplitter  then StrException.Raise "Str.tryBetween: firstSplitter is null (stringToSplit:%s, secondSplitter:%s)" (exnf stringToSplit) (exnf secondSplitter)
@@ -294,10 +297,10 @@ type Str private () =
             else
                 Some <|stringToSplit.Substring(start + firstSplitter.Length, ende - start - firstSplitter.Length)// finds text between two chars
 
-    /// Finds text between two strings
+    /// Finds text between two strings.
     /// e.g.: between "X" "T" "cXabTk" =  "ab"
-    /// Returns full input string if not both splitters are found.
-    /// Delimiters are excluded in the returned strings
+    /// Returns the full input string unless both splitters are found.
+    /// Delimiters are excluded from the returned string.
     static member (*inline*) betweenOrInput (firstSplitter:string) (secondSplitter:string) (stringToSplit:string): string  =
         if isNull stringToSplit  then StrException.Raise "Str.betweenOrInput: stringToSplit is null (firstSplitter:%s, secondSplitter:%s) " (exnf firstSplitter) (exnf secondSplitter)
         if isNull firstSplitter  then StrException.Raise "Str.betweenOrInput: firstSplitter is null (stringToSplit:%s, secondSplitter:%s)" (exnf stringToSplit) (exnf secondSplitter)
@@ -310,10 +313,10 @@ type Str private () =
             else
                 stringToSplit.Substring(start + firstSplitter.Length, ende - start - firstSplitter.Length)// finds text between two chars
 
-    /// Finds text between two Characters
+    /// Finds text between two characters.
     /// e.g.: between 'X' 'T' "cXabTk" =  "ab"
-    /// Fails if not both splitters are found.
-    /// Delimiters are excluded in the returned strings
+    /// Fails unless both splitters are found.
+    /// Delimiters are excluded from the returned string.
     static member (*inline*) betweenChars (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string) :string =
         if isNull stringToSplit then StrException.Raise "Str.between: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
@@ -325,10 +328,11 @@ type Str private () =
                 stringToSplit.Substring(start + 1, ende - start - 1)// finds text between two chars
 
 
-    /// Finds text between two Characters
+    /// Finds text between two characters.
     /// e.g.: between 'X' 'T' "cXabTk" =  "ab"
-    /// Returns None if not both splitters are found.
-    /// Delimiters are excluded in the returned strings
+    /// Returns None unless both splitters are found.
+    /// Delimiters are excluded from the returned string.
+    /// Throws StrException if the input string is null.
     static member (*inline*) tryBetweenChars (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string): option<string>  =
         if isNull stringToSplit then StrException.Raise "Str.tryBetween: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
@@ -339,10 +343,10 @@ type Str private () =
             else
                 Some <|stringToSplit.Substring(start + 1, ende - start - 1)// finds text between two chars
 
-    /// Finds text between two Characters
+    /// Finds text between two characters.
     /// e.g.: between 'X' 'T' "cXabTk" =  "ab"
-    /// Returns full input string if not both splitters are found.
-    /// Delimiters are excluded in the returned strings
+    /// Returns the full input string unless both splitters are found.
+    /// Delimiters are excluded from the returned string.
     static member (*inline*) betweenCharsOrInput (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string): string  =
         if isNull stringToSplit then StrException.Raise "Str.betweenOrInput: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
@@ -354,9 +358,9 @@ type Str private () =
                 stringToSplit.Substring(start + 1, ende - start - 1)// finds text between two chars
 
 
-    /// Split string into two elements,
-    /// Fails if  splitter is not found.
-    /// The splitter is not included in the two return strings.
+    /// Splits a string into two elements.
+    /// Fails if the splitter is not found.
+    /// The splitter is not included in the two returned strings.
     static member (*inline*) splitOnce (splitter:string) (stringToSplit:string) : string*string =
         if isNull stringToSplit then StrException.Raise "Str.splitOnce: stringToSplit is null (splitter:%s)" (exnf splitter)
         if isNull splitter      then StrException.Raise "Str.splitOnce: splitter is null (stringToSplit:%s)" (exnf stringToSplit)
@@ -364,10 +368,10 @@ type Str private () =
         if start = -1 then StrException.Raise "Str.splitOnce: splitter %s not found in stringToSplit: %s" (exnf splitter) (exnf stringToSplit)
         else               stringToSplit.Substring(0, start), stringToSplit.Substring(start + splitter.Length)
 
-    /// Finds text before, between and after  two strings.
-    /// e.g.: between "X" "T" "cXabTk" = "c", "ab", "k"
-    /// Fails if not both splitters are found.
-    /// Delimiters are excluded in the three returned strings
+    /// Finds text before, between, and after two strings.
+    /// e.g.: splitTwice "X" "T" "cXabTk" = "c", "ab", "k"
+    /// Fails unless both splitters are found.
+    /// Delimiters are excluded from the three returned strings.
     static member (*inline*) splitTwice (firstSplitter:string) (secondSplitter:string) (stringToSplit:string) : string*string*string =
         if isNull stringToSplit  then StrException.Raise "Str.splitTwice: stringToSplit is null (firstSplitter:%s, secondSplitter:%s) " (exnf firstSplitter) (exnf secondSplitter)
         if isNull firstSplitter  then StrException.Raise "Str.splitTwice: firstSplitter is null (stringToSplit:%s, secondSplitter:%s)" (exnf stringToSplit) (exnf secondSplitter)
@@ -382,9 +386,10 @@ type Str private () =
                 stringToSplit.Substring(start + firstSplitter.Length, ende - start - firstSplitter.Length),// finds text between two chars
                 stringToSplit.Substring(ende + secondSplitter.Length)
 
-    /// Split string into two elements,
-    /// If splitter not found None is returned
-    /// Splitter is not included in the two return strings.
+    /// Splits a string into two elements.
+    /// Returns None if the splitter is not found.
+    /// The splitter is not included in the two returned strings.
+    /// Throws StrException if the splitter or input string is null.
     static member (*inline*) trySplitOnce (splitter:string) (stringToSplit:string) : option<string*string> =
         if isNull stringToSplit then StrException.Raise "Str.trySplitOnce: stringToSplit is null (splitter:%s)" (exnf splitter)
         if isNull splitter      then StrException.Raise "Str.trySplitOnce: splitter is null (stringToSplit:%s)" (exnf stringToSplit)
@@ -392,10 +397,11 @@ type Str private () =
         if start = -1 then None
         else               Some (stringToSplit.Substring(0, start), stringToSplit.Substring(start + splitter.Length))
 
-    /// Finds text before, between and after two strings.
-    /// e.g.: between "X" "T" "cXabTk" = "c", "ab", "k"
-    /// If not both splitters are found returns None
-    /// Delimiters are excluded in the three returned strings
+    /// Finds text before, between, and after two strings.
+    /// e.g.: trySplitTwice "X" "T" "cXabTk" = Some ("c", "ab", "k")
+    /// Returns None unless both splitters are found.
+    /// Delimiters are excluded from the three returned strings.
+    /// Throws StrException if a splitter or the input string is null.
     static member (*inline*) trySplitTwice (firstSplitter:string) (secondSplitter:string) (stringToSplit:string) : option<string*string*string>=
         if isNull stringToSplit  then StrException.Raise "Str.trySplitTwice: stringToSplit is null (firstSplitter:%s, secondSplitter:%s)" (exnf firstSplitter) (exnf secondSplitter)
         if isNull firstSplitter  then StrException.Raise "Str.trySplitTwice: firstSplitter is null (stringToSplit:%s, secondSplitter:%s)" (exnf stringToSplit)(exnf secondSplitter)
@@ -412,14 +418,14 @@ type Str private () =
                     )
 
 
-    /// Makes First letter of string to Uppercase if possible.
+    /// Makes the first letter of a string uppercase, if possible.
     static member (*inline*) up1 (txt:string) : string =
         if isNull txt then StrException.Raise "Str.up1: string is null"
         if txt="" || Char.IsUpper txt.[0] then txt
         elif Char.IsLetter txt.[0] then  String(Char.ToUpper(txt.[0]),1) + txt.Substring(1)
         else txt
 
-    /// Makes First letter of string to Lowercase if possible.
+    /// Makes the first letter of a string lowercase, if possible.
     static member (*inline*) low1 (txt:string) : string =
         if isNull txt then StrException.Raise "Str.low1: string is null"
         if txt="" || Char.IsLower txt.[0] then txt
@@ -443,11 +449,13 @@ type Str private () =
         txt.Substring(st,len)
 
 
-    /// Counts how often a substring appears in a string
-    /// Uses StringComparison.Ordinal
+    /// Counts non-overlapping occurrences of a non-empty substring in a string.
+    /// Uses StringComparison.Ordinal.
+    /// Throws StrException if the substring is null or empty, or if the input string is null.
     static member (*inline*) countSubString (subString:string) (textToSearch:string) : int =
         if isNull textToSearch then StrException.Raise "Str.countSubString: textToSearch is null, subString: %s" (exnf subString)
         if isNull subString    then StrException.Raise "Str.countSubString: subString is null, textToSearch: %s" (exnf textToSearch)
+        if subString.Length = 0 then StrException.Raise "Str.countSubString: subString is empty, textToSearch: %s" (exnf textToSearch)
         let rec find (fromIdx:int) k =
             let r = textToSearch.IndexOf(subString, fromIdx, StringComparison.Ordinal)
             if r < 0 then k
@@ -475,12 +483,12 @@ type Str private () =
         if isNull txt then StrException.Raise "Str.addPrefix: txt is null"
         prefix+txt
 
-    /// Add a double quote (") at start and end.
+    /// Adds a double quote (") at the start and end.
     static member (*inline*) inQuotes (txt:string) : string =
         if isNull txt then StrException.Raise "Str.inQuotes: txt is null"
         "\"" + txt + "\""
 
-    /// Add a single quote (') at start and end.
+    /// Adds a single quote (') at the start and end.
     static member (*inline*) inSingleQuotes (txt:string) : string =
         if isNull txt then StrException.Raise "Str.inSingleQuotes: txt is null"
         "'" + txt + "'"
@@ -488,33 +496,35 @@ type Str private () =
     /// Joins string into one line.
     /// Replaces line break with a space character.
     /// Skips leading whitespace on each line.
-    /// Joins multiple whitespaces into one.
+    /// Collapses consecutive whitespace into a single space.
     /// If string is null returns *null string*
     /// Does not include surrounding quotes.
     static member formatInOneLine (s:string) : string =
         Format.inOneLine(s)
 
-    /// Reduces a string length for display to a maximum Length.
-    /// Shows (..) as placeholder for skipped characters if string is longer than maxCharCount.
-    /// If maxChars is bigger than 35 the placeholder will include the count of skipped characters: e.g. ( ... and 123 more chars.).
-    /// maxCharCount will be set to be minimum 6.
-    /// Returned strings are enclosed in quotation marks: '"'.
-    /// If input is null it returns *null string*
+    /// Formats a string for display using at most maxCharCount content characters, with a minimum of 8.
+    /// Surrounding quotation marks add two characters to the returned string.
+    /// Depending on maxCharCount, skipped characters are represented by (..), (...), or a message such as ( ... and 123 more chars.).
+    /// If input is null, returns *null* when maxCharCount is below 15 and *null string* otherwise.
     static member formatTruncated (maxCharCount:int) (s:string) : string =
         Format.truncated(maxCharCount)(s)
 
-    /// Adds a note about trimmed line count if there are more ( ... and %d more lines.).
-    /// Returned strings are enclosed in quotation marks: '"'.
-    /// If string is null returns *null string*.
+    /// Limits a string to maxLineCount logical lines and adds a note such as (... and 3 more lines.) when truncated.
+    /// Recognizes CR, LF, and CRLF line endings. Truncated results are enclosed in quotation marks; unchanged results are not.
+    /// maxLineCount is treated as at least 1. If the string is null, returns *null string*.
     static member formatTruncatedToMaxLines (maxLineCount:int) (s:string) : string =
         Format.truncatedToMaxLines(maxLineCount)(s)
 
 
     /// Insert thousand separators into a string representing a float or int.
     /// Before and after the decimal point.
-    /// Assumes a string that represent a float or int
+    /// Assumes a string that represents a float or int
     /// with '.' as decimal separator and no other input formatting.
+    /// Throws StrException if the input is null or empty.
     static member addThousandSeparators (thousandSeparator:char) (number:string) : string =
+
+        if isNull number then StrException.Raise "Str.addThousandSeparators: number is null"
+        if number.Length = 0 then StrException.Raise "Str.addThousandSeparators: number is empty"
 
         let b = Text.StringBuilder(number.Length + number.Length / 3 + 1)
         let inline add (c:char) = b.Append(c) |> ignore
@@ -549,13 +559,15 @@ type Str private () =
             if periodIdx>start then
                 doBeforeComma start (periodIdx-1)
             add '.'
-            if periodIdx < number.Length then
-                match max (number.IndexOf 'e') (number.IndexOf 'E') with //, StringComparison.OrdinalIgnoreCase) with // not supported by Fable compiler
-                |  -1  -> doAfterComma (periodIdx+1) (number.Length-1)
-                | eIdx -> // if float is in scientific notation don't insert comas into it too:
+            match max (number.IndexOf 'e') (number.IndexOf 'E') with //, StringComparison.OrdinalIgnoreCase) with // not supported by Fable compiler
+            | -1 ->
+                if periodIdx < number.Length-1 then
+                    doAfterComma (periodIdx+1) (number.Length-1)
+            | eIdx -> // if float is in scientific notation don't insert commas into it too:
+                if periodIdx+1 < eIdx then
                     doAfterComma (periodIdx+1) (eIdx-1)
-                    for e = eIdx to number.Length-1 do
-                        add number.[e]
+                for e = eIdx to number.Length-1 do
+                    add number.[e]
 
         b.ToString()
 
@@ -575,7 +587,7 @@ type Str private () =
         stringToSearchIn.Contains(stringToFind)
 
     /// Returns true if a specified substring occurs within this string ignoring casing.
-    /// uses: stringToSearchIn.IndexOf(stringToFind, StringComparison.OrdinalIgnoreCase) <> -1
+    /// On .NET, uses StringComparison.OrdinalIgnoreCase. In Fable, lowercases both strings before searching, which may differ for some Unicode characters.
     static member (*inline*) containsIgnoreCase (stringToFind:string) (stringToSearchIn:string) =
         // TODO for JS: use toLowerCase or regex: https://stackoverflow.com/questions/60634324/check-whether-string-contains-substring-non-case-sensitive
         if isNull stringToSearchIn then StrException.Raise "Str.containsIgnoreCase: stringToSearchIn is null, stringToFind: %s"     (exnf stringToFind)
@@ -587,23 +599,23 @@ type Str private () =
       #endif
 
 
-    /// Returns true if a specified substring does NOT occurs within this string.
+    /// Returns true if a specified substring does NOT occur within this string.
     static member (*inline*) notContains (stringToFind:string) (stringToSearchIn:string) =
         if isNull stringToSearchIn then StrException.Raise "Str.notContains: stringToSearchIn is null, stringToFind: %s"     (exnf stringToFind)
         if isNull stringToFind     then StrException.Raise "Str.notContains: stringToFind     is null, stringToSearchIn: %s" (exnf stringToSearchIn)
         not (stringToSearchIn.Contains(stringToFind))
 
-    /// Returns true if specified character occurs within this string.
+    /// Returns true if the specified character occurs within this string.
     static member (*inline*) containsChar (charToFind:char) (stringToSearchIn:string) =
         if isNull stringToSearchIn then StrException.Raise "Str.containsChar: stringToSearchIn is null, char: '%c'" charToFind
         stringToSearchIn.IndexOf(charToFind) <> -1
 
-    /// Returns true if specified character does NOT occurs within this string.
+    /// Returns true if the specified character does NOT occur within this string.
     static member (*inline*) notContainsChar (charToFind:char) (stringToSearchIn:string) =
         if isNull stringToSearchIn then StrException.Raise "Str.notContainsChar: stringToSearchIn is null, char: '%c'" charToFind
         stringToSearchIn.IndexOf(charToFind) = -1
 
-    /// Compares two specified String objects and returns an integer that indicates their relative position in the sort order, u
+    /// Compares two specified String objects and returns an integer that indicates their relative position in the sort order.
     /// Uses StringComparison.Ordinal.
     static member (*inline*) compare strA strB =
         if isNull strA then StrException.Raise "Str.compare: strA is null, strB: %s" (exnf strB)
@@ -637,7 +649,7 @@ type Str private () =
         stringSearchInAtEnd.EndsWith(stringToFindAtEnd, StringComparison.OrdinalIgnoreCase)
         // #endif
 
-    /// Determines whether the beginning of this string instance matches the specified string, using StringComparison.Ordinal..
+    /// Determines whether the beginning of this string instance matches the specified string, using StringComparison.Ordinal.
     static member (*inline*) startsWith (stringToFindAtStart:string) (stringToSearchIn:string)  =
         if isNull stringToFindAtStart then StrException.Raise "Str.startsWith: stringToFindAtStart is null. (stringToSearchIn:%s) " (exnf stringToSearchIn)
         if isNull stringToSearchIn then StrException.Raise "Str.startsWith: stringToSearchIn is null. (stringToFindAtStart:%s) " (exnf stringToFindAtStart)
@@ -675,7 +687,7 @@ type Str private () =
 
     /// Reports the zero-based index of the first occurrence of the specified character in this instance.
     /// The search starts at a specified character position and examines a specified number of character positions.
-    /// When used in Fable this use the Knuth-Morris-Pratt algorithm via Str.indicesOf
+    /// When used in Fable, this uses the Knuth-Morris-Pratt algorithm via Str.indicesOf.
     static member (*inline*) indexOfCharFromFor (charToFind:char) startIndex count (stringToSearchIn:string)  =
         #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
             if isNull stringToSearchIn then StrException.Raise "Str.indexOfCharFromFor : stringToSearchIn is null. (charToFind:'%c')  (startIndex:%d)  (count:%d) " charToFind startIndex count
@@ -701,7 +713,7 @@ type Str private () =
 
     /// Reports the zero-based index of the first occurrence of the specified string in this instance.
     /// The search starts at a specified character position and examines a specified number of character positions, using StringComparison.Ordinal.
-    /// When used in Fable this use the Knuth-Morris-Pratt algorithm via Str.indicesOf
+    /// When used in Fable, this uses the Knuth-Morris-Pratt algorithm via Str.indicesOf.
     static member (*inline*) indexOfStringFromFor (stringToFind:string) (startIndex:int) (count:int) (stringToSearchIn:string)  =
         #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // otherwise error FABLE: The only extra argument accepted for String.IndexOf/LastIndexOf is startIndex.
             if isNull stringToFind then StrException.Raise "Str.indexOfStringFromFor: stringToFind is null. (startIndex:%d)  (count:%d)  (stringToSearchIn:%s) " startIndex count (exnf stringToSearchIn)
@@ -721,19 +733,31 @@ type Str private () =
     /// Reports the zero-based index of the first occurrence in this instance of any character in a specified array of Unicode characters.
     static member (*inline*) indexOfAny (anyOf:char[]) (stringToSearchIn:string)  =
         if isNull stringToSearchIn then StrException.Raise "Str.indexOfAny: stringToSearchIn is null. (anyOf:%A) " anyOf
+        #if FABLE_COMPILER_TYPESCRIPT // TS-only
+        stringToSearchIn.IndexOfAny((emitJsExpr anyOf "$0 as string[]" : char[]))
+        #else
         stringToSearchIn.IndexOfAny(anyOf)
+        #endif
 
     /// Reports the zero-based index of the first occurrence in this instance of any character in a specified array of Unicode characters.
     /// The search starts at a specified character position.
     static member (*inline*) indexOfAnyFrom (anyOf:char[]) startIndex (stringToSearchIn:string)  =
         if isNull stringToSearchIn then StrException.Raise "Str.indexOfAnyFrom: stringToSearchIn is null. (anyOf:%A)  (startIndex:%d) " anyOf startIndex
+        #if FABLE_COMPILER_TYPESCRIPT // TS-only
+        stringToSearchIn.IndexOfAny((emitJsExpr anyOf "$0 as string[]" : char[]), startIndex)
+        #else
         stringToSearchIn.IndexOfAny(anyOf, startIndex)
+        #endif
 
     /// Reports the zero-based index of the first occurrence in this instance of any character in a specified array of Unicode characters.
     /// The search starts at a specified character position and examines a specified number of character positions.
     static member (*inline*) indexOfAnyFromFor (anyOf:char[]) startIndex count (stringToSearchIn:string)  =
         if isNull stringToSearchIn then StrException.Raise "Str.indexOfAnyFromFor: stringToSearchIn is null. (anyOf:%A)  (startIndex:%d)  (count:%d) " anyOf startIndex count
+        #if FABLE_COMPILER_TYPESCRIPT // TS-only
+        stringToSearchIn.IndexOfAny((emitJsExpr anyOf "$0 as string[]" : char[]), startIndex, count)
+        #else
         stringToSearchIn.IndexOfAny(anyOf, startIndex, count)
+        #endif
 
     /// Returns a new string in which a specified string is inserted at a specified index position in this instance.
     static member (*inline*) insert startIndex (stringToInsert:string) (insertIntoThisString:string)  =
@@ -839,31 +863,31 @@ type Str private () =
         txt.Replace(oldValue, newValue) // will return the same instance if text to replace is not found
 
 
-    /// Returns a new string in which only the first occurrences of a specified string in the current instance is replaced with another specified string.
+    /// Returns a new string in which only the first occurrence of a specified string in the current instance is replaced with another specified string.
     /// (Will return the same instance if text to replace is not found)
     static member (*inline*) replaceFirst (oldValue:string) (newValue:string) (txt:string)  =
         if isNull oldValue then StrException.Raise "Str.replaceFirst: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
         if isNull newValue then StrException.Raise "Str.replaceFirst: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
         if isNull txt then StrException.Raise "Str.replaceFirst: txt is null. (oldValue:%s)  (newValue:%s) " (exnf oldValue) (exnf newValue)
-        let idx = txt.IndexOf(oldValue)
+        let idx = txt.IndexOf(oldValue, StringComparison.Ordinal)
         if idx < 0 then txt
         else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
 
-    /// Returns a new string in which only the last occurrences of a specified string in the current instance is replaced with another specified string.
+    /// Returns a new string in which only the last occurrence of a specified string in the current instance is replaced with another specified string.
     /// (Will return the same instance if text to replace is not found)
     static member (*inline*) replaceLast (oldValue:string) (newValue:string) (txt:string)  =
         if isNull oldValue then StrException.Raise "Str.replaceLast: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
         if isNull newValue then StrException.Raise "Str.replaceLast: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
         if isNull txt then StrException.Raise "Str.replaceLast: txt is null. (oldValue:%s)  (newValue:%s) " (exnf oldValue) (exnf newValue)
-        let idx = txt.LastIndexOf(oldValue)
+        let idx = txt.LastIndexOf(oldValue, StringComparison.Ordinal)
         if idx < 0 then txt
         else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
 
-    /// Concatenates string with Environment.NewLine
+    /// Concatenates strings with Environment.NewLine.
     static member inline concatLines  (lines:string seq) =
         String.concat Environment.NewLine lines
 
-    /// Concatenates string with given separator
+    /// Concatenates strings with the given separator.
     /// Same as FSharp.Core.String.concat
     static member inline concat (separator:string) (lines:string seq) =
         String.concat separator lines
@@ -871,20 +895,20 @@ type Str private () =
 
     //-----------split by string overloads --------------
 
-    /// Split string by "\r\n", "\r" and "\n"
+    /// Splits a string by "\r\n", "\r", and "\n".
     static member (*inline*) splitLines  (stringToSplit:string) =
         if isNull stringToSplit then StrException.Raise "Str.splitLines: stringToSplit is null"
         stringToSplit.Split( [| "\r\n"; "\r"; "\n" |] , StringSplitOptions.None)
 
 
-    /// Split string, Remove Empty Entries
+    /// Splits a string and removes empty entries.
     /// Like: string.Split([| splitter |], StringSplitOptions.RemoveEmptyEntries)
     static member (*inline*) split (splitter:string) (stringToSplit:string) =
         if isNull stringToSplit then StrException.Raise "Str.split: stringToSplit is null (splitter:%s)" (exnf splitter)
         if isNull splitter      then StrException.Raise "Str.split: splitter is null (stringToSplit:%s)" (exnf stringToSplit)
         stringToSplit.Split([|splitter|], StringSplitOptions.RemoveEmptyEntries)
 
-    /// Split string, Keep Empty Entries
+    /// Splits a string and keeps empty entries.
     /// Like : string.Split([| splitter |], StringSplitOptions.None)
     static member (*inline*) splitKeep (splitter:string) (stringToSplit:string) =
         if isNull stringToSplit then StrException.Raise "Str.splitKeep: stringToSplit is null (splitter:%s)" (exnf splitter)
@@ -893,29 +917,37 @@ type Str private () =
 
     //-----------split by Char overloads --------------
 
-    /// Split string by a Char, Remove Empty Entries
+    /// Splits a string by a character and removes empty entries.
     /// Like: string.Split([| splitter |], StringSplitOptions.RemoveEmptyEntries)
     static member (*inline*) splitChar (separator:char) (stringToSplit:string)  =
         if isNull stringToSplit then StrException.Raise "Str.splitChar: stringToSplit is null. (separator:'%c') " separator
         stringToSplit.Split([| separator|] , StringSplitOptions.RemoveEmptyEntries)
 
-    /// Split string by any of multiple Chars, Remove Empty Entries
+    /// Splits a string by any of multiple characters and removes empty entries.
     /// Like: string.Split([| splitter |], StringSplitOptions.RemoveEmptyEntries)
     static member (*inline*) splitChars(separators:char[]) (stringToSplit:string)  =
         if isNull stringToSplit then StrException.Raise "Str.splitByChars: stringToSplit is null. (separators:%A)  " separators
+        #if FABLE_COMPILER_TYPESCRIPT // TS-only
+        stringToSplit.Split((emitJsExpr separators "$0 as string[]" : char[]), StringSplitOptions.RemoveEmptyEntries)
+        #else
         stringToSplit.Split(separators, StringSplitOptions.RemoveEmptyEntries)
+        #endif
 
-    /// Split string by a Char, Keep Empty Entries
+    /// Splits a string by a character and keeps empty entries.
     /// Like : string.Split([| splitter |], StringSplitOptions.None)
     static member (*inline*) splitCharKeep (separator:char) (stringToSplit:string)  =
         if isNull stringToSplit then StrException.Raise "Str.splitCharKeep: stringToSplit is null. (separator:'%c') " separator
         stringToSplit.Split(separator)
 
-    /// Split string by any of multiple Chars, Keep Empty Entries
+    /// Splits a string by any of multiple characters and keeps empty entries.
     /// Like : string.Split([| splitter |], StringSplitOptions.None)
     static member (*inline*) splitCharsKeep (separators:char[]) (stringToSplit:string)  =
         if isNull stringToSplit then StrException.Raise "Str.splitCharsKeep: stringToSplit is null. (separators:%A)" separators
+        #if FABLE_COMPILER_TYPESCRIPT // TS-only
+        stringToSplit.Split((emitJsExpr separators "$0 as string[]" : char[]))
+        #else
         stringToSplit.Split(separators)
+        #endif
 
     //---------------------------- end split -----------------
 
@@ -957,7 +989,7 @@ type Str private () =
         if isNull txt then StrException.Raise "Str.trim: txt is null."
         txt.Trim()
 
-    /// Removes all leading and trailing occurrences of a set of characters specified in an array from the current String object.
+    /// Removes all leading and trailing occurrences of a specified character from the current String object.
     static member (*inline*) trimChar (trimChar:char) (txt:string)  =
         if isNull txt then StrException.Raise "Str.trimChar: txt is null."
         txt.Trim([|trimChar|])
@@ -972,7 +1004,7 @@ type Str private () =
         if isNull txt then StrException.Raise "Str.trimEnd: txt is null."
         txt.TrimEnd()
 
-    /// Removes all trailing occurrences of a  characters specified in an array from the current String object.
+    /// Removes all trailing occurrences of a specified character from the current String object.
     static member (*inline*) trimEndChar (trimChar:char) (txt:string)  =
         if isNull txt then StrException.Raise "Str.trimEndChar: txt is null."
         txt.TrimEnd([|trimChar|])
@@ -987,7 +1019,7 @@ type Str private () =
         if isNull txt then StrException.Raise "Str.trimStart: txt is null."
         txt.TrimStart()
 
-    /// Removes all leading occurrences of a characters specified in an array from the current String object.
+    /// Removes all leading occurrences of a specified character from the current String object.
     static member (*inline*) trimStartChar (trimChar:char) (txt:string)  =
         if isNull txt then StrException.Raise "Str.trimStartChar: txt is null."
         txt.TrimStart(trimChar)
@@ -998,20 +1030,21 @@ type Str private () =
         txt.TrimStart(trimChars)
 
 
-    /// Removes accents & diacritics from characters
+    /// Removes accents and diacritics represented by Unicode non-spacing marks.
     /// first does txt.Normalize(System.Text.NormalizationForm.FormD)
     /// and then removes all non-spacing marks
     /// eventually returns string.Normalize(NormalizationForm.FormC)
-    /// (in Fable this just call txt.normalize("NFKD") instead)
+    /// In Fable JavaScript, uses NFD, removes non-spacing marks, and then normalizes to Form C.
     static member normalize (txt:string ) : string =
                 if isNull txt then StrException.Raise "Str.normalize: txt is null"
 
-        #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT_JAVASCRIPT
+        #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
                 //https://stackoverflow.com/a/37511463/969070:
                 let n :string = txt?normalize("NFD")
-                emitJsExpr n """$0.replace(/\p{Mn}/gu, "")"""
+                let withoutMarks : string = emitJsExpr n """$0.replace(/\p{Mn}/gu, "")"""
+                withoutMarks?normalize("NFC")
         #else
-            #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT // Fail for all other Fable targets ( eg, Rust, Python)
+            #if FABLE_COMPILER // Fail for all other Fable targets ( eg, Rust, Python)
                 failwith "Str.normalize: not implemented for Fable targets other than JS"
             #else
                 // better: https://github.com/apache/lucenenet/blob/master/src/Lucene.Net.Analysis.Common/Analysis/Miscellaneous/ASCIIFoldingFilter.cs

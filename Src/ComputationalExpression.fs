@@ -1,4 +1,4 @@
-﻿namespace Str
+namespace Str
 
 open System
 open System.Text
@@ -16,9 +16,9 @@ module ComputationalExpressions =
     let inline private addLn    (b: StringBuilder) (s:string) : unit = b.AppendLine  s   |> ignore<StringBuilder>
 
     /// Computational Expression String Builder:
-    /// use 'yield' to append text, or seq of strings separated by a new line
+    /// use 'yield' to append text, or a sequence of strings with a new line appended after every item, including the last,
     /// and 'yield!' (with an exclamation mark)  to append text followed by a new line character.
-    /// accepts ints, guids and chars too.
+    /// Accepts ints, GUIDs, and chars too.
     type StringBufferBuilder () =
         // adapted from https://github.com/fsharp/fslang-suggestions/issues/775
 
@@ -79,9 +79,9 @@ module ComputationalExpressions =
 module AutoOpenComputationalExpression  =
 
     /// Computational Expression String Builder:
-    /// use 'yield' to append text, or seq of strings separated by a new line
+    /// use 'yield' to append text, or a sequence of strings with a new line appended after every item, including the last,
     /// and 'yield!' (with an exclamation mark)  to append text followed by a new line character.
-    /// accepts ints, guids and chars  too.
+    /// Accepts ints, GUIDs, and chars too.
     let str  =
         ComputationalExpressions.StringBufferBuilder ()
 

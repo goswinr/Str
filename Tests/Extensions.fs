@@ -13,6 +13,10 @@ module Extensions =
     #endif
 
 
+    #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
+    #else
+    [<Tests>]
+    #endif
     let tests = testList "String extensions tests" [
 
         testCase "DoesNotContain with substring" <| fun _ ->
@@ -240,6 +244,10 @@ module Extensions =
         testCase "LastX should throw when x > length" <| fun _ ->
             let s = "Hi"
             Expect.throws (fun _ -> s.LastX 5 |> ignore) "Expected exception when x > length"
+
+        testCase "LastX should throw when x is negative" <| fun _ ->
+            let s = "Hi"
+            Expect.throws (fun _ -> s.LastX -1 |> ignore) "Expected exception when x is negative"
 
         testCase "GetLooped should throw for empty string" <| fun _ ->
             let s = ""
