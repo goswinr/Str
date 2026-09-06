@@ -67,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation ported from [FsEx](https://github.com/goswinr/FsEx/blob/main/Src/StringModule.fs)
 - Added more tests
 
-[Unreleased]: https://github.com/goswinr/Str/compare/0.24.0...HEAD
+[0.24.1]: https://github.com/goswinr/Str/compare/0.24.0...0.24.1
 [0.24.0]: https://github.com/goswinr/Str/compare/0.23.0...0.24.0
 [0.23.0]: https://github.com/goswinr/Str/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/goswinr/Str/compare/0.21.0...0.22.0
