@@ -24,13 +24,10 @@ dotnet build Str.sln
 Tests must be run from the Tests directory. Both .NET and JavaScript tests share the same test definitions.
 
 ```bash
-# Run .NET tests (using Expecto)
+# Run .NET tests (using Scriptorium)
 cd Tests && dotnet run
 
-# Run .NET tests with filter (Expecto supports --filter)
-cd Tests && dotnet run -- --filter "test name pattern"
-
-# Run JavaScript tests (using Fable.Mocha)
+# Run JavaScript tests (Fable compiles to Tests/js, then `--runScript` runs it with Node.js)
 cd Tests && npm test
 
 # Run JS tests + verify TypeScript compilation
@@ -63,10 +60,12 @@ The library is structured in a specific compilation order (defined in `Src/Str.f
 
 - **Error Handling**: Custom `StrException` type with descriptive messages including truncated string values via `Format.truncated`
 
-### Dual Test Framework
+### Test Framework
 
-The test project (`Tests/`) uses conditional compilation:
-- `#if FABLE_COMPILER` → Fable.Mocha for JS
-- `#else` → Expecto for .NET
+The test project (`Tests/`) uses [Scriptorium](https://fable-hub.github.io/Scriptorium/) on both .NET and JS, with no conditional compilation for the framework:
+- `Scriptorium.Quill` provides the test DSL (`open type Scriptorium.Quill.Test`: `testList ("name", [ ... ])`, `test ("name", fun _ -> ...)`) and the runner (`Runner.runTests` in `Tests/Main.fs`).
+- `Scriptorium.Nib` provides the assertions (`open Scriptorium.Nib.Assertion`), e.g. `assertThat result (tag "message" >> isEqualTo expected)`, `assertThat (fun () -> ...) (tag "message" >> throws)`, `assertThat flag isTrue`.
+- There is no CLI `--filter`; to run a subset temporarily use `ftest` / `ftestList` (focus) or `xtest` / `xtestList` (pending). Focused tests fail the run on CI.
+- Test names must be unique within a list; the runner rejects duplicate test paths.
 
-Both frameworks share the same test definitions in `Tests/Module.fs` and `Tests/Extensions.fs`.
+The same test definitions in `Tests/Module.fs`, `Tests/Extensions.fs` and `Tests/StringBuilder.fs` run on both .NET and JS.

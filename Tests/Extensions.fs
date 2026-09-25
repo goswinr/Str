@@ -6,254 +6,300 @@ module Extensions =
     open Str.ExtensionsString
     open System
 
-    #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
-    open Fable.Mocha
-    #else
-    open Expecto
-    #endif
+    open Scriptorium.Nib.Assertion
+    open type Scriptorium.Quill.Test
 
 
-    #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
-    #else
-    [<Tests>]
-    #endif
-    let tests = testList "String extensions tests" [
+    let tests = testList ("String extensions tests", [
 
-        testCase "DoesNotContain with substring" <| fun _ ->
+        test ("DoesNotContain with substring", fun _ ->
             let s = "Hello, world!"
-            Expect.isTrue (s.DoesNotContain("Goodbye")) "Expected string not to contain 'Goodbye'"
+            assertThat (s.DoesNotContain("Goodbye")) (tag "Expected string not to contain 'Goodbye'" >> isTrue)
+        )
 
-        testCase "DoesNotContain with char" <| fun _ ->
+        test ("DoesNotContain with char", fun _ ->
             let s = "Hello, world!"
-            Expect.isTrue (s.DoesNotContain('x')) "Expected string not to contain 'x'"
+            assertThat (s.DoesNotContain('x')) (tag "Expected string not to contain 'x'" >> isTrue)
+        )
 
-        testCase "Contains with char" <| fun _ ->
+        test ("Contains with char", fun _ ->
             let s = "Hello, world!"
-            Expect.isTrue (s.Contains('H')) "Expected string to contain 'H'"
+            assertThat (s.Contains('H')) (tag "Expected string to contain 'H'" >> isTrue)
+        )
 
-        testCase "Split with char" <| fun _ ->
+        test ("Split with char", fun _ ->
             let s = "Hello, world!"
             let split = s.Split(',')
-            Expect.equal split.Length 2 "Expected split to have 2 elements"
-            Expect.equal split.[0] "Hello" "Expected first element to be 'Hello'"
-            Expect.equal split.[1] " world!" "Expected second element to be ' world!'"
+            assertThat split.Length (tag "Expected split to have 2 elements" >> isEqualTo 2)
+            assertThat split.[0] (tag "Expected first element to be 'Hello'" >> isEqualTo "Hello")
+            assertThat split.[1] (tag "Expected second element to be ' world!'" >> isEqualTo " world!")
+        )
 
-        testCase "LastIndex" <| fun _ ->
+        test ("LastIndex", fun _ ->
             let s = "Hello, world!"
             let result = s.LastIndex
-            Expect.equal result 12 "Expected last index to be 12"
+            assertThat result (tag "Expected last index to be 12" >> isEqualTo 12)
+        )
 
-        testCase "Last" <| fun _ ->
+        test ("Last", fun _ ->
             let s = "Hello, world!"
             let result = s.Last
-            Expect.equal result '!' "Expected last character to be '!'"
+            assertThat result (tag "Expected last character to be '!'" >> isEqualTo '!')
+        )
 
-        testCase "SecondLast" <| fun _ ->
+        test ("SecondLast", fun _ ->
             let s = "Hello, world!"
             let result = s.SecondLast
-            Expect.equal result 'd' "Expected second last character to be 'd'"
+            assertThat result (tag "Expected second last character to be 'd'" >> isEqualTo 'd')
+        )
 
-        testCase "ThirdLast" <| fun _ ->
+        test ("ThirdLast", fun _ ->
             let s = "Hello, world!"
             let result = s.ThirdLast
-            Expect.equal result 'l' "Expected third last character to be 'l'"
+            assertThat result (tag "Expected third last character to be 'l'" >> isEqualTo 'l')
+        )
 
-        testCase "LastX" <| fun _ ->
+        test ("LastX", fun _ ->
             let s = "Hello, world!"
             let result = s.LastX 5
-            Expect.equal result "orld!" "Expected last 5 characters to be 'orld!'"
+            assertThat result (tag "Expected last 5 characters to be 'orld!'" >> isEqualTo "orld!")
+        )
 
-        testCase "First" <| fun _ ->
+        test ("First", fun _ ->
             let s = "Hello, world!"
             let result = s.First
-            Expect.equal result 'H' "Expected first character to be 'H'"
+            assertThat result (tag "Expected first character to be 'H'" >> isEqualTo 'H')
+        )
 
-        testCase "Second" <| fun _ ->
+        test ("Second", fun _ ->
             let s = "Hello, world!"
             let result = s.Second
-            Expect.equal result 'e' "Expected second character to be 'e'"
+            assertThat result (tag "Expected second character to be 'e'" >> isEqualTo 'e')
+        )
 
-        testCase "Third" <| fun _ ->
+        test ("Third", fun _ ->
             let s = "Hello, world!"
             let result = s.Third
-            Expect.equal result 'l' "Expected third character to be 'l'"
+            assertThat result (tag "Expected third character to be 'l'" >> isEqualTo 'l')
+        )
 
-        testCase "GetNeg" <| fun _ ->
+        test ("GetNeg", fun _ ->
             let s = "Hello, world!"
             let result = s.GetNeg -1
-            Expect.equal result '!' "Expected character at index -1 to be '!'"
+            assertThat result (tag "Expected character at index -1 to be '!'" >> isEqualTo '!')
+        )
 
-        testCase "GetLooped with positive index" <| fun _ ->
+        test ("GetLooped with positive index", fun _ ->
             let s = "Hello, world!"
             let result = s.GetLooped 13
-            Expect.equal result 'H' "Expected character at looped index 13 to be 'H'"
+            assertThat result (tag "Expected character at looped index 13 to be 'H'" >> isEqualTo 'H')
+        )
 
-        testCase "GetLooped with negative index" <| fun _ ->
+        test ("GetLooped with negative index", fun _ ->
             let s = "Hello, world!"
             let result = s.GetLooped -1
-            Expect.equal result '!' "Expected character at looped index -1 to be '!'"
+            assertThat result (tag "Expected character at looped index -1 to be '!'" >> isEqualTo '!')
+        )
 
-        testCase "Slice with positive indices" <| fun _ ->
+        test ("Slice with positive indices", fun _ ->
             let s = "Hello, world!"
             let result = s.Slice(0, 4)
-            Expect.equal result "Hello" "Expected slice from index 0 to 5 to be 'Hello'"
+            assertThat result (tag "Expected slice from index 0 to 5 to be 'Hello'" >> isEqualTo "Hello")
+        )
 
-        testCase "Slice with negative indices" <| fun _ ->
+        test ("Slice with negative indices", fun _ ->
             let s = "Hello, world!"
             let result = s.Slice(-6, -1)
-            Expect.equal result "world!" "Expected slice from index -6 to -1 to be 'world'"
+            assertThat result (tag "Expected slice from index -6 to -1 to be 'world'" >> isEqualTo "world!")
+        )
 
-        testCase "ReplaceFirst" <| fun _ ->
+        test ("ReplaceFirst", fun _ ->
             let s = "Hello-XT-world-XT!"
             let result = s.ReplaceFirst("XT", "000")
-            Expect.equal result "Hello-000-world-XT!" "Expected first occurrence of 'XT' to be replaced with '000'"
+            assertThat result (tag "Expected first occurrence of 'XT' to be replaced with '000'" >> isEqualTo "Hello-000-world-XT!")
+        )
 
-        testCase "ReplaceLast" <| fun _ ->
+        test ("ReplaceLast", fun _ ->
             let s = "Hello-XT-world-XT!"
             let result = s.ReplaceLast("XT", "000")
-            Expect.equal result "Hello-XT-world-000!" "Expected last occurrence of 'XT' to be replaced with '000'"
+            assertThat result (tag "Expected last occurrence of 'XT' to be replaced with '000'" >> isEqualTo "Hello-XT-world-000!")
+        )
 
-        testCase "ReplaceLast casing" <| fun _ ->
+        test ("ReplaceLast casing", fun _ ->
             let s = "Hello-xT-world-Xt!"
             let result = s.ReplaceLast("XT", "000")
-            Expect.equal result "Hello-xT-world-Xt!" "Expected no occurrence of 'XT' to be replaced with '000'"
+            assertThat result (tag "Expected no occurrence of 'XT' to be replaced with '000'" >> isEqualTo "Hello-xT-world-Xt!")
+        )
 
         // ============ str.IsWhite tests ============
-        testCase "str.IsWhite should return true for empty string" <| fun _ ->
+        test ("str.IsWhite should return true for empty string", fun _ ->
             let s = ""
-            Expect.isTrue s.IsWhite "Expected empty string to be white"
+            assertThat s.IsWhite (tag "Expected empty string to be white" >> isTrue)
+        )
 
-        testCase "str.IsWhite should return true for whitespace only" <| fun _ ->
+        test ("str.IsWhite should return true for whitespace only", fun _ ->
             let s = "   \t\n"
-            Expect.isTrue s.IsWhite "Expected whitespace to be white"
+            assertThat s.IsWhite (tag "Expected whitespace to be white" >> isTrue)
+        )
 
-        testCase "str.IsWhite should return false for non-whitespace" <| fun _ ->
+        test ("str.IsWhite should return false for non-whitespace", fun _ ->
             let s = "Hello"
-            Expect.isFalse s.IsWhite "Expected text to not be white"
+            assertThat s.IsWhite (tag "Expected text to not be white" >> isFalse)
+        )
 
-        testCase "str.IsWhite should return false for text with whitespace" <| fun _ ->
+        test ("str.IsWhite should return false for text with whitespace", fun _ ->
             let s = "  Hello  "
-            Expect.isFalse s.IsWhite "Expected text with spaces to not be white"
+            assertThat s.IsWhite (tag "Expected text with spaces to not be white" >> isFalse)
+        )
 
         // ============ str.IsNotWhite tests ============
-        testCase "str.IsNotWhite should return false for empty string" <| fun _ ->
+        test ("str.IsNotWhite should return false for empty string", fun _ ->
             let s = ""
-            Expect.isFalse s.IsNotWhite "Expected empty string to be white"
+            assertThat s.IsNotWhite (tag "Expected empty string to be white" >> isFalse)
+        )
 
-        testCase "str.IsNotWhite should return false for whitespace only" <| fun _ ->
+        test ("str.IsNotWhite should return false for whitespace only", fun _ ->
             let s = "   \t\n"
-            Expect.isFalse s.IsNotWhite "Expected whitespace to be white"
+            assertThat s.IsNotWhite (tag "Expected whitespace to be white" >> isFalse)
+        )
 
-        testCase "str.IsNotWhite should return true for non-whitespace" <| fun _ ->
+        test ("str.IsNotWhite should return true for non-whitespace", fun _ ->
             let s = "Hello"
-            Expect.isTrue s.IsNotWhite "Expected text to not be white"
+            assertThat s.IsNotWhite (tag "Expected text to not be white" >> isTrue)
+        )
 
         // ============ str.IsEmpty tests ============
-        testCase "str.IsEmpty should return true for empty string" <| fun _ ->
+        test ("str.IsEmpty should return true for empty string", fun _ ->
             let s = ""
-            Expect.isTrue s.IsEmpty "Expected empty string to be empty"
+            assertThat s.IsEmpty (tag "Expected empty string to be empty" >> isTrue)
+        )
 
-        testCase "str.IsEmpty should return false for whitespace" <| fun _ ->
+        test ("str.IsEmpty should return false for whitespace", fun _ ->
             let s = "   "
-            Expect.isFalse s.IsEmpty "Expected whitespace to not be empty"
+            assertThat s.IsEmpty (tag "Expected whitespace to not be empty" >> isFalse)
+        )
 
-        testCase "str.IsEmpty should return false for text" <| fun _ ->
+        test ("str.IsEmpty should return false for text", fun _ ->
             let s = "Hello"
-            Expect.isFalse s.IsEmpty "Expected text to not be empty"
+            assertThat s.IsEmpty (tag "Expected text to not be empty" >> isFalse)
+        )
 
         // ============ str.IsNotEmpty tests ============
-        testCase "str.IsNotEmpty should return false for empty string" <| fun _ ->
+        test ("str.IsNotEmpty should return false for empty string", fun _ ->
             let s = ""
-            Expect.isFalse s.IsNotEmpty "Expected empty string to be empty"
+            assertThat s.IsNotEmpty (tag "Expected empty string to be empty" >> isFalse)
+        )
 
-        testCase "str.IsNotEmpty should return true for whitespace" <| fun _ ->
+        test ("str.IsNotEmpty should return true for whitespace", fun _ ->
             let s = "   "
-            Expect.isTrue s.IsNotEmpty "Expected whitespace to not be empty"
+            assertThat s.IsNotEmpty (tag "Expected whitespace to not be empty" >> isTrue)
+        )
 
-        testCase "str.IsNotEmpty should return true for text" <| fun _ ->
+        test ("str.IsNotEmpty should return true for text", fun _ ->
             let s = "Hello"
-            Expect.isTrue s.IsNotEmpty "Expected text to not be empty"
+            assertThat s.IsNotEmpty (tag "Expected text to not be empty" >> isTrue)
+        )
 
         // ============ str.Get tests ============
-        testCase "str.Get should return character at index 0" <| fun _ ->
+        test ("str.Get should return character at index 0", fun _ ->
             let s = "Hello"
-            Expect.equal (s.Get 0) 'H' "Expected first char to be 'H'"
+            assertThat (s.Get 0) (tag "Expected first char to be 'H'" >> isEqualTo 'H')
+        )
 
-        testCase "str.Get should return character at middle index" <| fun _ ->
+        test ("str.Get should return character at middle index", fun _ ->
             let s = "Hello"
-            Expect.equal (s.Get 2) 'l' "Expected char at index 2 to be 'l'"
+            assertThat (s.Get 2) (tag "Expected char at index 2 to be 'l'" >> isEqualTo 'l')
+        )
 
-        testCase "str.Get should return character at last index" <| fun _ ->
+        test ("str.Get should return character at last index", fun _ ->
             let s = "Hello"
-            Expect.equal (s.Get 4) 'o' "Expected last char to be 'o'"
+            assertThat (s.Get 4) (tag "Expected last char to be 'o'" >> isEqualTo 'o')
+        )
 
-        testCase "str.Get should throw for negative index" <| fun _ ->
+        test ("str.Get should throw for negative index", fun _ ->
             let s = "Hello"
-            Expect.throws (fun _ -> s.Get -1 |> ignore) "Expected exception for negative index"
+            assertThat (fun _ -> s.Get -1 |> ignore) (tag "Expected exception for negative index" >> throws)
+        )
 
-        testCase "str.Get should throw for out of range index" <| fun _ ->
+        test ("str.Get should throw for out of range index", fun _ ->
             let s = "Hello"
-            Expect.throws (fun _ -> s.Get 10 |> ignore) "Expected exception for out of range"
+            assertThat (fun _ -> s.Get 10 |> ignore) (tag "Expected exception for out of range" >> throws)
+        )
 
-        testCase "str.Get should throw for empty string" <| fun _ ->
+        test ("str.Get should throw for empty string", fun _ ->
             let s = ""
-            Expect.throws (fun _ -> s.Get 0 |> ignore) "Expected exception for empty string"
+            assertThat (fun _ -> s.Get 0 |> ignore) (tag "Expected exception for empty string" >> throws)
+        )
 
         // ============ str.Idx tests ============
-        testCase "str.Idx should return character at index 0" <| fun _ ->
+        test ("str.Idx should return character at index 0", fun _ ->
             let s = "Hello"
-            Expect.equal (s.Idx 0) 'H' "Expected first char to be 'H'"
+            assertThat (s.Idx 0) (tag "Expected first char to be 'H'" >> isEqualTo 'H')
+        )
 
-        testCase "str.Idx should return character at middle index" <| fun _ ->
+        test ("str.Idx should return character at middle index", fun _ ->
             let s = "Hello"
-            Expect.equal (s.Idx 2) 'l' "Expected char at index 2 to be 'l'"
+            assertThat (s.Idx 2) (tag "Expected char at index 2 to be 'l'" >> isEqualTo 'l')
+        )
 
-        testCase "str.Idx should throw for negative index" <| fun _ ->
+        test ("str.Idx should throw for negative index", fun _ ->
             let s = "Hello"
-            Expect.throws (fun _ -> s.Idx -1 |> ignore) "Expected exception for negative index"
+            assertThat (fun _ -> s.Idx -1 |> ignore) (tag "Expected exception for negative index" >> throws)
+        )
 
-        testCase "str.Idx should throw for out of range index" <| fun _ ->
+        test ("str.Idx should throw for out of range index", fun _ ->
             let s = "Hello"
-            Expect.throws (fun _ -> s.Idx 10 |> ignore) "Expected exception for out of range"
+            assertThat (fun _ -> s.Idx 10 |> ignore) (tag "Expected exception for out of range" >> throws)
+        )
 
         // ============ Edge cases for existing tests ============
-        testCase "First should throw for empty string" <| fun _ ->
+        test ("First should throw for empty string", fun _ ->
             let s = ""
-            Expect.throws (fun _ -> s.First |> ignore) "Expected exception for empty string"
+            assertThat (fun _ -> s.First |> ignore) (tag "Expected exception for empty string" >> throws)
+        )
 
-        testCase "Last should throw for empty string" <| fun _ ->
+        test ("Last should throw for empty string", fun _ ->
             let s = ""
-            Expect.throws (fun _ -> s.Last |> ignore) "Expected exception for empty string"
+            assertThat (fun _ -> s.Last |> ignore) (tag "Expected exception for empty string" >> throws)
+        )
 
-        testCase "Second should throw for single char string" <| fun _ ->
+        test ("Second should throw for single char string", fun _ ->
             let s = "A"
-            Expect.throws (fun _ -> s.Second |> ignore) "Expected exception for single char"
+            assertThat (fun _ -> s.Second |> ignore) (tag "Expected exception for single char" >> throws)
+        )
 
-        testCase "SecondLast should throw for single char string" <| fun _ ->
+        test ("SecondLast should throw for single char string", fun _ ->
             let s = "A"
-            Expect.throws (fun _ -> s.SecondLast |> ignore) "Expected exception for single char"
+            assertThat (fun _ -> s.SecondLast |> ignore) (tag "Expected exception for single char" >> throws)
+        )
 
-        testCase "Third should throw for two char string" <| fun _ ->
+        test ("Third should throw for two char string", fun _ ->
             let s = "AB"
-            Expect.throws (fun _ -> s.Third |> ignore) "Expected exception for two char string"
+            assertThat (fun _ -> s.Third |> ignore) (tag "Expected exception for two char string" >> throws)
+        )
 
-        testCase "ThirdLast should throw for two char string" <| fun _ ->
+        test ("ThirdLast should throw for two char string", fun _ ->
             let s = "AB"
-            Expect.throws (fun _ -> s.ThirdLast |> ignore) "Expected exception for two char string"
+            assertThat (fun _ -> s.ThirdLast |> ignore) (tag "Expected exception for two char string" >> throws)
+        )
 
-        testCase "LastX should throw when x > length" <| fun _ ->
+        test ("LastX should throw when x > length", fun _ ->
             let s = "Hi"
-            Expect.throws (fun _ -> s.LastX 5 |> ignore) "Expected exception when x > length"
+            assertThat (fun _ -> s.LastX 5 |> ignore) (tag "Expected exception when x > length" >> throws)
+        )
 
-        testCase "LastX should throw when x is negative" <| fun _ ->
+        test ("LastX should throw when x is negative", fun _ ->
             let s = "Hi"
-            Expect.throws (fun _ -> s.LastX -1 |> ignore) "Expected exception when x is negative"
+            assertThat (fun _ -> s.LastX -1 |> ignore) (tag "Expected exception when x is negative" >> throws)
+        )
 
-        testCase "GetLooped should throw for empty string" <| fun _ ->
+        test ("GetLooped should throw for empty string", fun _ ->
             let s = ""
-            Expect.throws (fun _ -> s.GetLooped 0 |> ignore) "Expected exception for empty string"
+            assertThat (fun _ -> s.GetLooped 0 |> ignore) (tag "Expected exception for empty string" >> throws)
+        )
 
-        testCase "Slice should throw for invalid range" <| fun _ ->
+        test ("Slice should throw for invalid range", fun _ ->
             let s = "Hello"
-            Expect.throws (fun _ -> s.Slice(3, 1) |> ignore) "Expected exception for invalid range"
-        ]
+            assertThat (fun _ -> s.Slice(3, 1) |> ignore) (tag "Expected exception for invalid range" >> throws)
+        )
+        ])

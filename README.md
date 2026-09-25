@@ -298,13 +298,16 @@ sb.IndexOf ","       // 5
 All Tests run in both javascript and dotnet.
 Successful Fable compilation to typescript is verified too.
 
-For testing with .NET using Expecto:
+The tests use [Scriptorium](https://fable-hub.github.io/Scriptorium/) (Scriptorium.Quill + Scriptorium.Nib).
+The same test definitions and entry point run on .NET and on JS.
+
+For testing with .NET:
 
 ```bash
 dotnet run --project ./Tests/Tests.fsproj
 ```
 
-for JS testing with Fable.Mocha and TS verification:
+for JS testing (Fable compiles the tests and runs them with Node.js via `dotnet fable --runScript`) and TS verification:
 
 ```bash
 cd Tests

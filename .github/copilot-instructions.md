@@ -23,14 +23,13 @@
   - `dotnet build Str.sln`
   - `dotnet build Src/Str.fsproj --configuration Release`
 - Run tests from `Tests/` (required):
-  - .NET tests (Expecto): `dotnet run`
-  - Filtered .NET tests: `dotnet run -- --filter "pattern"`
-  - JS tests (Fable.Mocha): `npm test`
+  - .NET tests (Scriptorium): `dotnet run`
+  - JS tests (Scriptorium, via `dotnet fable --runScript`): `npm test`
   - JS tests + TypeScript check: `npm run testTS`
 - For first JS test runs or clean environments, run `dotnet tool restore` and install Node dependencies in `Tests/`.
 
 ## Conventions
-- Treat `Tests/Main.fs` conditional runner structure as the source of truth for dual test framework behavior.
+- Tests use Scriptorium (`Scriptorium.Quill` for `testList`/`test` and `Runner.runTests`, `Scriptorium.Nib` for `assertThat`). The single entry point in `Tests/Main.fs` runs on both .NET and JS; there is no `--filter`, use `ftest`/`xtest` temporarily instead.
 - Keep test definitions cross-platform: shared test logic lives in `Tests/Module.fs`, `Tests/Extensions.fs`, and `Tests/StringBuilder.fs`.
 - If you modify behavior in Fable-specific branches, update or add tests that validate parity across .NET and JS paths.
 - Prefer linking to canonical docs instead of duplicating long explanations:

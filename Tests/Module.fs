@@ -2,1374 +2,1668 @@ namespace Tests
 
 open Str
 
-#if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
-open Fable.Mocha
-#else
-open Expecto
-#endif
+open Scriptorium.Nib.Assertion
+open type Scriptorium.Quill.Test
 
 open System
 
 module Module =
 
 
- #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
- #else
- [<Tests>]
- #endif
  let tests =
-  testList "Module.fs Tests" [
+  testList ("Module.fs Tests", [
 
-        testCase "indicesOf with pattern found" <| fun _ ->
+        test ("indicesOf with pattern found", fun _ ->
             let text = "abababab"
             let pattern = "abab"
             let result = Str.indicesOf (text, pattern, 0, text.Length, 10) |> Array.ofSeq
-            Expect.equal result [|0; 2; 4|] "Expected pattern to be found at indices [0; 2; 4]"
+            assertThat result (tag "Expected pattern to be found at indices [0; 2; 4]" >> isEqualTo [|0; 2; 4|])
+        )
 
-        testCase "indicesOf with pattern found2" <| fun _ ->
+        test ("indicesOf with pattern found2", fun _ ->
             let text = "abab0abab0"
             let pattern = "abab"
             let result = Str.indicesOf (text, pattern, 0, text.Length, 10) |> Array.ofSeq
-            Expect.equal result [|0; 5|] "Expected pattern to be found at indices [0; 5]"
+            assertThat result (tag "Expected pattern to be found at indices [0; 5]" >> isEqualTo [|0; 5|])
+        )
 
-        testCase "Str.indicesOf with pattern not found" <| fun _ ->
+        test ("Str.indicesOf with pattern not found", fun _ ->
             let text = "Hello, world!"
             let pattern = "xyz"
             let result = Str.indicesOf (text, pattern, 0, text.Length, 10)|> Array.ofSeq
-            Expect.equal result [||] "Expected pattern to not be found"
+            assertThat result (tag "Expected pattern to not be found" >> isEqualTo [||])
+        )
 
-        testCase "Str.indicesOf with null pattern" <| fun _ ->
+        test ("Str.indicesOf with null pattern", fun _ ->
             let text = "Hello, world!"
             let testFunc = fun () -> Str.indicesOf (text, null, 0, text.Length, 10) |> ignore
-            Expect.throws testFunc "Expected an exception when pattern is null"
+            assertThat testFunc (tag "Expected an exception when pattern is null" >> throws)
+        )
 
-        testCase "Str.indicesOf with null text" <| fun _ ->
+        test ("Str.indicesOf with null text", fun _ ->
             let pattern = "Hello"
             let testFunc = fun () -> Str.indicesOf (null, pattern, 0, 5, 10) |> ignore
-            Expect.throws testFunc "Expected an exception when text is null"
+            assertThat testFunc (tag "Expected an exception when text is null" >> throws)
+        )
 
-        testCase "Str.indicesOf with negative searchFromIdx" <| fun _ ->
+        test ("Str.indicesOf with negative searchFromIdx", fun _ ->
             let text = "Hello, world!"
             let pattern = "Hello"
             let testFunc = fun () -> Str.indicesOf (text, pattern, -1, text.Length, 10) |> ignore
-            Expect.throws testFunc "Expected an exception when searchFromIdx is negative"
+            assertThat testFunc (tag "Expected an exception when searchFromIdx is negative" >> throws)
+        )
 
-        testCase "Str.indicesOf with negative searchLength" <| fun _ ->
+        test ("Str.indicesOf with negative searchLength", fun _ ->
             let text = "Hello, world!"
             let pattern = "Hello"
             let testFunc = fun () -> Str.indicesOf (text, pattern, 0, -1, 10) |> ignore
-            Expect.throws testFunc "Expected an exception when searchLength is negative"
+            assertThat testFunc (tag "Expected an exception when searchLength is negative" >> throws)
+        )
 
-        testCase "Str.indicesOf with searchFromIdx + searchLength > text.Length" <| fun _ ->
+        test ("Str.indicesOf with searchFromIdx + searchLength > text.Length", fun _ ->
             let text = "Hello, world!"
             let pattern = "Hello"
             let testFunc = fun () -> Str.indicesOf (text, pattern, 0, text.Length + 1, 10) |> ignore
-            Expect.throws testFunc "Expected an exception when searchFromIdx + searchLength > text.Length"
+            assertThat testFunc (tag "Expected an exception when searchFromIdx + searchLength > text.Length" >> throws)
+        )
 
-        testCase "Str.indicesOf respects a restricted range for a full-text pattern" <| fun _ ->
+        test ("Str.indicesOf respects a restricted range for a full-text pattern", fun _ ->
             let result = Str.indicesOf ("abc", "abc", 1, 2, 10) |> Array.ofSeq
-            Expect.equal result [||] "Index 0 is outside the requested range"
+            assertThat result (tag "Index 0 is outside the requested range" >> isEqualTo [||])
+        )
 
-        testCase "Str.indicesOf returns no matches for a zero-length search range" <| fun _ ->
+        test ("Str.indicesOf returns no matches for a zero-length search range", fun _ ->
             let result = Str.indicesOf ("abc", "a", 0, 0, 10) |> Array.ofSeq
-            Expect.equal result [||] "A zero-length range cannot contain a non-empty pattern"
+            assertThat result (tag "A zero-length range cannot contain a non-empty pattern" >> isEqualTo [||])
+        )
 
-        testCase "Str.indicesOf rejects a negative match limit" <| fun _ ->
-            Expect.throws (fun () -> Str.indicesOf ("abc", "a", 0, 3, -1) |> ignore) "Expected a negative match limit to throw"
+        test ("Str.indicesOf rejects a negative match limit", fun _ ->
+            assertThat (fun () -> Str.indicesOf ("abc", "a", 0, 3, -1) |> ignore) (tag "Expected a negative match limit to throw" >> throws)
+        )
 
-        testCase "truncate should return the truncated string" <| fun _ ->
+        test ("truncate should return the truncated string", fun _ ->
             let result = Str.truncate 5 "Hello, World!"
-            Expect.equal result "Hello" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello")
+        )
 
-        testCase "truncate should return the same string if length is greater than string length" <| fun _ ->
+        test ("truncate should return the same string if length is greater than string length", fun _ ->
             let result = Str.truncate 50 "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "skip should return the string after skipping the specified length" <| fun _ ->
+        test ("skip should return the string after skipping the specified length", fun _ ->
             let result = Str.skip 5 "Hello, World!"
-            Expect.equal result ", World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ", World!")
+        )
 
-        testCase "take should return the string of the specified length" <| fun _ ->
+        test ("take should return the string of the specified length", fun _ ->
             let result = Str.take 5 "Hello, World!"
-            Expect.equal result "Hello" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello")
+        )
 
-        testCase "delete should return the string after deleting the specified text" <| fun _ ->
+        test ("delete should return the string after deleting the specified text", fun _ ->
             let result = Str.delete "Hello" "Hello, World!Hello"
-            Expect.equal result ", World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ", World!")
+        )
 
-        testCase "deleteChar should return the string after deleting the specified char" <| fun _ ->
+        test ("deleteChar should return the string after deleting the specified char", fun _ ->
             let result = Str.deleteChar 'H' "HelloH, World!"
-            Expect.equal result "ello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "ello, World!")
+        )
 
-        testCase "truncate should return an empty string if length is 0" <| fun _ ->
+        test ("truncate should return an empty string if length is 0", fun _ ->
             let result = Str.truncate 0 "Hello, World!"
-            Expect.equal result "" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "")
+        )
 
-        testCase "truncate should throw an exception if length is negative" <| fun _ ->
-            Expect.throws (fun _ -> Str.truncate -5 "Hello, World!"  |> ignore<string>) "Should throw an exception"
+        test ("truncate should throw an exception if length is negative", fun _ ->
+            assertThat (fun _ -> Str.truncate -5 "Hello, World!"  |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "skip should return an empty string if length is equal to string length" <| fun _ ->
+        test ("skip should return an empty string if length is equal to string length", fun _ ->
             let result = Str.skip 13 "Hello, World!"
-            Expect.equal result "" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "")
+        )
 
-        testCase "skip should throw an exception if length is greater than string length" <| fun _ ->
-            Expect.throws (fun _ -> Str.skip 50 "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("skip should throw an exception if length is greater than string length", fun _ ->
+            assertThat (fun _ -> Str.skip 50 "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "take should return an empty string if length is 0" <| fun _ ->
+        test ("take should return an empty string if length is 0", fun _ ->
             let result = Str.take 0 "Hello, World!"
-            Expect.equal result "" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "")
+        )
 
-        testCase "take should throw an exception if length is negative" <| fun _ ->
-            Expect.throws (fun _ -> Str.take -5 "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("take should throw an exception if length is negative", fun _ ->
+            assertThat (fun _ -> Str.take -5 "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "delete should return the same string if text is not found" <| fun _ ->
+        test ("delete should return the same string if text is not found", fun _ ->
             let result = Str.delete "Goodbye" "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "deleteChar should return the same string if char is not found" <| fun _ ->
+        test ("deleteChar should return the same string if char is not found", fun _ ->
             let result = Str.deleteChar 'Z' "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "delete should return the same string if text is empty" <| fun _ ->
+        test ("delete should return the same string if text is empty", fun _ ->
             let result = Str.delete "" "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "delete should throw an exception if text is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.delete null "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("delete should throw an exception if text is null", fun _ ->
+            assertThat (fun _ -> Str.delete null "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "deleteChar should return the same string if char is null" <| fun _ ->
+        test ("deleteChar should return the same string if char is null", fun _ ->
             let result = Str.deleteChar '@' "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "truncate should return the same string if length is equal to string length" <| fun _ ->
+        test ("truncate should return the same string if length is equal to string length", fun _ ->
             let result = Str.truncate 13 "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "take should return the same string if length is equal to string length" <| fun _ ->
+        test ("take should return the same string if length is equal to string length", fun _ ->
             let result = Str.take 12 "Hello, World!"
-            Expect.equal result "Hello, World" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World")
+        )
 
-        testCase "unifyLineEndings should replace all line endings with System.Environment.NewLine" <| fun _ ->
+        test ("unifyLineEndings should replace all line endings with System.Environment.NewLine", fun _ ->
             let result = Str.unifyLineEndings "Hello\r\nWorld!\rHello\nWorld!"
-            Expect.equal result ("Hello" + Environment.NewLine + "World!" + Environment.NewLine + "Hello" + Environment.NewLine + "World!") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ("Hello" + Environment.NewLine + "World!" + Environment.NewLine + "Hello" + Environment.NewLine + "World!"))
+        )
 
-        testCase "unifyLineEndings should throw an exception if input is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.unifyLineEndings null |> ignore<string>) "Should throw an exception"
+        test ("unifyLineEndings should throw an exception if input is null", fun _ ->
+            assertThat (fun _ -> Str.unifyLineEndings null |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "before should return the string before the splitter" <| fun _ ->
+        test ("before should return the string before the splitter", fun _ ->
             let result = Str.before "," "Hello, World!"
-            Expect.equal result "Hello" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello")
+        )
 
-        testCase "before should throw an exception if splitter is not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.before "Z" "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("before should throw an exception if splitter is not found", fun _ ->
+            assertThat (fun _ -> Str.before "Z" "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "before should throw an exception if stringToSearchIn is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.before "," null |> ignore<string>) "Should throw an exception"
+        test ("before should throw an exception if stringToSearchIn is null", fun _ ->
+            assertThat (fun _ -> Str.before "," null |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "before should throw an exception if splitter is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.before null "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("before should throw an exception if splitter is null", fun _ ->
+            assertThat (fun _ -> Str.before null "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "beforeChar should return the string before the splitter" <| fun _ ->
+        test ("beforeChar should return the string before the splitter", fun _ ->
             let result = Str.beforeChar ',' "Hello, World!"
-            Expect.equal result "Hello" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello")
+        )
 
-        testCase "beforeChar should throw an exception if splitter is not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.beforeChar 'Z' "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("beforeChar should throw an exception if splitter is not found", fun _ ->
+            assertThat (fun _ -> Str.beforeChar 'Z' "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "tryBefore should return Some string before the splitter" <| fun _ ->
+        test ("tryBefore should return Some string before the splitter", fun _ ->
             let result = Str.tryBefore "," "Hello, World!"
-            Expect.equal result (Some "Hello") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some "Hello"))
+        )
 
-        testCase "tryBefore should return None if splitter is not found" <| fun _ ->
+        test ("tryBefore should return None if splitter is not found", fun _ ->
             let result = Str.tryBefore "Z" "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
-        testCase "tryBeforeChar should return Some string before the splitter" <| fun _ ->
+        test ("tryBeforeChar should return Some string before the splitter", fun _ ->
             let result = Str.tryBeforeChar ',' "Hello, World!"
-            Expect.equal result (Some "Hello") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some "Hello"))
+        )
 
-        testCase "tryBeforeChar should return None if splitter is not found" <| fun _ ->
+        test ("tryBeforeChar should return None if splitter is not found", fun _ ->
             let result = Str.tryBeforeChar 'Z' "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
-        testCase "beforeOrInput should return the string before the splitter" <| fun _ ->
+        test ("beforeOrInput should return the string before the splitter", fun _ ->
             let result = Str.beforeOrInput "," "Hello, World!"
-            Expect.equal result "Hello" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello")
+        )
 
-        testCase "beforeOrInput should return the input string if splitter is not found" <| fun _ ->
+        test ("beforeOrInput should return the input string if splitter is not found", fun _ ->
             let result = Str.beforeOrInput "Z" "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "beforeCharOrInput should return the string before the splitter" <| fun _ ->
+        test ("beforeCharOrInput should return the string before the splitter", fun _ ->
             let result = Str.beforeCharOrInput ',' "Hello, World!"
-            Expect.equal result "Hello" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello")
+        )
 
-        testCase "beforeCharOrInput should return the input string if splitter is not found" <| fun _ ->
+        test ("beforeCharOrInput should return the input string if splitter is not found", fun _ ->
             let result = Str.beforeCharOrInput 'Z' "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "after should return the string after the splitter" <| fun _ ->
+        test ("after should return the string after the splitter", fun _ ->
             let result = Str.after "," "Hello, World!"
-            Expect.equal result " World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World!")
+        )
 
-        testCase "after should throw an exception if splitter is not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.after "Z" "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("after should throw an exception if splitter is not found", fun _ ->
+            assertThat (fun _ -> Str.after "Z" "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "afterChar should return the string after the splitter" <| fun _ ->
+        test ("afterChar should return the string after the splitter", fun _ ->
             let result = Str.afterChar ',' "Hello, World!"
-            Expect.equal result " World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World!")
+        )
 
-        testCase "afterChar should throw an exception if splitter is not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.afterChar 'Z' "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("afterChar should throw an exception if splitter is not found", fun _ ->
+            assertThat (fun _ -> Str.afterChar 'Z' "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "tryAfter should return Some string after the splitter" <| fun _ ->
+        test ("tryAfter should return Some string after the splitter", fun _ ->
             let result = Str.tryAfter "," "Hello, World!"
-            Expect.equal result (Some " World!") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some " World!"))
+        )
 
-        testCase "tryAfter should return None if splitter is not found" <| fun _ ->
+        test ("tryAfter should return None if splitter is not found", fun _ ->
             let result = Str.tryAfter "Z" "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
-        testCase "tryAfterChar should return Some string after the splitter" <| fun _ ->
+        test ("tryAfterChar should return Some string after the splitter", fun _ ->
             let result = Str.tryAfterChar ',' "Hello, World!"
-            Expect.equal result (Some " World!") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some " World!"))
+        )
 
-        testCase "tryAfterChar should return None if splitter is not found" <| fun _ ->
+        test ("tryAfterChar should return None if splitter is not found", fun _ ->
             let result = Str.tryAfterChar 'Z' "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
 
-        testCase "afterOrInput should return the string after the splitter" <| fun _ ->
+        test ("afterOrInput should return the string after the splitter", fun _ ->
             let result = Str.afterOrInput "," "Hello, World!"
-            Expect.equal result " World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World!")
+        )
 
-        testCase "afterOrInput should return the input string if splitter is not found" <| fun _ ->
+        test ("afterOrInput should return the input string if splitter is not found", fun _ ->
             let result = Str.afterOrInput "Z" "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "afterCharOrInput should return the string after the splitter" <| fun _ ->
+        test ("afterCharOrInput should return the string after the splitter", fun _ ->
             let result = Str.afterCharOrInput ',' "Hello, World!"
-            Expect.equal result " World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World!")
+        )
 
-        testCase "afterCharOrInput should return the input string if splitter is not found" <| fun _ ->
+        test ("afterCharOrInput should return the input string if splitter is not found", fun _ ->
             let result = Str.afterCharOrInput 'Z' "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "between should return the string between the splitters" <| fun _ ->
+        test ("between should return the string between the splitters", fun _ ->
             let result = Str.between "," "!" "Hello, World!"
-            Expect.equal result " World" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World")
+        )
 
-        testCase "between should throw an exception if splitters are not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.between "Z" "Y" "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("between should throw an exception if splitters are not found", fun _ ->
+            assertThat (fun _ -> Str.between "Z" "Y" "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "tryBetween should return Some string between the splitters" <| fun _ ->
+        test ("tryBetween should return Some string between the splitters", fun _ ->
             let result = Str.tryBetween "," "!" "Hello, World!"
-            Expect.equal result (Some " World") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some " World"))
+        )
 
-        testCase "tryBetween should return None if splitters are not found" <| fun _ ->
+        test ("tryBetween should return None if splitters are not found", fun _ ->
             let result = Str.tryBetween "Z" "Y" "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
-        testCase "betweenOrInput should return the string between the splitters" <| fun _ ->
+        test ("betweenOrInput should return the string between the splitters", fun _ ->
             let result = Str.betweenOrInput "," "!" "Hello, World!"
-            Expect.equal result " World" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World")
+        )
 
-        testCase "betweenOrInput should return the input string if splitters are not found" <| fun _ ->
+        test ("betweenOrInput should return the input string if splitters are not found", fun _ ->
             let result = Str.betweenOrInput "Z" "Y" "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
-        testCase "betweenChars should return the string between the splitters" <| fun _ ->
+        test ("betweenChars should return the string between the splitters", fun _ ->
             let result = Str.betweenChars ',' '!' "Hello, World!"
-            Expect.equal result " World" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World")
+        )
 
-        testCase "betweenChars should throw an exception if splitters are not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.betweenChars 'Z' 'Y' "Hello, World!" |> ignore<string>) "Should throw an exception"
+        test ("betweenChars should throw an exception if splitters are not found", fun _ ->
+            assertThat (fun _ -> Str.betweenChars 'Z' 'Y' "Hello, World!" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "tryBetweenChars should return Some string between the splitters" <| fun _ ->
+        test ("tryBetweenChars should return Some string between the splitters", fun _ ->
             let result = Str.tryBetweenChars ',' '!' "Hello, World!"
-            Expect.equal result (Some " World") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some " World"))
+        )
 
-        testCase "tryBetweenChars should return None if splitters are not found" <| fun _ ->
+        test ("tryBetweenChars should return None if splitters are not found", fun _ ->
             let result = Str.tryBetweenChars 'Z' 'Y' "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
-        testCase "betweenCharsOrInput should return the string between the splitters" <| fun _ ->
+        test ("betweenCharsOrInput should return the string between the splitters", fun _ ->
             let result = Str.betweenCharsOrInput ',' '!' "Hello, World!"
-            Expect.equal result " World" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo " World")
+        )
 
-        testCase "betweenCharsOrInput should return the input string if splitters are not found" <| fun _ ->
+        test ("betweenCharsOrInput should return the input string if splitters are not found", fun _ ->
             let result = Str.betweenCharsOrInput 'Z' 'Y' "Hello, World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
 
-        testCase "splitOnce should split the string once at the splitter" <| fun _ ->
+        test ("splitOnce should split the string once at the splitter", fun _ ->
             let result = Str.splitOnce "," "Hello, World!"
-            Expect.equal result ("Hello", " World!") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ("Hello", " World!"))
+        )
 
-        testCase "splitOnce should throw an exception if splitter is not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitOnce "Z" "Hello, World!" |> ignore<string*string>) "Should throw an exception"
+        test ("splitOnce should throw an exception if splitter is not found", fun _ ->
+            assertThat (fun _ -> Str.splitOnce "Z" "Hello, World!" |> ignore<string*string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "splitOnce should throw an exception if stringToSplit is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitOnce "," null |> ignore<string*string>) "Should throw an exception"
+        test ("splitOnce should throw an exception if stringToSplit is null", fun _ ->
+            assertThat (fun _ -> Str.splitOnce "," null |> ignore<string*string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "splitOnce should throw an exception if splitter is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitOnce null "Hello, World!" |> ignore<string*string>) "Should throw an exception"
+        test ("splitOnce should throw an exception if splitter is null", fun _ ->
+            assertThat (fun _ -> Str.splitOnce null "Hello, World!" |> ignore<string*string>) (tag "Should throw an exception" >> throws)
+        )
 
 
-        testCase "splitOnce should return the input string and an empty string if splitter is at the end" <| fun _ ->
+        test ("splitOnce should return the input string and an empty string if splitter is at the end", fun _ ->
             let result = Str.splitOnce "," "Hello,"
-            Expect.equal result ("Hello", "") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ("Hello", ""))
+        )
 
-        testCase "splitOnce should return an empty string and the input string if splitter is at the start" <| fun _ ->
+        test ("splitOnce should return an empty string and the input string if splitter is at the start", fun _ ->
             let result = Str.splitOnce "," ",World!"
-            Expect.equal result ("", "World!") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ("", "World!"))
+        )
 
-        testCase "splitOnce should return two empty strings if input string is the splitter" <| fun _ ->
+        test ("splitOnce should return two empty strings if input string is the splitter", fun _ ->
             let result = Str.splitOnce "," ","
-            Expect.equal result ("", "") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ("", ""))
+        )
 
-        testCase "splitOnce should throw an exception if input string is empty" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitOnce "," "" |> ignore<string*string>) "Should throw an exception"
+        test ("splitOnce should throw an exception if input string is empty", fun _ ->
+            assertThat (fun _ -> Str.splitOnce "," "" |> ignore<string*string>) (tag "Should throw an exception" >> throws)
+        )
 
 
-        testCase "splitTwice should split the string twice at the splitters" <| fun _ ->
+        test ("splitTwice should split the string twice at the splitters", fun _ ->
             let result = Str.splitTwice "X" "T" "cXabTk"
-            Expect.equal result ("c", "ab", "k") "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo ("c", "ab", "k"))
+        )
 
-        testCase "splitTwice should throw an exception if firstSplitter is not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitTwice "Z" "T" "cXabTk" |> ignore<string*string*string>) "Should throw an exception"
+        test ("splitTwice should throw an exception if firstSplitter is not found", fun _ ->
+            assertThat (fun _ -> Str.splitTwice "Z" "T" "cXabTk" |> ignore<string*string*string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "splitTwice should throw an exception if secondSplitter is not found" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitTwice "X" "Z" "cXabTk" |> ignore<string*string*string>) "Should throw an exception"
+        test ("splitTwice should throw an exception if secondSplitter is not found", fun _ ->
+            assertThat (fun _ -> Str.splitTwice "X" "Z" "cXabTk" |> ignore<string*string*string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "splitTwice should throw an exception if stringToSplit is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitTwice "X" "T" null |> ignore<string*string*string>) "Should throw an exception"
+        test ("splitTwice should throw an exception if stringToSplit is null", fun _ ->
+            assertThat (fun _ -> Str.splitTwice "X" "T" null |> ignore<string*string*string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "splitTwice should throw an exception if firstSplitter is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitTwice null "T" "cXabTk" |> ignore<string*string*string>) "Should throw an exception"
+        test ("splitTwice should throw an exception if firstSplitter is null", fun _ ->
+            assertThat (fun _ -> Str.splitTwice null "T" "cXabTk" |> ignore<string*string*string>) (tag "Should throw an exception" >> throws)
+        )
 
-        testCase "splitTwice should throw an exception if secondSplitter is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.splitTwice "X" null "cXabTk" |> ignore<string*string*string>) "Should throw an exception"
+        test ("splitTwice should throw an exception if secondSplitter is null", fun _ ->
+            assertThat (fun _ -> Str.splitTwice "X" null "cXabTk" |> ignore<string*string*string>) (tag "Should throw an exception" >> throws)
+        )
 
 
-        testCase "between should return the input string if splitters are at the start and end" <| fun _ ->
+        test ("between should return the input string if splitters are at the start and end", fun _ ->
             let result = Str.between "," "!" ",Hello, World!"
-            Expect.equal result "Hello, World" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World")
+        )
 
-        testCase "between should return an empty string if input string is the splitters" <| fun _ ->
+        test ("between should return an empty string if input string is the splitters", fun _ ->
             let result = Str.between "," "!" ",!"
-            Expect.equal result "" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "")
+        )
 
-        testCase "between should throw an exception if input string is empty" <| fun _ ->
-            Expect.throws (fun _ -> Str.between "," "!" "" |> ignore<string>) "Should throw an exception"
+        test ("between should throw an exception if input string is empty", fun _ ->
+            assertThat (fun _ -> Str.between "," "!" "" |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
         // trySplitOnce
-        testCase "trySplitOnce should return Some tuple if splitter is found" <| fun _ ->
+        test ("trySplitOnce should return Some tuple if splitter is found", fun _ ->
             let result = Str.trySplitOnce "," "Hello, World!"
-            Expect.equal result (Some ("Hello", " World!")) "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some ("Hello", " World!")))
+        )
 
-        testCase "trySplitOnce should return None if splitter is not found" <| fun _ ->
+        test ("trySplitOnce should return None if splitter is not found", fun _ ->
             let result = Str.trySplitOnce "Z" "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
         // trySplitTwice
-        testCase "trySplitTwice should return Some tuple if splitters are found" <| fun _ ->
+        test ("trySplitTwice should return Some tuple if splitters are found", fun _ ->
             let result = Str.trySplitTwice "H" "o" "Hello, World!"
-            Expect.equal result (Some ("", "ell", ", World!")) "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo (Some ("", "ell", ", World!")))
+        )
 
-        testCase "trySplitTwice should return None if splitters are not found" <| fun _ ->
+        test ("trySplitTwice should return None if splitters are not found", fun _ ->
             let result = Str.trySplitTwice "Z" "Y" "Hello, World!"
-            Expect.equal result None "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo None)
+        )
 
         // up1
-        testCase "up1 should return the string with the first character uppercased" <| fun _ ->
+        test ("up1 should return the string with the first character uppercased", fun _ ->
             let result = Str.up1 "hello"
-            Expect.equal result "Hello" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello")
+        )
 
         // low1
-        testCase "low1 should return the string with the first character lowercased" <| fun _ ->
+        test ("low1 should return the string with the first character lowercased", fun _ ->
             let result = Str.low1 "HELLO"
-            Expect.equal result "hELLO" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "hELLO")
+        )
 
         // slice
-        testCase "slice should return a substring from the start index to the end index" <| fun _ ->
+        test ("slice should return a substring from the start index to the end index", fun _ ->
             let result = Str.slice 0 5 "Hello, World!"
-            Expect.equal result "Hello," "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello,")
+        )
 
         // slice
-        testCase "neg slice should return a substring from the start index to the end index" <| fun _ ->
+        test ("neg slice should return a substring from the start index to the end index", fun _ ->
             let result = Str.slice -3 -1 "Hello, World!"
-            Expect.equal result "ld!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "ld!")
+        )
 
 
         // countSubString
-        testCase "countSubString should return the number of occurrences of the substring" <| fun _ ->
+        test ("countSubString should return the number of occurrences of the substring", fun _ ->
             let result = Str.countSubString "l" "Hello, World!"
-            Expect.equal result 3 "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo 3)
+        )
 
-        testCase "countSubString counts non-overlapping occurrences" <| fun _ ->
+        test ("countSubString counts non-overlapping occurrences", fun _ ->
             let result = Str.countSubString "aa" "aaaaa"
-            Expect.equal result 2 "Expected two non-overlapping occurrences"
+            assertThat result (tag "Expected two non-overlapping occurrences" >> isEqualTo 2)
+        )
 
-        testCase "countSubString rejects an empty substring" <| fun _ ->
-            Expect.throws (fun () -> Str.countSubString "" "abc" |> ignore) "Expected an empty substring to throw"
+        test ("countSubString rejects an empty substring", fun _ ->
+            assertThat (fun () -> Str.countSubString "" "abc" |> ignore) (tag "Expected an empty substring to throw" >> throws)
+        )
 
         // countChar
-        testCase "countChar should return the number of occurrences of the character" <| fun _ ->
+        test ("countChar should return the number of occurrences of the character", fun _ ->
             let result = Str.countChar 'l' "Hello, World!"
-            Expect.equal result 3 "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo 3)
+        )
 
 
 
 
         // addSuffix
-        testCase "addSuffix should add the suffix to the string" <| fun _ ->
+        test ("addSuffix should add the suffix to the string", fun _ ->
             let result = Str.addSuffix " World!" "Hello,"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
         // addPrefix
-        testCase "addPrefix should add the prefix to the string" <| fun _ ->
+        test ("addPrefix should add the prefix to the string", fun _ ->
             let result = Str.addPrefix "Hello, " "World!"
-            Expect.equal result "Hello, World!" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "Hello, World!")
+        )
 
         // inQuotes
-        testCase "inQuotes should add double quotes at the start and end of the string" <| fun _ ->
+        test ("inQuotes should add double quotes at the start and end of the string", fun _ ->
             let result = Str.inQuotes "Hello, World!"
-            Expect.equal result "\"Hello, World!\"" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "\"Hello, World!\"")
+        )
 
         // inSingleQuotes
-        testCase "inSingleQuotes should add single quotes at the start and end of the string" <| fun _ ->
+        test ("inSingleQuotes should add single quotes at the start and end of the string", fun _ ->
             let result = Str.inSingleQuotes "Hello, World!"
-            Expect.equal result "'Hello, World!'" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "'Hello, World!'")
+        )
 
         // contains
-        testCase "contains should return true if the string contains the substring" <| fun _ ->
+        test ("contains should return true if the string contains the substring", fun _ ->
             let result = Str.contains "World" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // containsIgnoreCase
-        testCase "containsIgnoreCase should return true if the string contains the substring, ignoring case" <| fun _ ->
+        test ("containsIgnoreCase should return true if the string contains the substring, ignoring case", fun _ ->
             let result = Str.containsIgnoreCase "world" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // containsIgnoreCase
-        testCase "containsIgnoreCase should return false if the string not contains the substring, ignoring case" <| fun _ ->
+        test ("containsIgnoreCase should return false if the string not contains the substring, ignoring case", fun _ ->
             let result = Str.containsIgnoreCase "worl1" "Hello, World!"
-            Expect.isFalse result "Should be false"
+            assertThat result (tag "Should be false" >> isFalse)
+        )
 
         // notContains
-        testCase "notContains should return true if the string does not contain the substring" <| fun _ ->
+        test ("notContains should return true if the string does not contain the substring", fun _ ->
             let result = Str.notContains "Universe" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // containsChar
-        testCase "containsChar should return true if the string contains the character" <| fun _ ->
+        test ("containsChar should return true if the string contains the character", fun _ ->
             let result = Str.containsChar 'H' "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // notContainsChar
-        testCase "notContainsChar should return true if the string does not contain the character" <| fun _ ->
+        test ("notContainsChar should return true if the string does not contain the character", fun _ ->
             let result = Str.notContainsChar 'Z' "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // compare
-        testCase "compare should return 0 if the strings are equal" <| fun _ ->
+        test ("compare should return 0 if the strings are equal", fun _ ->
             let result = Str.compare "Hello, World!" "Hello, World!"
-            Expect.equal result 0 "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo 0)
+        )
 
         // compareIgnoreCase
-        testCase "compareIgnoreCase should return 0 if the strings are equal, ignoring case" <| fun _ ->
+        test ("compareIgnoreCase should return 0 if the strings are equal, ignoring case", fun _ ->
             let result = Str.compareIgnoreCase "hello, world!" "Hello, World!"
-            Expect.equal result 0 "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo 0)
+        )
 
         // compareIgnoreCase
-        testCase "compareIgnoreCase should not return 0 if the strings are not equal, ignoring case" <| fun _ ->
+        test ("compareIgnoreCase should not return 0 if the strings are not equal, ignoring case", fun _ ->
             let result = Str.compareIgnoreCase "hello,world!" "Hello, World!"
-            Expect.isFalse (result= 0) "Should not be equal"
+            assertThat (result= 0) (tag "Should not be equal" >> isFalse)
+        )
 
         // endsWith
-        testCase "endsWith should return true if the string ends with the substring" <| fun _ ->
+        test ("endsWith should return true if the string ends with the substring", fun _ ->
             let result = Str.endsWith "World!" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // endsWithIgnoreCase
-        testCase "endsWithIgnoreCase should return true if the string ends with the substring, ignoring case" <| fun _ ->
+        test ("endsWithIgnoreCase should return true if the string ends with the substring, ignoring case", fun _ ->
             let result = Str.endsWithIgnoreCase "world!" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // startsWith
-        testCase "startsWith should return true if the string starts with the substring" <| fun _ ->
+        test ("startsWith should return true if the string starts with the substring", fun _ ->
             let result = Str.startsWith "Hello" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // startsWithIgnoreCase
-        testCase "startsWithIgnoreCase should return true if the string starts with the substring, ignoring case-3" <| fun _ ->
+        test ("startsWithIgnoreCase should return true if the string starts with the substring, ignoring case-3", fun _ ->
             let result = Str.startsWithIgnoreCase "hello" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // equals
-        testCase "equals should return true if the strings are equal" <| fun _ ->
+        test ("equals should return true if the strings are equal", fun _ ->
             let result = Str.equals "Hello, World!" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // equals
-        testCase "equals should return false if the strings are not equal" <| fun _ ->
+        test ("equals should return false if the strings are not equal", fun _ ->
             let result = Str.equals "Hello, world!" "Hello, World!"
-            Expect.isFalse result "Should be false"
+            assertThat result (tag "Should be false" >> isFalse)
+        )
 
         // countChar
-        testCase "countChar should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.countChar 'l' null |> ignore<int>) "Should throw an exception"
+        test ("countChar should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.countChar 'l' null |> ignore<int>) (tag "Should throw an exception" >> throws)
+        )
 
 
 
         // addSuffix
-        testCase "addSuffix should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.addSuffix " World!" null |> ignore<string>) "Should throw an exception"
+        test ("addSuffix should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.addSuffix " World!" null |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
         // addPrefix
-        testCase "addPrefix should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.addPrefix "Hello, " null |> ignore<string>) "Should throw an exception"
+        test ("addPrefix should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.addPrefix "Hello, " null |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
         // inQuotes
-        testCase "inQuotes should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.inQuotes null |> ignore<string>) "Should throw an exception"
+        test ("inQuotes should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.inQuotes null |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
         // inSingleQuotes
-        testCase "inSingleQuotes should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.inSingleQuotes null |> ignore<string>) "Should throw an exception"
+        test ("inSingleQuotes should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.inSingleQuotes null |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
         // contains
-        testCase "contains should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.contains "World" null |> ignore<bool>) "Should throw an exception"
+        test ("contains should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.contains "World" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // containsIgnoreCase
-        testCase "containsIgnoreCase should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.containsIgnoreCase "world" null |> ignore<bool>) "Should throw an exception"
+        test ("containsIgnoreCase should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.containsIgnoreCase "world" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // notContains
-        testCase "notContains should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.notContains "Universe" null |> ignore<bool>) "Should throw an exception"
+        test ("notContains should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.notContains "Universe" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // containsChar
-        testCase "containsChar should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.containsChar 'H' null |> ignore<bool>) "Should throw an exception"
+        test ("containsChar should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.containsChar 'H' null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // notContainsChar
-        testCase "notContainsChar should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.notContainsChar 'Z' null |> ignore<bool>) "Should throw an exception"
+        test ("notContainsChar should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.notContainsChar 'Z' null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // compare
-        testCase "compare should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.compare "Hello, World!" null |> ignore<int>) "Should throw an exception"
+        test ("compare should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.compare "Hello, World!" null |> ignore<int>) (tag "Should throw an exception" >> throws)
+        )
 
         // compareIgnoreCase
-        testCase "compareIgnoreCase should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.compareIgnoreCase "hello, world!" null |> ignore<int>) "Should throw an exception"
+        test ("compareIgnoreCase should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.compareIgnoreCase "hello, world!" null |> ignore<int>) (tag "Should throw an exception" >> throws)
+        )
 
         // endsWith
-        testCase "endsWith should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.endsWith "World!" null |> ignore<bool>) "Should throw an exception"
+        test ("endsWith should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.endsWith "World!" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // endsWithIgnoreCase
-        testCase "endsWithIgnoreCase should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.endsWithIgnoreCase "world!" null |> ignore<bool>) "Should throw an exception"
+        test ("endsWithIgnoreCase should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.endsWithIgnoreCase "world!" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // startsWith
-        testCase "startsWith should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.startsWith "Hello" null |> ignore<bool>) "Should throw an exception"
+        test ("startsWith should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.startsWith "Hello" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // startsWithIgnoreCase
-        testCase "startsWithIgnoreCase should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.startsWithIgnoreCase "hello" null |> ignore<bool>) "Should throw an exception"
+        test ("startsWithIgnoreCase should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.startsWithIgnoreCase "hello" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
         // equals
-        testCase "equals should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.equals "Hello, World!" null |> ignore<bool>) "Should throw an exception"
+        test ("equals should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.equals "Hello, World!" null |> ignore<bool>) (tag "Should throw an exception" >> throws)
+        )
 
 
 
         // equalsIgnoreCase
-        testCase "equalsIgnoreCase should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.equalsIgnoreCase null "Hello"  |> ignore  ) "Should throw exception"
+        test ("equalsIgnoreCase should handle null input", fun _ ->
+            assertThat (fun _ -> Str.equalsIgnoreCase null "Hello"  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfChar
-        testCase "indexOfChar should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfChar 'H' null  |> ignore  ) "Should throw exception"
+        test ("indexOfChar should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfChar 'H' null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfCharFrom
-        testCase "indexOfCharFrom should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfCharFrom 'H' 0 null  |> ignore  ) "Should throw exception"
+        test ("indexOfCharFrom should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfCharFrom 'H' 0 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfCharFromFor
-        testCase "indexOfCharFromFor should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfCharFromFor 'H' 0 1 null  |> ignore  ) "Should throw exception"
+        test ("indexOfCharFromFor should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfCharFromFor 'H' 0 1 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfString
-        testCase "indexOfString should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfString null "Hello"  |> ignore  ) "Should throw exception"
-            Expect.throws (fun _ -> Str.indexOfString "Hello" null  |> ignore  ) "Should throw exception"
+        test ("indexOfString should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfString null "Hello"  |> ignore  ) (tag "Should throw exception" >> throws)
+            assertThat (fun _ -> Str.indexOfString "Hello" null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfStringFrom
-        testCase "indexOfStringFrom should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfStringFrom null 0 "Hello"  |> ignore  ) "Should throw exception"
-            Expect.throws (fun _ -> Str.indexOfStringFrom "Hello" 0 null  |> ignore  ) "Should throw exception"
+        test ("indexOfStringFrom should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfStringFrom null 0 "Hello"  |> ignore  ) (tag "Should throw exception" >> throws)
+            assertThat (fun _ -> Str.indexOfStringFrom "Hello" 0 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfStringFromFor
-        testCase "indexOfStringFromFor should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfStringFromFor null 0 1 "Hello"  |> ignore  ) "Should throw exception"
-            Expect.throws (fun _ -> Str.indexOfStringFromFor "Hello" 0 1 null  |> ignore  ) "Should throw exception"
+        test ("indexOfStringFromFor should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfStringFromFor null 0 1 "Hello"  |> ignore  ) (tag "Should throw exception" >> throws)
+            assertThat (fun _ -> Str.indexOfStringFromFor "Hello" 0 1 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfAny
-        testCase "indexOfAny should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfAny [|'H'|] null  |> ignore  ) "Should throw exception"
+        test ("indexOfAny should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfAny [|'H'|] null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfAnyFrom
-        testCase "indexOfAnyFrom should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfAnyFrom [|'H'|] 0 null  |> ignore  ) "Should throw exception"
+        test ("indexOfAnyFrom should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfAnyFrom [|'H'|] 0 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // indexOfAnyFromFor
-        testCase "indexOfAnyFromFor should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfAnyFromFor [|'H'|] 0 1 null  |> ignore  ) "Should throw exception"
+        test ("indexOfAnyFromFor should handle null input", fun _ ->
+            assertThat (fun _ -> Str.indexOfAnyFromFor [|'H'|] 0 1 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // insert
-        testCase "insert should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.insert 0 null "Hello"  |> ignore  ) "Should throw exception"
-            Expect.throws (fun _ -> Str.insert 0 "Hello" null  |> ignore  ) "Should throw exception"
+        test ("insert should handle null input", fun _ ->
+            assertThat (fun _ -> Str.insert 0 null "Hello"  |> ignore  ) (tag "Should throw exception" >> throws)
+            assertThat (fun _ -> Str.insert 0 "Hello" null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // lastIndexOfChar
-        testCase "lastIndexOfChar should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.lastIndexOfChar 'H' null  |> ignore  ) "Should throw exception"
+        test ("lastIndexOfChar should handle null input", fun _ ->
+            assertThat (fun _ -> Str.lastIndexOfChar 'H' null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // lastIndexOfCharFrom
-        testCase "lastIndexOfCharFrom should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.lastIndexOfCharFrom 'H' 0 null  |> ignore  ) "Should throw exception"
+        test ("lastIndexOfCharFrom should handle null input", fun _ ->
+            assertThat (fun _ -> Str.lastIndexOfCharFrom 'H' 0 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // lastIndexOfCharFromFor
-        // testCase "lastIndexOfCharFromFor should handle null input" <| fun _ ->
-        //     Expect.throws (fun _ -> Str.lastIndexOfCharFromFor 'H' 0 1 null  |> ignore  ) "Should throw exception"
+        // test ("lastIndexOfCharFromFor should handle null input", fun _ ->
+        //     assertThat (fun _ -> Str.lastIndexOfCharFromFor 'H' 0 1 null  |> ignore  ) (tag "Should throw exception" >> throws)
+        // )
 
         // lastIndexOfString
-        testCase "lastIndexOfString should handle null input" <| fun _ ->
-            Expect.throws (fun _ -> Str.lastIndexOfString null "Hello"  |> ignore  ) "Should throw exception"
-            Expect.throws (fun _ -> Str.lastIndexOfString "Hello" null  |> ignore  ) "Should throw exception"
+        test ("lastIndexOfString should handle null input", fun _ ->
+            assertThat (fun _ -> Str.lastIndexOfString null "Hello"  |> ignore  ) (tag "Should throw exception" >> throws)
+            assertThat (fun _ -> Str.lastIndexOfString "Hello" null  |> ignore  ) (tag "Should throw exception" >> throws)
+        )
 
         // startsWith
-        testCase "startsWith should return true if the string starts with the substring,2" <| fun _ ->
+        test ("startsWith should return true if the string starts with the substring,2", fun _ ->
             let result = Str.startsWith "Hello, World!" "Hello"
-            Expect.isFalse result "Should be false"
+            assertThat result (tag "Should be false" >> isFalse)
+        )
 
         // startsWithIgnoreCase
-        testCase "startsWithIgnoreCase should return true if the string starts with the substring, ignoring case" <| fun _ ->
+        test ("startsWithIgnoreCase should return true if the string starts with the substring, ignoring case", fun _ ->
             let result = Str.startsWithIgnoreCase "hell" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // equals
-        testCase "equals should return true if the strings are equal -3" <| fun _ ->
+        test ("equals should return true if the strings are equal -3", fun _ ->
             let result = Str.equals "Hello, World!" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // equals
-        testCase "equals should return false if the strings are not equal2" <| fun _ ->
+        test ("equals should return false if the strings are not equal2", fun _ ->
             let result = Str.equals "Hello, world!" "Hello, World!"
-            Expect.isFalse result "Should be false"
+            assertThat result (tag "Should be false" >> isFalse)
+        )
 
         // countChar
-        testCase "countChar should return the correct count" <| fun _ ->
+        test ("countChar should return the correct count", fun _ ->
             let result = Str.countChar 'l' "Hello, World!"
-            Expect.equal result 3 "Should be 3"
+            assertThat result (tag "Should be 3" >> isEqualTo 3)
+        )
 
 
 
         // addSuffix
-        testCase "addSuffix should return the string with the suffix added" <| fun _ ->
+        test ("addSuffix should return the string with the suffix added", fun _ ->
             let result = Str.addSuffix " World!" "Hello,"
-            Expect.equal result "Hello, World!" "Should be 'Hello, World!'"
+            assertThat result (tag "Should be 'Hello, World!'" >> isEqualTo "Hello, World!")
+        )
 
         // addPrefix
-        testCase "addPrefix should return the string with the prefix added" <| fun _ ->
+        test ("addPrefix should return the string with the prefix added", fun _ ->
             let result = Str.addPrefix "Hello, " "World!"
-            Expect.equal result "Hello, World!" "Should be 'Hello, World!'"
+            assertThat result (tag "Should be 'Hello, World!'" >> isEqualTo "Hello, World!")
+        )
 
         // inQuotes
-        testCase "inQuotes should return the string in quotes" <| fun _ ->
+        test ("inQuotes should return the string in quotes", fun _ ->
             let result = Str.inQuotes "Hello, World!"
-            Expect.equal result "\"Hello, World!\"" "Should be '\"Hello, World!\"'"
+            assertThat result (tag "Should be '\"Hello, World!\"'" >> isEqualTo "\"Hello, World!\"")
+        )
 
         // inSingleQuotes
-        testCase "inSingleQuotes should return the string in single quotes" <| fun _ ->
+        test ("inSingleQuotes should return the string in single quotes", fun _ ->
             let result = Str.inSingleQuotes "Hello, World!"
-            Expect.equal result "'Hello, World!'" "Should be ''Hello, World!''"
+            assertThat result (tag "Should be ''Hello, World!''" >> isEqualTo "'Hello, World!'")
+        )
 
 
 
         // contains
-        testCase "contains should return true if the string contains the substring -2" <| fun _ ->
+        test ("contains should return true if the string contains the substring -2", fun _ ->
             let result = Str.contains "World" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // containsIgnoreCase
-        testCase "containsIgnoreCase should return true if the string contains the substring, ignoring case -2" <| fun _ ->
+        test ("containsIgnoreCase should return true if the string contains the substring, ignoring case -2", fun _ ->
             let result = Str.containsIgnoreCase "world" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // notContains
-        testCase "notContains should return true if the string does not contain the substring -2" <| fun _ ->
+        test ("notContains should return true if the string does not contain the substring -2", fun _ ->
             let result = Str.notContains "Universe" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // containsChar
-        testCase "containsChar should return true if the string contains the character -2" <| fun _ ->
+        test ("containsChar should return true if the string contains the character -2", fun _ ->
             let result = Str.containsChar 'H' "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // notContainsChar
-        testCase "notContainsChar should return true if the string does not contain the character -2" <| fun _ ->
+        test ("notContainsChar should return true if the string does not contain the character -2", fun _ ->
             let result = Str.notContainsChar 'Z' "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // compare
-        testCase "compare should return 0 if the strings are equal -2" <| fun _ ->
+        test ("compare should return 0 if the strings are equal -2", fun _ ->
             let result = Str.compare "Hello, World!" "Hello, World!"
-            Expect.equal result 0 "Should be 0"
+            assertThat result (tag "Should be 0" >> isEqualTo 0)
+        )
 
         // compareIgnoreCase
-        testCase "compareIgnoreCase should return 0 if the strings are equal, ignoring case -2" <| fun _ ->
+        test ("compareIgnoreCase should return 0 if the strings are equal, ignoring case -2", fun _ ->
             let result = Str.compareIgnoreCase "hello, world!" "Hello, World!"
-            Expect.equal result 0 "Should be 0"
+            assertThat result (tag "Should be 0" >> isEqualTo 0)
+        )
 
         // endsWith
-        testCase "endsWith should return true if the string ends with the substring -2" <| fun _ ->
+        test ("endsWith should return true if the string ends with the substring -2", fun _ ->
             let result = Str.endsWith "World!" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // endsWithIgnoreCase
-        testCase "endsWithIgnoreCase should return true if the string ends with the substring, ignoring case -2" <| fun _ ->
+        test ("endsWithIgnoreCase should return true if the string ends with the substring, ignoring case -2", fun _ ->
             let result = Str.endsWithIgnoreCase "world!" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // startsWith
-        testCase "startsWith should return true if the string starts with the substring -2" <| fun _ ->
+        test ("startsWith should return true if the string starts with the substring -2", fun _ ->
             let result = Str.startsWith "Hello" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // startsWithIgnoreCase
-        testCase "startsWithIgnoreCase should return true if the string starts with the substring, ignoring case -2" <| fun _ ->
+        test ("startsWithIgnoreCase should return true if the string starts with the substring, ignoring case -2", fun _ ->
             let result = Str.startsWithIgnoreCase "hello" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
         // equals
-        testCase "equals should return true if the strings are equal -2" <| fun _ ->
+        test ("equals should return true if the strings are equal -2", fun _ ->
             let result = Str.equals "Hello, World!" "Hello, World!"
-            Expect.isTrue result "Should be true"
+            assertThat result (tag "Should be true" >> isTrue)
+        )
 
-        testCase "Test equalsIgnoreCase function" <| fun _ ->
+        test ("Test equalsIgnoreCase function", fun _ ->
             let result1 = Str.equalsIgnoreCase "test" "TEST"
             let result2 = Str.equalsIgnoreCase "test" "Test1"
-            Expect.isTrue result1 "Should be true"
-            Expect.isFalse result2 "Should be false"
+            assertThat result1 (tag "Should be true" >> isTrue)
+            assertThat result2 (tag "Should be false" >> isFalse)
+        )
 
-        testCase "Test indexOfChar function" <| fun _ ->
+        test ("Test indexOfChar function", fun _ ->
             let result1 = Str.indexOfChar 'e' "test"
             let result2 = Str.indexOfChar 'z' "test"
-            Expect.equal result1 1 "Should be 1"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfCharFrom function" <| fun _ ->
+        test ("Test indexOfCharFrom function", fun _ ->
             let result1 = Str.indexOfCharFrom 's' 1 "test"
             let result2 = Str.indexOfCharFrom 'z' 1 "test"
-            Expect.equal result1 2 "Should be 2"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 2" >> isEqualTo 2)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfCharFromFor function" <| fun _ ->
+        test ("Test indexOfCharFromFor function", fun _ ->
             let result1 = Str.indexOfCharFromFor 's' 1 2 "test"
             let result2 = Str.indexOfCharFromFor 'z' 1 2 "test"
-            Expect.equal result1 2 "Should be 2"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 2" >> isEqualTo 2)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfString function" <| fun _ ->
+        test ("Test indexOfString function", fun _ ->
             let result1 = Str.indexOfString "es" "test"
             let result2 = Str.indexOfString "zz" "test"
-            Expect.equal result1 1 "Should be 1"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfStringFrom function" <| fun _ ->
+        test ("Test indexOfStringFrom function", fun _ ->
             let result1 = Str.indexOfStringFrom "es" 1 "test"
             let result2 = Str.indexOfStringFrom "zz" 1 "test"
-            Expect.equal result1 1 "Should be 1"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfStringFromFor function" <| fun _ ->
+        test ("Test indexOfStringFromFor function", fun _ ->
             let result1 = Str.indexOfStringFromFor "es" 1 3 "ttesttt"
             let result2 = Str.indexOfStringFromFor "tt" 1 3 "testtt"
             let result3 = Str.indexOfStringFromFor "zz" 1 3 "zzszzz"
-            Expect.equal result1 2 "Should be 2"
-            Expect.equal result2 -1 "Should be -1"
-            Expect.equal result3 -1 "Should be -1"
+            assertThat result1 (tag "Should be 2" >> isEqualTo 2)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+            assertThat result3 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfAny function" <| fun _ ->
+        test ("Test indexOfAny function", fun _ ->
             let result1 = Str.indexOfAny [|'e'; 's'|] "test"
             let result2 = Str.indexOfAny [|'z'; 'x'|] "test"
-            Expect.equal result1 1 "Should be 1"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfAnyFrom function" <| fun _ ->
+        test ("Test indexOfAnyFrom function", fun _ ->
             let result1 = Str.indexOfAnyFrom [|'e'; 's'|] 1 "test"
             let result2 = Str.indexOfAnyFrom [|'z'; 'x'|] 1 "test"
-            Expect.equal result1 1 "Should be 1"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test indexOfAnyFromFor function" <| fun _ ->
+        test ("Test indexOfAnyFromFor function", fun _ ->
             let result1 = Str.indexOfAnyFromFor [|'e'; 's'|] 1 2 "test"
             let result2 = Str.indexOfAnyFromFor [|'z'; 'x'|] 1 2 "test"
-            Expect.equal result1 1 "Should be 1"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test insert function" <| fun _ ->
+        test ("Test insert function", fun _ ->
             let result1 = Str.insert 1 "es" "tt"
             let result2 = Str.insert 1 "zz" "tst"
-            Expect.equal result1 "test" "Should be 'test'"
-            Expect.equal result2 "tzzst" "Should be 'tzzst'"
+            assertThat result1 (tag "Should be 'test'" >> isEqualTo "test")
+            assertThat result2 (tag "Should be 'tzzst'" >> isEqualTo "tzzst")
+        )
 
-        testCase "Test lastIndexOfChar function" <| fun _ ->
+        test ("Test lastIndexOfChar function", fun _ ->
             let result1 = Str.lastIndexOfChar 't' "test"
             let result2 = Str.lastIndexOfChar 'z' "test"
-            Expect.equal result1 3 "Should be 3"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 3" >> isEqualTo 3)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test lastIndexOfCharFrom function" <| fun _ ->
+        test ("Test lastIndexOfCharFrom function", fun _ ->
             let result1 = Str.lastIndexOfCharFrom 't' 2 "test"
             let result2 = Str.lastIndexOfCharFrom 'z' 2 "test"
-            Expect.equal result1 0 "Should be 0"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 0" >> isEqualTo 0)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        // testCase "Test lastIndexOfCharFromFor function" <| fun _ ->
+        // test ("Test lastIndexOfCharFromFor function", fun _ ->
         //     let result1 = Str.lastIndexOfCharFromFor 't' 2 3 "test"
         //     let result2 = Str.lastIndexOfCharFromFor 'z' 2 3 "test"
-        //     Expect.equal result1 0 "Should be 0"
-        //     Expect.equal result2 -1 "Should be -1"
+        //     assertThat result1 (tag "Should be 0" >> isEqualTo 0)
+        //     assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        // )
 
-        testCase "Test lastIndexOfString function" <| fun _ ->
+        test ("Test lastIndexOfString function", fun _ ->
             let result1 = Str.lastIndexOfString "es" "testes"
             let result2 = Str.lastIndexOfString "zz" "test"
-            Expect.equal result1 4 "Should be 4"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 4" >> isEqualTo 4)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        testCase "Test lastIndexOfStringFrom function" <| fun _ ->
+        test ("Test lastIndexOfStringFrom function", fun _ ->
             let result1 = Str.lastIndexOfStringFrom "es" 3 "testes"
             let result2 = Str.lastIndexOfStringFrom "zz" 1 "test"
-            Expect.equal result1 1 "Should be 1"
-            Expect.equal result2 -1 "Should be -1"
+            assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+            assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        )
 
-        // testCase "Test lastIndexOfStringFromFor function" <| fun _ ->
+        // test ("Test lastIndexOfStringFromFor function", fun _ ->
         //     let result1 = Str.lastIndexOfStringFromFor "es" 2 2 "testes"
         //     let result2 = Str.lastIndexOfStringFromFor "zz" 1 2 "test"
-        //     Expect.equal result1 1 "Should be 1"
-        //     Expect.equal result2 -1 "Should be -1"
+        //     assertThat result1 (tag "Should be 1" >> isEqualTo 1)
+        //     assertThat result2 (tag "Should be -1" >> isEqualTo -1)
+        // )
 
-        testCase "Test padLeft function" <| fun _ ->
+        test ("Test padLeft function", fun _ ->
             let result = Str.padLeft 10 "test"
-            Expect.equal result "      test" "Should be '      test'"
+            assertThat result (tag "Should be '      test'" >> isEqualTo "      test")
+        )
 
-        testCase "Test padLeftWith function" <| fun _ ->
+        test ("Test padLeftWith function", fun _ ->
             let result = Str.padLeftWith 10 '*' "test"
-            Expect.equal result "******test" "Should be '******test'"
+            assertThat result (tag "Should be '******test'" >> isEqualTo "******test")
+        )
 
-        testCase "Test padRight function" <| fun _ ->
+        test ("Test padRight function", fun _ ->
             let result = Str.padRight 10 "test"
-            Expect.equal result "test      " "Should be 'test      '"
+            assertThat result (tag "Should be 'test      '" >> isEqualTo "test      ")
+        )
 
-        testCase "Test padRightWith function" <| fun _ ->
+        test ("Test padRightWith function", fun _ ->
             let result = Str.padRightWith 10 '*' "test"
-            Expect.equal result "test******" "Should be 'test******'"
+            assertThat result (tag "Should be 'test******'" >> isEqualTo "test******")
+        )
 
-        testCase "Test remove function" <| fun _ ->
+        test ("Test remove function", fun _ ->
             let result = Str.remove 1 "test"
-            Expect.equal result "t" "Should be 't'"
+            assertThat result (tag "Should be 't'" >> isEqualTo "t")
+        )
 
-        testCase "Test removeFrom function" <| fun _ ->
+        test ("Test removeFrom function", fun _ ->
             let result = Str.removeFrom 1 2 "test"
-            Expect.equal result "tt" "Should be 'tt'"
+            assertThat result (tag "Should be 'tt'" >> isEqualTo "tt")
+        )
 
-        testCase "Test replaceChar function" <| fun _ ->
+        test ("Test replaceChar function", fun _ ->
             let result = Str.replaceChar 'e' 'a' "teste"
-            Expect.equal result "tasta" "Should be 'tast'"
+            assertThat result (tag "Should be 'tast'" >> isEqualTo "tasta")
+        )
 
-        testCase "Test replace function" <| fun _ ->
+        test ("Test replace function", fun _ ->
             let result = Str.replace "es" "ar" "test"
-            Expect.equal result "tart" "Should be 'tart'"
+            assertThat result (tag "Should be 'tart'" >> isEqualTo "tart")
+        )
 
-        testCase "Test replacefirst function" <| fun _ ->
+        test ("Test replacefirst function", fun _ ->
             let result = Str.replaceFirst "es" "ar" "testes"
-            Expect.equal result "tartes" "Should be 'tartes'"
+            assertThat result (tag "Should be 'tartes'" >> isEqualTo "tartes")
+        )
 
-        testCase "Test replacefirst function bad case " <| fun _ ->
+        test ("Test replacefirst function bad case ", fun _ ->
             let result = Str.replaceFirst "eS" "ar" "testes"
-            Expect.equal result "testes" "Should be still be 'testes'"
+            assertThat result (tag "Should be still be 'testes'" >> isEqualTo "testes")
+        )
 
-        testCase "Test replaceLast function" <| fun _ ->
+        test ("Test replaceLast function", fun _ ->
             let result = Str.replaceLast "es" "ar" "testes"
-            Expect.equal result "testar" "Should be 'testar'"
+            assertThat result (tag "Should be 'testar'" >> isEqualTo "testar")
+        )
 
-        testCase "Test replaceLast function bad case " <| fun _ ->
+        test ("Test replaceLast function bad case ", fun _ ->
             let result = Str.replaceLast "eS" "ar" "testes"
-            Expect.equal result "testes" "Should be still be 'testes'"
+            assertThat result (tag "Should be still be 'testes'" >> isEqualTo "testes")
+        )
 
-        testCase "replaceFirst and replaceLast use ordinal matching" <| fun _ ->
+        test ("replaceFirst and replaceLast use ordinal matching", fun _ ->
             let decomposed = "e\u0301"
-            Expect.equal (Str.replaceFirst "\u00E9" "X" decomposed) decomposed "replaceFirst should not use linguistic equivalence"
-            Expect.equal (Str.replaceLast "\u00E9" "X" decomposed) decomposed "replaceLast should not use linguistic equivalence"
+            assertThat (Str.replaceFirst "\u00E9" "X" decomposed) (tag "replaceFirst should not use linguistic equivalence" >> isEqualTo decomposed)
+            assertThat (Str.replaceLast "\u00E9" "X" decomposed) (tag "replaceLast should not use linguistic equivalence" >> isEqualTo decomposed)
+        )
 
 
-        testCase "Test concat function" <| fun _ ->
+        test ("Test concat function", fun _ ->
             let result = Str.concat "$" ["line1"; "line2"; "line3"]
-            Expect.equal result "line1$line2$line3"    "Should be 'line1$line2$line3'"
+            assertThat result (tag "Should be 'line1$line2$line3'" >> isEqualTo "line1$line2$line3")
+        )
 
-        testCase "Test concatLines function" <| fun _ ->
+        test ("Test concatLines function", fun _ ->
             let result = Str.concatLines ["line1"; "line2"; "line3"]
             let nl = System.Environment.NewLine
-            Expect.equal result ("line1"+nl+"line2"+nl+"line3")    ("Should be 'line1"+nl+"line2"+nl+"line3'")
+            assertThat result (tag ("Should be 'line1"+nl+"line2"+nl+"line3'") >> isEqualTo ("line1"+nl+"line2"+nl+"line3"))
+        )
 
-        testCase "Test splitLines function" <| fun _ ->
+        test ("Test splitLines function", fun _ ->
             let result = Str.splitLines "line1\nline2\nline3"
-            Expect.equal result [|"line1"; "line2"; "line3"|] "Should be ['line1'; 'line2'; 'line3']"
+            assertThat result (tag "Should be ['line1'; 'line2'; 'line3']" >> isEqualTo [|"line1"; "line2"; "line3"|])
+        )
 
-        testCase "Test split function" <| fun _ ->
+        test ("Test split function", fun _ ->
             let result = Str.split "," "1,2,3"
-            Expect.equal result [|"1"; "2"; "3"|] "Should be ['1'; '2'; '3']"
+            assertThat result (tag "Should be ['1'; '2'; '3']" >> isEqualTo [|"1"; "2"; "3"|])
+        )
 
 
-        testCase "Test split function2" <| fun _ ->
+        test ("Test split function2", fun _ ->
             let result = Str.split "," "1,2,,3"
-            Expect.equal result [|"1"; "2"; "3"|] "Should be ['1'; '2'; '3']"
+            assertThat result (tag "Should be ['1'; '2'; '3']" >> isEqualTo [|"1"; "2"; "3"|])
+        )
 
 
-        testCase "Test splitKeep function" <| fun _ ->
+        test ("Test splitKeep function", fun _ ->
             let result = Str.splitKeep "," "1,2,3,,"
-            Expect.equal result [|"1"; "2"; "3"; ""; ""|] "Should be ['1'; '2'; '3'; ''; '']"
+            assertThat result (tag "Should be ['1'; '2'; '3'; ''; '']" >> isEqualTo [|"1"; "2"; "3"; ""; ""|])
+        )
 
-        testCase "Test splitChar function" <| fun _ ->
+        test ("Test splitChar function", fun _ ->
             let result = Str.splitChar ',' "1,2,3,,"
-            Expect.equal result [|"1"; "2"; "3"|] "Should be ['1'; '2'; '3']"
+            assertThat result (tag "Should be ['1'; '2'; '3']" >> isEqualTo [|"1"; "2"; "3"|])
+        )
 
-        testCase "Test splitChars function" <| fun _ ->
+        test ("Test splitChars function", fun _ ->
             let result = Str.splitChars [|','; ' '|] "1,2 3,,"
-            Expect.equal result [|"1"; "2"; "3"|] "Should be ['1'; '2'; '3']"
+            assertThat result (tag "Should be ['1'; '2'; '3']" >> isEqualTo [|"1"; "2"; "3"|])
+        )
 
-        testCase "Test splitCharKeep function" <| fun _ ->
+        test ("Test splitCharKeep function", fun _ ->
             let result = Str.splitCharKeep ',' "1,2,3,,"
-            Expect.equal result [|"1"; "2"; "3"; ""; ""|] "Should be ['1'; '2'; '3'; ''; '']"
+            assertThat result (tag "Should be ['1'; '2'; '3'; ''; '']" >> isEqualTo [|"1"; "2"; "3"; ""; ""|])
+        )
 
-        testCase "Test splitCharsKeep function" <| fun _ ->
+        test ("Test splitCharsKeep function", fun _ ->
             let result = Str.splitCharsKeep [|','; ' '|] "1,2 3,,"
-            Expect.equal result [|"1"; "2"; "3"; ""; ""|] "Should be ['1'; '2'; '3'; ''; '']"
+            assertThat result (tag "Should be ['1'; '2'; '3'; ''; '']" >> isEqualTo [|"1"; "2"; "3"; ""; ""|])
+        )
 
-        testCase "Test substringFrom function" <| fun _ ->
+        test ("Test substringFrom function", fun _ ->
             let result = Str.substringFrom 1 "test"
-            Expect.equal result "est" "Should be 'est'"
+            assertThat result (tag "Should be 'est'" >> isEqualTo "est")
+        )
 
-        testCase "Test substringFromFor function" <| fun _ ->
+        test ("Test substringFromFor function", fun _ ->
             let result = Str.substringFromFor 1 2 "test"
-            Expect.equal result "es" "Should be 'es'"
+            assertThat result (tag "Should be 'es'" >> isEqualTo "es")
+        )
 
-        testCase "Test toCharArray function" <| fun _ ->
+        test ("Test toCharArray function", fun _ ->
             let result = Str.toCharArray "test"
-            Expect.equal result [|'t'; 'e'; 's'; 't'|] "Should be ['t'; 'e'; 's'; 't']"
+            assertThat result (tag "Should be ['t'; 'e'; 's'; 't']" >> isEqualTo [|'t'; 'e'; 's'; 't'|])
+        )
 
-        testCase "Test toCharArrayFromFor function" <| fun _ ->
+        test ("Test toCharArrayFromFor function", fun _ ->
             let result = Str.toCharArrayFromFor 1 2 "test"
-            Expect.equal result [|'e'; 's'|] "Should be ['e'; 's']"
+            assertThat result (tag "Should be ['e'; 's']" >> isEqualTo [|'e'; 's'|])
+        )
 
-        testCase "Test toLower function" <| fun _ ->
+        test ("Test toLower function", fun _ ->
             let result = Str.toLower "TEST"
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test toUpper function" <| fun _ ->
+        test ("Test toUpper function", fun _ ->
             let result = Str.toUpper "test"
-            Expect.equal result "TEST" "Should be 'TEST'"
+            assertThat result (tag "Should be 'TEST'" >> isEqualTo "TEST")
+        )
 
-        testCase "Test trim function" <| fun _ ->
+        test ("Test trim function", fun _ ->
             let result = Str.trim "  test  "
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimChar function" <| fun _ ->
+        test ("Test trimChar function", fun _ ->
             let result = Str.trimChar '*' "*test*"
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimChars function" <| fun _ ->
+        test ("Test trimChars function", fun _ ->
             let result = Str.trimChars [|' '; '*'|] " *test* "
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimEnd function" <| fun _ ->
+        test ("Test trimEnd function", fun _ ->
             let result = Str.trimEnd "test  "
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimEndChar function" <| fun _ ->
+        test ("Test trimEndChar function", fun _ ->
             let result = Str.trimEndChar '*' "test*"
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimEndChars function" <| fun _ ->
+        test ("Test trimEndChars function", fun _ ->
             let result = Str.trimEndChars [|' '; '*'|] "test* "
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimStart function" <| fun _ ->
+        test ("Test trimStart function", fun _ ->
             let result = Str.trimStart "  test"
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimStartChar function" <| fun _ ->
+        test ("Test trimStartChar function", fun _ ->
             let result = Str.trimStartChar '*' "*test"
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test trimStartChars function" <| fun _ ->
+        test ("Test trimStartChars function", fun _ ->
             let result = Str.trimStartChars [|' '; '*'|] " *test"
-            Expect.equal result "test" "Should be 'test'"
+            assertThat result (tag "Should be 'test'" >> isEqualTo "test")
+        )
 
-        testCase "Test formatInOneLine function" <| fun _ ->
+        test ("Test formatInOneLine function", fun _ ->
             let result = Str.formatInOneLine "line1\nline2\nline3"
-            Expect.equal result "line1 line2 line3" "Should be 'line1 line2 line3'"
+            assertThat result (tag "Should be 'line1 line2 line3'" >> isEqualTo "line1 line2 line3")
+        )
 
-        testCase "formatInOneLine collapses Unicode whitespace" <| fun _ ->
+        test ("formatInOneLine collapses Unicode whitespace", fun _ ->
             let result = Str.formatInOneLine "a\u00A0\u00A0b"
-            Expect.equal result "a b" "Non-breaking spaces should be collapsed"
+            assertThat result (tag "Non-breaking spaces should be collapsed" >> isEqualTo "a b")
+        )
 
-        testCase "Test formatTruncated function" <| fun _ ->
+        test ("Test formatTruncated function", fun _ ->
             let result = Str.formatTruncated 26 "This is a very long string that should be truncated"
-            Expect.equal result "\"This is a very long(...)ed\"" "Should be '\"This is a very long(...)ed\"'"
+            assertThat result (tag "Should be '\"This is a very long(...)ed\"'" >> isEqualTo "\"This is a very long(...)ed\"")
+        )
 
-        testCase "Test formatTruncatedToMaxLines function" <| fun _ ->
+        test ("Test formatTruncatedToMaxLines function", fun _ ->
             let result = Str.formatTruncatedToMaxLines 2 "line1\r\nline2\r\nline3\r\nline4\r\nline5"
-            Expect.equal result "\"line1\r\nline2(... and 3 more lines.)\"" "The result should contain no more than two lines"
+            assertThat result (tag "The result should contain no more than two lines" >> isEqualTo "\"line1\r\nline2(... and 3 more lines.)\"")
+        )
 
-        testCase "formatTruncatedToMaxLines truncates exactly one additional line" <| fun _ ->
+        test ("formatTruncatedToMaxLines truncates exactly one additional line", fun _ ->
             let result = Str.formatTruncatedToMaxLines 1 "line1\nline2"
-            Expect.equal result "\"line1(... and 1 more line.)\"" "The note should remain on the final allowed line"
+            assertThat result (tag "The note should remain on the final allowed line" >> isEqualTo "\"line1(... and 1 more line.)\"")
+        )
 
-        testCase "formatTruncatedToMaxLines recognizes standalone CR line endings" <| fun _ ->
+        test ("formatTruncatedToMaxLines recognizes standalone CR line endings", fun _ ->
             let result = Str.formatTruncatedToMaxLines 2 "a\rb\rc"
-            Expect.equal result "\"a\rb(... and 1 more line.)\"" "Standalone CR should delimit lines without adding an extra output line"
+            assertThat result (tag "Standalone CR should delimit lines without adding an extra output line" >> isEqualTo "\"a\rb(... and 1 more line.)\"")
+        )
 
-        testCase "formatTruncatedToMaxLines leaves an in-range string unchanged" <| fun _ ->
+        test ("formatTruncatedToMaxLines leaves an in-range string unchanged", fun _ ->
             let input = "line1\nline2"
-            Expect.equal (Str.formatTruncatedToMaxLines 2 input) input "Unchanged results should not be quoted"
+            assertThat (Str.formatTruncatedToMaxLines 2 input) (tag "Unchanged results should not be quoted" >> isEqualTo input)
+        )
 
 
 
-        testCase "str builder " <| fun _ ->
+        test ("str builder ", fun _ ->
             let result =
                 str{
                     "Hello"
                     " "
                     "World"
                 }
-            Expect.equal result "Hello World" "Should be 'Hello World'"
+            assertThat result (tag "Should be 'Hello World'" >> isEqualTo "Hello World")
+        )
 
         // ============ str computation expression comprehensive tests ============
-        testCase "str builder with char yield" <| fun _ ->
+        test ("str builder with char yield", fun _ ->
             let result = str { 'H'; 'i' }
-            Expect.equal result "Hi" "Should be 'Hi'"
+            assertThat result (tag "Should be 'Hi'" >> isEqualTo "Hi")
+        )
 
-        testCase "str builder with int yield" <| fun _ ->
+        test ("str builder with int yield", fun _ ->
             let result = str { 42 }
-            Expect.equal result "42" "Should be '42'"
+            assertThat result (tag "Should be '42'" >> isEqualTo "42")
+        )
 
-        testCase "str builder appends a newline after every sequence item" <| fun _ ->
+        test ("str builder appends a newline after every sequence item", fun _ ->
             let result = str { ["a"; "b"] }
             let expected = "a" + Environment.NewLine + "b" + Environment.NewLine
-            Expect.equal result expected "A yielded string sequence should include a trailing newline"
+            assertThat result (tag "A yielded string sequence should include a trailing newline" >> isEqualTo expected)
+        )
 
-        testCase "str builder with Guid yield" <| fun _ ->
+        test ("str builder with Guid yield", fun _ ->
             let g = System.Guid.Empty
             let result = str { g }
-            Expect.equal result "00000000-0000-0000-0000-000000000000" "Should be empty guid"
+            assertThat result (tag "Should be empty guid" >> isEqualTo "00000000-0000-0000-0000-000000000000")
+        )
 
-        testCase "str builder with yield! for string (with newline)" <| fun _ ->
+        test ("str builder with yield! for string (with newline)", fun _ ->
             let result = str { yield! "Hello" ; "World" }
-            Expect.isTrue (result.Contains("Hello")) "Should contain Hello"
-            Expect.isTrue (result.Contains("World")) "Should contain World"
-            Expect.isTrue (result.Contains("\n") || result.Contains("\r")) "Should contain newline"
+            assertThat (result.Contains("Hello")) (tag "Should contain Hello" >> isTrue)
+            assertThat (result.Contains("World")) (tag "Should contain World" >> isTrue)
+            assertThat (result.Contains("\n") || result.Contains("\r")) (tag "Should contain newline" >> isTrue)
+        )
 
-        testCase "str builder with yield! for char (with newline)" <| fun _ ->
+        test ("str builder with yield! for char (with newline)", fun _ ->
             let result = str { yield! 'A' ; 'B' }
-            Expect.isTrue (result.Contains("A")) "Should contain A"
-            Expect.isTrue (result.Contains("B")) "Should contain B"
+            assertThat (result.Contains("A")) (tag "Should contain A" >> isTrue)
+            assertThat (result.Contains("B")) (tag "Should contain B" >> isTrue)
+        )
 
-        testCase "str builder with yield! for int (with newline)" <| fun _ ->
+        test ("str builder with yield! for int (with newline)", fun _ ->
             let result = str { yield! 1 ; 2 }
-            Expect.isTrue (result.Contains("1")) "Should contain 1"
-            Expect.isTrue (result.Contains("2")) "Should contain 2"
+            assertThat (result.Contains("1")) (tag "Should contain 1" >> isTrue)
+            assertThat (result.Contains("2")) (tag "Should contain 2" >> isTrue)
+        )
 
-        testCase "str builder with seq of strings" <| fun _ ->
+        test ("str builder with seq of strings", fun _ ->
             let lines = ["Line1"; "Line2"; "Line3"]
             let result = str { yield lines }
-            Expect.isTrue (result.Contains("Line1")) "Should contain Line1"
-            Expect.isTrue (result.Contains("Line2")) "Should contain Line2"
-            Expect.isTrue (result.Contains("Line3")) "Should contain Line3"
+            assertThat (result.Contains("Line1")) (tag "Should contain Line1" >> isTrue)
+            assertThat (result.Contains("Line2")) (tag "Should contain Line2" >> isTrue)
+            assertThat (result.Contains("Line3")) (tag "Should contain Line3" >> isTrue)
+        )
 
-        testCase "str builder with for loop" <| fun _ ->
+        test ("str builder with for loop", fun _ ->
             let result = str {
                 for i in 1..3 do
                     yield i.ToString()
             }
-            Expect.equal result "123" "Should be '123'"
+            assertThat result (tag "Should be '123'" >> isEqualTo "123")
+        )
 
-        testCase "str builder with for loop and strings" <| fun _ ->
+        test ("str builder with for loop and strings", fun _ ->
             let items = ["A"; "B"; "C"]
             let result = str {
                 for item in items do
                     yield item
             }
-            Expect.equal result "ABC" "Should be 'ABC'"
+            assertThat result (tag "Should be 'ABC'" >> isEqualTo "ABC")
+        )
 
-        testCase "str builder with while loop" <| fun _ ->
+        test ("str builder with while loop", fun _ ->
             let mutable count = 0
             let result = str {
                 while count < 3 do
                     yield "X"
                     count <- count + 1
             }
-            Expect.equal result "XXX" "Should be 'XXX'"
+            assertThat result (tag "Should be 'XXX'" >> isEqualTo "XXX")
+        )
 
-        testCase "str builder empty" <| fun _ ->
+        test ("str builder empty", fun _ ->
             let result = str { () }
-            Expect.equal result "" "Should be empty string"
+            assertThat result (tag "Should be empty string" >> isEqualTo "")
+        )
 
-        testCase "str builder mixed types" <| fun _ ->
+        test ("str builder mixed types", fun _ ->
             let result = str {
                 "Count: "
                 42
                 ", Char: "
                 'X'
             }
-            Expect.equal result "Count: 42, Char: X" "Should combine different types"
+            assertThat result (tag "Should combine different types" >> isEqualTo "Count: 42, Char: X")
+        )
 
 
 
         // normalize
-        testCase "normalize should throw an exception if input string is null" <| fun _ ->
-            Expect.throws (fun _ -> Str.normalize null |> ignore<string>) "Should throw an exception"
+        test ("normalize should throw an exception if input string is null", fun _ ->
+            assertThat (fun _ -> Str.normalize null |> ignore<string>) (tag "Should throw an exception" >> throws)
+        )
 
         // normalize
-        testCase "normalize should return the normalized string" <| fun _ ->
+        test ("normalize should return the normalized string", fun _ ->
             let result = Str.normalize "Héllò, Wörld!"
-            Expect.equal result "Hello, World!" "Should be 'Hello, World!'"
+            assertThat result (tag "Should be 'Hello, World!'" >> isEqualTo "Hello, World!")
+        )
 
         // normalize
-        testCase "normalize" <| fun _ ->
+        test ("normalize", fun _ ->
             let result = Str.normalize "crème brûlée"
-            Expect.equal result "creme brulee" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "creme brulee")
+        )
 
         // normalize
-        testCase "normalize2" <| fun _ ->
+        test ("normalize2", fun _ ->
             let result = Str.normalize "crèmeö brûlée"
-            Expect.equal result "cremeo brulee" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "cremeo brulee")
+        )
 
 
         #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
         // error FABLE: Microsoft.FSharp.Core.Operators.ArrayExtensions.String.GetReverseIndex is not supported by Fable
         #else
         // slice
-        testCase "neg slice2 should return a substring from the start index to the end index" <| fun _ ->
+        test ("neg slice2 should return a substring from the start index to the end index", fun _ ->
             let result = "Hello, World!".[1..^1]
-            Expect.equal result "ello, World" "Should be equal"
+            assertThat result (tag "Should be equal" >> isEqualTo "ello, World")
+        )
         #endif
 
 
 
         // addThousandSeparators tests
-        testCase "addThousandSeparators should format integer with apostrophe separator" <| fun _ ->
+        test ("addThousandSeparators should format integer with apostrophe separator", fun _ ->
             let result = Str.addThousandSeparators '\'' "1234567"
-            Expect.equal result "1'234'567" "Should be '1'234'567'"
+            assertThat result (tag "Should be '1'234'567'" >> isEqualTo "1'234'567")
+        )
 
-        testCase "addThousandSeparators should format integer with comma separator" <| fun _ ->
+        test ("addThousandSeparators should format integer with comma separator", fun _ ->
             let result = Str.addThousandSeparators ',' "1234567"
-            Expect.equal result "1,234,567" "Should be '1,234,567'"
+            assertThat result (tag "Should be '1,234,567'" >> isEqualTo "1,234,567")
+        )
 
-        testCase "addThousandSeparators should format small integer without separator" <| fun _ ->
+        test ("addThousandSeparators should format small integer without separator", fun _ ->
             let result = Str.addThousandSeparators '\'' "123"
-            Expect.equal result "123" "Should be '123'"
+            assertThat result (tag "Should be '123'" >> isEqualTo "123")
+        )
 
-        testCase "addThousandSeparators should format negative integer" <| fun _ ->
+        test ("addThousandSeparators should format negative integer", fun _ ->
             let result = Str.addThousandSeparators '\'' "-1234567"
-            Expect.equal result "-1'234'567" "Should be '-1'234'567'"
+            assertThat result (tag "Should be '-1'234'567'" >> isEqualTo "-1'234'567")
+        )
 
-        testCase "addThousandSeparators should format float with decimal part" <| fun _ ->
+        test ("addThousandSeparators should format float with decimal part", fun _ ->
             let result = Str.addThousandSeparators '\'' "1234567.89"
-            Expect.equal result "1'234'567.89" "Should be '1'234'567.89'"
+            assertThat result (tag "Should be '1'234'567.89'" >> isEqualTo "1'234'567.89")
+        )
 
-        testCase "addThousandSeparators should format float with long decimal part" <| fun _ ->
+        test ("addThousandSeparators should format float with long decimal part", fun _ ->
             let result = Str.addThousandSeparators '\'' "1234.5678901234"
-            Expect.equal result "1'234.567'890'123'4" "Should be '1'234.567'890'123'4'"
+            assertThat result (tag "Should be '1'234.567'890'123'4'" >> isEqualTo "1'234.567'890'123'4")
+        )
 
-        testCase "addThousandSeparators should format negative float" <| fun _ ->
+        test ("addThousandSeparators should format negative float", fun _ ->
             let result = Str.addThousandSeparators '\'' "-9876543.21"
-            Expect.equal result "-9'876'543.21" "Should be '-9'876'543.21'"
+            assertThat result (tag "Should be '-9'876'543.21'" >> isEqualTo "-9'876'543.21")
+        )
 
-        testCase "addThousandSeparators should handle single digit" <| fun _ ->
+        test ("addThousandSeparators should handle single digit", fun _ ->
             let result = Str.addThousandSeparators '\'' "5"
-            Expect.equal result "5" "Should be '5'"
+            assertThat result (tag "Should be '5'" >> isEqualTo "5")
+        )
 
-        testCase "addThousandSeparators should handle zero" <| fun _ ->
+        test ("addThousandSeparators should handle zero", fun _ ->
             let result = Str.addThousandSeparators '\'' "0"
-            Expect.equal result "0" "Should be '0'"
+            assertThat result (tag "Should be '0'" >> isEqualTo "0")
+        )
 
-        testCase "addThousandSeparators should format exactly 1000" <| fun _ ->
+        test ("addThousandSeparators should format exactly 1000", fun _ ->
             let result = Str.addThousandSeparators '\'' "1000"
-            Expect.equal result "1'000" "Should be '1'000'"
+            assertThat result (tag "Should be '1'000'" >> isEqualTo "1'000")
+        )
 
-        testCase "addThousandSeparators should format exactly 1 million" <| fun _ ->
+        test ("addThousandSeparators should format exactly 1 million", fun _ ->
             let result = Str.addThousandSeparators '\'' "1000000"
-            Expect.equal result "1'000'000" "Should be '1'000'000'"
+            assertThat result (tag "Should be '1'000'000'" >> isEqualTo "1'000'000")
+        )
 
-        testCase "addThousandSeparators should handle decimal only number" <| fun _ ->
+        test ("addThousandSeparators should handle decimal only number", fun _ ->
             let result = Str.addThousandSeparators '\'' "0.123456789"
-            Expect.equal result "0.123'456'789" "Should be '0.123'456'789'"
+            assertThat result (tag "Should be '0.123'456'789'" >> isEqualTo "0.123'456'789")
+        )
 
-        testCase "addThousandSeparators should format negative with scientific notation" <| fun _ ->
+        test ("addThousandSeparators should format negative with scientific notation", fun _ ->
             let result = Str.addThousandSeparators '\'' "-123456.789e-5"
-            Expect.equal result "-123'456.789e-5" "Should be '-123'456.789e-5'"
+            assertThat result (tag "Should be '-123'456.789e-5'" >> isEqualTo "-123'456.789e-5")
+        )
 
-        testCase "addThousandSeparators should  format negative with scientific notation" <| fun _ ->
+        test ("addThousandSeparators should  format negative with scientific notation", fun _ ->
             let result = Str.addThousandSeparators '\'' "-1.23456789e-5"
-            Expect.equal result "-1.234'567'89e-5" "Should be '-1.234'567'89e-5'"
+            assertThat result (tag "Should be '-1.234'567'89e-5'" >> isEqualTo "-1.234'567'89e-5")
+        )
 
-        testCase "addThousandSeparators should work with underscore separator" <| fun _ ->
+        test ("addThousandSeparators should work with underscore separator", fun _ ->
             let result = Str.addThousandSeparators '_' "123456789"
-            Expect.equal result "123_456_789" "Should be '123_456_789'"
+            assertThat result (tag "Should be '123_456_789'" >> isEqualTo "123_456_789")
+        )
 
-        testCase "addThousandSeparators should work with space separator" <| fun _ ->
+        test ("addThousandSeparators should work with space separator", fun _ ->
             let result = Str.addThousandSeparators ' ' "123456789"
-            Expect.equal result "123 456 789" "Should be '123 456 789'"
+            assertThat result (tag "Should be '123 456 789'" >> isEqualTo "123 456 789")
+        )
 
-        testCase "addThousandSeparators should work after decimal point" <| fun _ ->
+        test ("addThousandSeparators should work after decimal point", fun _ ->
             let result = Str.addThousandSeparators '_' "12345.6789"
-            Expect.equal result "12_345.678_9" "Should be '12_345.678_9'"
+            assertThat result (tag "Should be '12_345.678_9'" >> isEqualTo "12_345.678_9")
+        )
 
 
-        testCase "addThousandSeparators should format with scientific notation" <| fun _ ->
+        test ("addThousandSeparators should format with scientific notation", fun _ ->
             let result = Str.addThousandSeparators '\'' "1234567e10"
-            Expect.equal result "1'234'567e10" "Should be '1234567e10'"
+            assertThat result (tag "Should be '1234567e10'" >> isEqualTo "1'234'567e10")
+        )
 
-        testCase "addThousandSeparators should format with scientific notation neg" <| fun _ ->
+        test ("addThousandSeparators should format with scientific notation neg", fun _ ->
             let result = Str.addThousandSeparators '\'' "-1234567e10"
-            Expect.equal result "-1'234'567e10" "Should be '-1234567e10'"
+            assertThat result (tag "Should be '-1234567e10'" >> isEqualTo "-1'234'567e10")
+        )
 
-        testCase "addThousandSeparators handles a trailing decimal point" <| fun _ ->
-            Expect.equal (Str.addThousandSeparators '\'' "1.") "1." "A trailing decimal point should be preserved"
+        test ("addThousandSeparators handles a trailing decimal point", fun _ ->
+            assertThat (Str.addThousandSeparators '\'' "1.") (tag "A trailing decimal point should be preserved" >> isEqualTo "1.")
+        )
 
-        testCase "addThousandSeparators handles a leading decimal point" <| fun _ ->
-            Expect.equal (Str.addThousandSeparators '\'' ".5") ".5" "A leading decimal point should be preserved"
+        test ("addThousandSeparators handles a leading decimal point", fun _ ->
+            assertThat (Str.addThousandSeparators '\'' ".5") (tag "A leading decimal point should be preserved" >> isEqualTo ".5")
+        )
 
-        testCase "addThousandSeparators handles a decimal point before an exponent" <| fun _ ->
-            Expect.equal (Str.addThousandSeparators '\'' "1.e3") "1.e3" "A decimal point before an exponent should be preserved"
+        test ("addThousandSeparators handles a decimal point before an exponent", fun _ ->
+            assertThat (Str.addThousandSeparators '\'' "1.e3") (tag "A decimal point before an exponent should be preserved" >> isEqualTo "1.e3")
+        )
 
-        testCase "addThousandSeparators rejects empty and null input" <| fun _ ->
-            Expect.throws (fun () -> Str.addThousandSeparators '\'' "" |> ignore) "Expected empty input to throw"
-            Expect.throws (fun () -> Str.addThousandSeparators '\'' null |> ignore) "Expected null input to throw"
+        test ("addThousandSeparators rejects empty and null input", fun _ ->
+            assertThat (fun () -> Str.addThousandSeparators '\'' "" |> ignore) (tag "Expected empty input to throw" >> throws)
+            assertThat (fun () -> Str.addThousandSeparators '\'' null |> ignore) (tag "Expected null input to throw" >> throws)
+        )
 
         // ============ Str.get tests ============
-        testCase "Str.get should return character at index" <| fun _ ->
+        test ("Str.get should return character at index", fun _ ->
             let result = Str.get 0 "Hello"
-            Expect.equal result 'H' "Should be 'H'"
+            assertThat result (tag "Should be 'H'" >> isEqualTo 'H')
+        )
 
-        testCase "Str.get should return character at middle index" <| fun _ ->
+        test ("Str.get should return character at middle index", fun _ ->
             let result = Str.get 2 "Hello"
-            Expect.equal result 'l' "Should be 'l'"
+            assertThat result (tag "Should be 'l'" >> isEqualTo 'l')
+        )
 
-        testCase "Str.get should return character at last index" <| fun _ ->
+        test ("Str.get should return character at last index", fun _ ->
             let result = Str.get 4 "Hello"
-            Expect.equal result 'o' "Should be 'o'"
+            assertThat result (tag "Should be 'o'" >> isEqualTo 'o')
+        )
 
-        testCase "Str.get should throw for null string" <| fun _ ->
-            Expect.throws (fun _ -> Str.get 0 null |> ignore) "Should throw for null"
+        test ("Str.get should throw for null string", fun _ ->
+            assertThat (fun _ -> Str.get 0 null |> ignore) (tag "Should throw for null" >> throws)
+        )
 
-        testCase "Str.get should throw for negative index" <| fun _ ->
-            Expect.throws (fun _ -> Str.get -1 "Hello" |> ignore) "Should throw for negative index"
+        test ("Str.get should throw for negative index", fun _ ->
+            assertThat (fun _ -> Str.get -1 "Hello" |> ignore) (tag "Should throw for negative index" >> throws)
+        )
 
-        testCase "Str.get should throw for index out of range" <| fun _ ->
-            Expect.throws (fun _ -> Str.get 10 "Hello" |> ignore) "Should throw for out of range"
+        test ("Str.get should throw for index out of range", fun _ ->
+            assertThat (fun _ -> Str.get 10 "Hello" |> ignore) (tag "Should throw for out of range" >> throws)
+        )
 
-        testCase "Str.get should throw for empty string" <| fun _ ->
-            Expect.throws (fun _ -> Str.get 0 "" |> ignore) "Should throw for empty string"
+        test ("Str.get should throw for empty string", fun _ ->
+            assertThat (fun _ -> Str.get 0 "" |> ignore) (tag "Should throw for empty string" >> throws)
+        )
 
         // ============ Str.isWhite tests ============
-        testCase "Str.isWhite should return true for null" <| fun _ ->
+        test ("Str.isWhite should return true for null", fun _ ->
             let result = Str.isWhite null
-            Expect.isTrue result "Should be true for null"
+            assertThat result (tag "Should be true for null" >> isTrue)
+        )
 
-        testCase "Str.isWhite should return true for empty string" <| fun _ ->
+        test ("Str.isWhite should return true for empty string", fun _ ->
             let result = Str.isWhite ""
-            Expect.isTrue result "Should be true for empty"
+            assertThat result (tag "Should be true for empty" >> isTrue)
+        )
 
-        testCase "Str.isWhite should return true for whitespace only" <| fun _ ->
+        test ("Str.isWhite should return true for whitespace only", fun _ ->
             let result = Str.isWhite "   "
-            Expect.isTrue result "Should be true for whitespace"
+            assertThat result (tag "Should be true for whitespace" >> isTrue)
+        )
 
-        testCase "Str.isWhite should return true for tabs and newlines" <| fun _ ->
+        test ("Str.isWhite should return true for tabs and newlines", fun _ ->
             let result = Str.isWhite "\t\n\r"
-            Expect.isTrue result "Should be true for tabs/newlines"
+            assertThat result (tag "Should be true for tabs/newlines" >> isTrue)
+        )
 
-        testCase "Str.isWhite should return false for non-whitespace" <| fun _ ->
+        test ("Str.isWhite should return false for non-whitespace", fun _ ->
             let result = Str.isWhite "Hello"
-            Expect.isFalse result "Should be false for text"
+            assertThat result (tag "Should be false for text" >> isFalse)
+        )
 
-        testCase "Str.isWhite should return false for whitespace with text" <| fun _ ->
+        test ("Str.isWhite should return false for whitespace with text", fun _ ->
             let result = Str.isWhite "  Hello  "
-            Expect.isFalse result "Should be false for text with whitespace"
+            assertThat result (tag "Should be false for text with whitespace" >> isFalse)
+        )
 
         // ============ Str.isNotWhite tests ============
-        testCase "Str.isNotWhite should return false for null" <| fun _ ->
+        test ("Str.isNotWhite should return false for null", fun _ ->
             let result = Str.isNotWhite null
-            Expect.isFalse result "Should be false for null"
+            assertThat result (tag "Should be false for null" >> isFalse)
+        )
 
-        testCase "Str.isNotWhite should return false for empty string" <| fun _ ->
+        test ("Str.isNotWhite should return false for empty string", fun _ ->
             let result = Str.isNotWhite ""
-            Expect.isFalse result "Should be false for empty"
+            assertThat result (tag "Should be false for empty" >> isFalse)
+        )
 
-        testCase "Str.isNotWhite should return false for whitespace only" <| fun _ ->
+        test ("Str.isNotWhite should return false for whitespace only", fun _ ->
             let result = Str.isNotWhite "   "
-            Expect.isFalse result "Should be false for whitespace"
+            assertThat result (tag "Should be false for whitespace" >> isFalse)
+        )
 
-        testCase "Str.isNotWhite should return true for non-whitespace" <| fun _ ->
+        test ("Str.isNotWhite should return true for non-whitespace", fun _ ->
             let result = Str.isNotWhite "Hello"
-            Expect.isTrue result "Should be true for text"
+            assertThat result (tag "Should be true for text" >> isTrue)
+        )
 
-        testCase "Str.isNotWhite should return true for whitespace with text" <| fun _ ->
+        test ("Str.isNotWhite should return true for whitespace with text", fun _ ->
             let result = Str.isNotWhite "  Hello  "
-            Expect.isTrue result "Should be true for text with whitespace"
+            assertThat result (tag "Should be true for text with whitespace" >> isTrue)
+        )
 
         // ============ Str.isEmpty tests ============
-        testCase "Str.isEmpty should return true for null" <| fun _ ->
+        test ("Str.isEmpty should return true for null", fun _ ->
             let result = Str.isEmpty null
-            Expect.isTrue result "Should be true for null"
+            assertThat result (tag "Should be true for null" >> isTrue)
+        )
 
-        testCase "Str.isEmpty should return true for empty string" <| fun _ ->
+        test ("Str.isEmpty should return true for empty string", fun _ ->
             let result = Str.isEmpty ""
-            Expect.isTrue result "Should be true for empty"
+            assertThat result (tag "Should be true for empty" >> isTrue)
+        )
 
-        testCase "Str.isEmpty should return false for whitespace" <| fun _ ->
+        test ("Str.isEmpty should return false for whitespace", fun _ ->
             let result = Str.isEmpty "   "
-            Expect.isFalse result "Should be false for whitespace (not empty)"
+            assertThat result (tag "Should be false for whitespace (not empty)" >> isFalse)
+        )
 
-        testCase "Str.isEmpty should return false for non-empty string" <| fun _ ->
+        test ("Str.isEmpty should return false for non-empty string", fun _ ->
             let result = Str.isEmpty "Hello"
-            Expect.isFalse result "Should be false for text"
+            assertThat result (tag "Should be false for text" >> isFalse)
+        )
 
         // ============ Str.isNotEmpty tests ============
-        testCase "Str.isNotEmpty should return false for null" <| fun _ ->
+        test ("Str.isNotEmpty should return false for null", fun _ ->
             let result = Str.isNotEmpty null
-            Expect.isFalse result "Should be false for null"
+            assertThat result (tag "Should be false for null" >> isFalse)
+        )
 
-        testCase "Str.isNotEmpty should return false for empty string" <| fun _ ->
+        test ("Str.isNotEmpty should return false for empty string", fun _ ->
             let result = Str.isNotEmpty ""
-            Expect.isFalse result "Should be false for empty"
+            assertThat result (tag "Should be false for empty" >> isFalse)
+        )
 
-        testCase "Str.isNotEmpty should return true for whitespace" <| fun _ ->
+        test ("Str.isNotEmpty should return true for whitespace", fun _ ->
             let result = Str.isNotEmpty "   "
-            Expect.isTrue result "Should be true for whitespace (not empty)"
+            assertThat result (tag "Should be true for whitespace (not empty)" >> isTrue)
+        )
 
-        testCase "Str.isNotEmpty should return true for non-empty string" <| fun _ ->
+        test ("Str.isNotEmpty should return true for non-empty string", fun _ ->
             let result = Str.isNotEmpty "Hello"
-            Expect.isTrue result "Should be true for text"
+            assertThat result (tag "Should be true for text" >> isTrue)
+        )
 
         // ============================================================
         // Extensive tests for functions with FABLE_COMPILER directives
@@ -1378,500 +1672,620 @@ module Module =
 
         // ============ containsIgnoreCase - extensive tests ============
 
-        testCase "containsIgnoreCase: exact match same case" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "Hello" "Hello") "exact match"
+        test ("containsIgnoreCase: exact match same case", fun _ ->
+            assertThat (Str.containsIgnoreCase "Hello" "Hello") (tag "exact match" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: all uppercase needle in lowercase haystack" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "HELLO" "hello world") "upper in lower"
+        test ("containsIgnoreCase: all uppercase needle in lowercase haystack", fun _ ->
+            assertThat (Str.containsIgnoreCase "HELLO" "hello world") (tag "upper in lower" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: all lowercase needle in uppercase haystack" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "hello" "HELLO WORLD") "lower in upper"
+        test ("containsIgnoreCase: all lowercase needle in uppercase haystack", fun _ ->
+            assertThat (Str.containsIgnoreCase "hello" "HELLO WORLD") (tag "lower in upper" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: mixed case needle" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "hElLo" "Hello World") "mixed case"
+        test ("containsIgnoreCase: mixed case needle", fun _ ->
+            assertThat (Str.containsIgnoreCase "hElLo" "Hello World") (tag "mixed case" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: empty needle in non-empty haystack" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "" "Hello") "empty needle always found"
+        test ("containsIgnoreCase: empty needle in non-empty haystack", fun _ ->
+            assertThat (Str.containsIgnoreCase "" "Hello") (tag "empty needle always found" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: empty needle in empty haystack" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "" "") "empty in empty"
+        test ("containsIgnoreCase: empty needle in empty haystack", fun _ ->
+            assertThat (Str.containsIgnoreCase "" "") (tag "empty in empty" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: non-empty needle in empty haystack" <| fun _ ->
-            Expect.isFalse (Str.containsIgnoreCase "x" "") "can't find in empty"
+        test ("containsIgnoreCase: non-empty needle in empty haystack", fun _ ->
+            assertThat (Str.containsIgnoreCase "x" "") (tag "can't find in empty" >> isFalse)
+        )
 
-        testCase "containsIgnoreCase: needle longer than haystack" <| fun _ ->
-            Expect.isFalse (Str.containsIgnoreCase "Hello World!" "Hello") "needle longer"
+        test ("containsIgnoreCase: needle longer than haystack", fun _ ->
+            assertThat (Str.containsIgnoreCase "Hello World!" "Hello") (tag "needle longer" >> isFalse)
+        )
 
-        testCase "containsIgnoreCase: single char match" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "a" "A") "single char case insensitive"
+        test ("containsIgnoreCase: single char match", fun _ ->
+            assertThat (Str.containsIgnoreCase "a" "A") (tag "single char case insensitive" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: single char no match" <| fun _ ->
-            Expect.isFalse (Str.containsIgnoreCase "z" "A") "single char no match"
+        test ("containsIgnoreCase: single char no match", fun _ ->
+            assertThat (Str.containsIgnoreCase "z" "A") (tag "single char no match" >> isFalse)
+        )
 
-        testCase "containsIgnoreCase: substring at start" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "hel" "Hello") "at start"
+        test ("containsIgnoreCase: substring at start", fun _ ->
+            assertThat (Str.containsIgnoreCase "hel" "Hello") (tag "at start" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: substring at end" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "LLO" "Hello") "at end"
+        test ("containsIgnoreCase: substring at end", fun _ ->
+            assertThat (Str.containsIgnoreCase "LLO" "Hello") (tag "at end" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: substring in middle" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "LL" "Hello") "in middle"
+        test ("containsIgnoreCase: substring in middle", fun _ ->
+            assertThat (Str.containsIgnoreCase "LL" "Hello") (tag "in middle" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: with digits" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "abc123" "xABC123y") "digits are case insensitive irrelevant"
+        test ("containsIgnoreCase: with digits", fun _ ->
+            assertThat (Str.containsIgnoreCase "abc123" "xABC123y") (tag "digits are case insensitive irrelevant" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: with special characters" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "!@#" "hello!@#world") "special chars"
+        test ("containsIgnoreCase: with special characters", fun _ ->
+            assertThat (Str.containsIgnoreCase "!@#" "hello!@#world") (tag "special chars" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: whitespace matters" <| fun _ ->
-            Expect.isFalse (Str.containsIgnoreCase "hello world" "helloworld") "whitespace matters"
+        test ("containsIgnoreCase: whitespace matters", fun _ ->
+            assertThat (Str.containsIgnoreCase "hello world" "helloworld") (tag "whitespace matters" >> isFalse)
+        )
 
-        testCase "containsIgnoreCase: repeated pattern" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "aa" "AAA") "repeated pattern"
+        test ("containsIgnoreCase: repeated pattern", fun _ ->
+            assertThat (Str.containsIgnoreCase "aa" "AAA") (tag "repeated pattern" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: null haystack throws" <| fun _ ->
-            Expect.throws (fun _ -> Str.containsIgnoreCase "x" null |> ignore<bool>) "null haystack"
+        test ("containsIgnoreCase: null haystack throws", fun _ ->
+            assertThat (fun _ -> Str.containsIgnoreCase "x" null |> ignore<bool>) (tag "null haystack" >> throws)
+        )
 
-        testCase "containsIgnoreCase: null needle throws" <| fun _ ->
-            Expect.throws (fun _ -> Str.containsIgnoreCase null "hello" |> ignore<bool>) "null needle"
+        test ("containsIgnoreCase: null needle throws", fun _ ->
+            assertThat (fun _ -> Str.containsIgnoreCase null "hello" |> ignore<bool>) (tag "null needle" >> throws)
+        )
 
-        testCase "containsIgnoreCase: both null throws" <| fun _ ->
-            Expect.throws (fun _ -> Str.containsIgnoreCase null null |> ignore<bool>) "both null"
+        test ("containsIgnoreCase: both null throws", fun _ ->
+            assertThat (fun _ -> Str.containsIgnoreCase null null |> ignore<bool>) (tag "both null" >> throws)
+        )
 
-        testCase "containsIgnoreCase: unicode letters" <| fun _ ->
-            Expect.isTrue (Str.containsIgnoreCase "über" "ÜBER cool") "unicode case"
+        test ("containsIgnoreCase: unicode letters", fun _ ->
+            assertThat (Str.containsIgnoreCase "über" "ÜBER cool") (tag "unicode case" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: very long string" <| fun _ ->
+        test ("containsIgnoreCase: very long string", fun _ ->
             let haystack = String.replicate 1000 "ab" + "XY" + String.replicate 1000 "cd"
-            Expect.isTrue (Str.containsIgnoreCase "xy" haystack) "find in long string"
+            assertThat (Str.containsIgnoreCase "xy" haystack) (tag "find in long string" >> isTrue)
+        )
 
-        testCase "containsIgnoreCase: near miss" <| fun _ ->
-            Expect.isFalse (Str.containsIgnoreCase "abd" "abc") "near miss"
+        test ("containsIgnoreCase: near miss", fun _ ->
+            assertThat (Str.containsIgnoreCase "abd" "abc") (tag "near miss" >> isFalse)
+        )
 
 
         // ============ indexOfCharFromFor - extensive tests ============
 
-        testCase "indexOfCharFromFor: find char at start of search range" <| fun _ ->
+        test ("indexOfCharFromFor: find char at start of search range", fun _ ->
             let result = Str.indexOfCharFromFor 'a' 0 3 "abc"
-            Expect.equal result 0 "char at start"
+            assertThat result (tag "char at start" >> isEqualTo 0)
+        )
 
-        testCase "indexOfCharFromFor: find char at end of search range" <| fun _ ->
+        test ("indexOfCharFromFor: find char at end of search range", fun _ ->
             let result = Str.indexOfCharFromFor 'c' 0 3 "abc"
-            Expect.equal result 2 "char at end of range"
+            assertThat result (tag "char at end of range" >> isEqualTo 2)
+        )
 
-        testCase "indexOfCharFromFor: char outside search range returns -1" <| fun _ ->
+        test ("indexOfCharFromFor: char outside search range returns -1", fun _ ->
             let result = Str.indexOfCharFromFor 'c' 0 2 "abc"
-            Expect.equal result -1 "char outside range"
+            assertThat result (tag "char outside range" >> isEqualTo -1)
+        )
 
-        testCase "indexOfCharFromFor: search from middle" <| fun _ ->
+        test ("indexOfCharFromFor: search from middle", fun _ ->
             let result = Str.indexOfCharFromFor 'b' 1 2 "abc"
-            Expect.equal result 1 "find from middle"
+            assertThat result (tag "find from middle" >> isEqualTo 1)
+        )
 
-        testCase "indexOfCharFromFor: char not present returns -1" <| fun _ ->
+        test ("indexOfCharFromFor: char not present returns -1", fun _ ->
             let result = Str.indexOfCharFromFor 'z' 0 3 "abc"
-            Expect.equal result -1 "char not present"
+            assertThat result (tag "char not present" >> isEqualTo -1)
+        )
 
-        testCase "indexOfCharFromFor: duplicate chars finds first in range" <| fun _ ->
+        test ("indexOfCharFromFor: duplicate chars finds first in range", fun _ ->
             let result = Str.indexOfCharFromFor 'a' 0 5 "abaca"
-            Expect.equal result 0 "first occurrence"
+            assertThat result (tag "first occurrence" >> isEqualTo 0)
+        )
 
-        testCase "indexOfCharFromFor: duplicate chars finds first in range starting later" <| fun _ ->
+        test ("indexOfCharFromFor: duplicate chars finds first in range starting later", fun _ ->
             let result = Str.indexOfCharFromFor 'a' 1 4 "abaca"
-            Expect.equal result 2 "first occurrence after start"
+            assertThat result (tag "first occurrence after start" >> isEqualTo 2)
+        )
 
-        testCase "indexOfCharFromFor: count of 1" <| fun _ ->
+        test ("indexOfCharFromFor: count of 1", fun _ ->
             let result = Str.indexOfCharFromFor 'a' 0 1 "abc"
-            Expect.equal result 0 "count 1 found"
+            assertThat result (tag "count 1 found" >> isEqualTo 0)
+        )
 
-        testCase "indexOfCharFromFor: count of 1 not found" <| fun _ ->
+        test ("indexOfCharFromFor: count of 1 not found", fun _ ->
             let result = Str.indexOfCharFromFor 'b' 0 1 "abc"
-            Expect.equal result -1 "count 1 not found"
+            assertThat result (tag "count 1 not found" >> isEqualTo -1)
+        )
 
-        testCase "indexOfCharFromFor: search entire string" <| fun _ ->
+        test ("indexOfCharFromFor: search entire string", fun _ ->
             let result = Str.indexOfCharFromFor 'o' 0 13 "Hello, World!"
-            Expect.equal result 4 "search entire string"
+            assertThat result (tag "search entire string" >> isEqualTo 4)
+        )
 
-        testCase "indexOfCharFromFor: search with startIndex past char" <| fun _ ->
+        test ("indexOfCharFromFor: search with startIndex past char", fun _ ->
             let result = Str.indexOfCharFromFor 'H' 1 5 "Hello, World!"
-            Expect.equal result -1 "start past the char"
+            assertThat result (tag "start past the char" >> isEqualTo -1)
+        )
 
-        testCase "indexOfCharFromFor: find second occurrence" <| fun _ ->
+        test ("indexOfCharFromFor: find second occurrence", fun _ ->
             let result = Str.indexOfCharFromFor 'l' 3 3 "Hello, World!"
-            Expect.equal result 3 "second l"
+            assertThat result (tag "second l" >> isEqualTo 3)
+        )
 
-        testCase "indexOfCharFromFor: null input throws" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfCharFromFor 'a' 0 1 null |> ignore) "null throws"
+        test ("indexOfCharFromFor: null input throws", fun _ ->
+            assertThat (fun _ -> Str.indexOfCharFromFor 'a' 0 1 null |> ignore) (tag "null throws" >> throws)
+        )
 
-        testCase "indexOfCharFromFor: space character" <| fun _ ->
+        test ("indexOfCharFromFor: space character", fun _ ->
             let result = Str.indexOfCharFromFor ' ' 0 7 "Hello, World!"
-            Expect.equal result 6 "find space"
+            assertThat result (tag "find space" >> isEqualTo 6)
+        )
 
-        testCase "indexOfCharFromFor: search in single char string found" <| fun _ ->
+        test ("indexOfCharFromFor: search in single char string found", fun _ ->
             let result = Str.indexOfCharFromFor 'x' 0 1 "x"
-            Expect.equal result 0 "single char found"
+            assertThat result (tag "single char found" >> isEqualTo 0)
+        )
 
-        testCase "indexOfCharFromFor: search in single char string not found" <| fun _ ->
+        test ("indexOfCharFromFor: search in single char string not found", fun _ ->
             let result = Str.indexOfCharFromFor 'y' 0 1 "x"
-            Expect.equal result -1 "single char not found"
+            assertThat result (tag "single char not found" >> isEqualTo -1)
+        )
 
-        testCase "indexOfCharFromFor: multiple identical chars" <| fun _ ->
+        test ("indexOfCharFromFor: multiple identical chars", fun _ ->
             let result = Str.indexOfCharFromFor 'a' 2 3 "aaaaa"
-            Expect.equal result 2 "finds at start of range in repeated chars"
+            assertThat result (tag "finds at start of range in repeated chars" >> isEqualTo 2)
+        )
 
-        testCase "indexOfCharFromFor: last position in range" <| fun _ ->
+        test ("indexOfCharFromFor: last position in range", fun _ ->
             let result = Str.indexOfCharFromFor 'c' 0 3 "xxc"
-            Expect.equal result 2 "last position in range"
+            assertThat result (tag "last position in range" >> isEqualTo 2)
+        )
 
-        testCase "indexOfCharFromFor: newline character" <| fun _ ->
+        test ("indexOfCharFromFor: newline character", fun _ ->
             let result = Str.indexOfCharFromFor '\n' 0 6 "ab\ncd\n"
-            Expect.equal result 2 "find newline"
+            assertThat result (tag "find newline" >> isEqualTo 2)
+        )
 
-        testCase "indexOfCharFromFor: tab character" <| fun _ ->
+        test ("indexOfCharFromFor: tab character", fun _ ->
             let result = Str.indexOfCharFromFor '\t' 0 4 "a\tb\t"
-            Expect.equal result 1 "find tab"
+            assertThat result (tag "find tab" >> isEqualTo 1)
+        )
 
 
         // ============ indexOfStringFromFor - extensive tests ============
 
-        testCase "indexOfStringFromFor: find at start of range" <| fun _ ->
+        test ("indexOfStringFromFor: find at start of range", fun _ ->
             let result = Str.indexOfStringFromFor "ab" 0 3 "abc"
-            Expect.equal result 0 "at start"
+            assertThat result (tag "at start" >> isEqualTo 0)
+        )
 
-        testCase "indexOfStringFromFor: find at end of range" <| fun _ ->
+        test ("indexOfStringFromFor: find at end of range", fun _ ->
             let result = Str.indexOfStringFromFor "cd" 1 4 "abcde"
-            Expect.equal result 2 "at end of range"
+            assertThat result (tag "at end of range" >> isEqualTo 2)
+        )
 
-        testCase "indexOfStringFromFor: not found in range" <| fun _ ->
+        test ("indexOfStringFromFor: not found in range", fun _ ->
             let result = Str.indexOfStringFromFor "de" 0 3 "abcde"
-            Expect.equal result -1 "not in range"
+            assertThat result (tag "not in range" >> isEqualTo -1)
+        )
 
-        testCase "indexOfStringFromFor: empty search string" <| fun _ ->
+        test ("indexOfStringFromFor: empty search string", fun _ ->
             let result = Str.indexOfStringFromFor "" 0 3 "abc"
-            Expect.equal result 0 "empty string found at startIndex"
+            assertThat result (tag "empty string found at startIndex" >> isEqualTo 0)
+        )
 
-        testCase "indexOfStringFromFor: exact match whole range" <| fun _ ->
+        test ("indexOfStringFromFor: exact match whole range", fun _ ->
             let result = Str.indexOfStringFromFor "abc" 0 3 "abc"
-            Expect.equal result 0 "exact match"
+            assertThat result (tag "exact match" >> isEqualTo 0)
+        )
 
-        testCase "indexOfStringFromFor: pattern longer than search range" <| fun _ ->
+        test ("indexOfStringFromFor: pattern longer than search range", fun _ ->
             let result = Str.indexOfStringFromFor "abcd" 0 3 "abcde"
-            Expect.equal result -1 "pattern longer than range"
+            assertThat result (tag "pattern longer than range" >> isEqualTo -1)
+        )
 
-        testCase "indexOfStringFromFor: single char pattern" <| fun _ ->
+        test ("indexOfStringFromFor: single char pattern", fun _ ->
             let result = Str.indexOfStringFromFor "c" 0 3 "abc"
-            Expect.equal result 2 "single char"
+            assertThat result (tag "single char" >> isEqualTo 2)
+        )
 
-        testCase "indexOfStringFromFor: duplicate patterns finds first in range" <| fun _ ->
+        test ("indexOfStringFromFor: duplicate patterns finds first in range", fun _ ->
             let result = Str.indexOfStringFromFor "ab" 0 6 "ababab"
-            Expect.equal result 0 "first occurrence"
+            assertThat result (tag "first occurrence" >> isEqualTo 0)
+        )
 
-        testCase "indexOfStringFromFor: duplicate patterns from offset" <| fun _ ->
+        test ("indexOfStringFromFor: duplicate patterns from offset", fun _ ->
             let result = Str.indexOfStringFromFor "ab" 1 5 "ababab"
-            Expect.equal result 2 "first after offset"
+            assertThat result (tag "first after offset" >> isEqualTo 2)
+        )
 
-        testCase "indexOfStringFromFor: overlapping pattern" <| fun _ ->
+        test ("indexOfStringFromFor: overlapping pattern", fun _ ->
             let result = Str.indexOfStringFromFor "aba" 0 5 "ababa"
-            Expect.equal result 0 "overlapping"
+            assertThat result (tag "overlapping" >> isEqualTo 0)
+        )
 
-        testCase "indexOfStringFromFor: overlapping pattern from offset" <| fun _ ->
+        test ("indexOfStringFromFor: overlapping pattern from offset", fun _ ->
             let result = Str.indexOfStringFromFor "aba" 1 4 "ababa"
-            Expect.equal result 2 "overlapping from offset"
+            assertThat result (tag "overlapping from offset" >> isEqualTo 2)
+        )
 
-        testCase "indexOfStringFromFor: null needle throws" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfStringFromFor null 0 3 "abc" |> ignore) "null needle"
+        test ("indexOfStringFromFor: null needle throws", fun _ ->
+            assertThat (fun _ -> Str.indexOfStringFromFor null 0 3 "abc" |> ignore) (tag "null needle" >> throws)
+        )
 
-        testCase "indexOfStringFromFor: null haystack throws" <| fun _ ->
-            Expect.throws (fun _ -> Str.indexOfStringFromFor "ab" 0 3 null |> ignore) "null haystack"
+        test ("indexOfStringFromFor: null haystack throws", fun _ ->
+            assertThat (fun _ -> Str.indexOfStringFromFor "ab" 0 3 null |> ignore) (tag "null haystack" >> throws)
+        )
 
-        testCase "indexOfStringFromFor: search in single char string" <| fun _ ->
+        test ("indexOfStringFromFor: search in single char string", fun _ ->
             let result = Str.indexOfStringFromFor "x" 0 1 "x"
-            Expect.equal result 0 "single char string found"
+            assertThat result (tag "single char string found" >> isEqualTo 0)
+        )
 
-        testCase "indexOfStringFromFor: search in single char string not found" <| fun _ ->
+        test ("indexOfStringFromFor: search in single char string not found", fun _ ->
             let result = Str.indexOfStringFromFor "y" 0 1 "x"
-            Expect.equal result -1 "single char string not found"
+            assertThat result (tag "single char string not found" >> isEqualTo -1)
+        )
 
-        testCase "indexOfStringFromFor: with special characters" <| fun _ ->
+        test ("indexOfStringFromFor: with special characters", fun _ ->
             let result = Str.indexOfStringFromFor "!@" 0 5 "hi!@#"
-            Expect.equal result 2 "special chars"
+            assertThat result (tag "special chars" >> isEqualTo 2)
+        )
 
-        testCase "indexOfStringFromFor: with whitespace pattern" <| fun _ ->
+        test ("indexOfStringFromFor: with whitespace pattern", fun _ ->
             let result = Str.indexOfStringFromFor " " 0 6 "a b c "
-            Expect.equal result 1 "whitespace pattern"
+            assertThat result (tag "whitespace pattern" >> isEqualTo 1)
+        )
 
-        testCase "indexOfStringFromFor: case sensitive" <| fun _ ->
+        test ("indexOfStringFromFor: case sensitive", fun _ ->
             let result = Str.indexOfStringFromFor "AB" 0 3 "abc"
-            Expect.equal result -1 "case sensitive"
+            assertThat result (tag "case sensitive" >> isEqualTo -1)
+        )
 
-        testCase "indexOfStringFromFor: pattern at exact boundary" <| fun _ ->
+        test ("indexOfStringFromFor: pattern at exact boundary", fun _ ->
             let result = Str.indexOfStringFromFor "cd" 2 2 "abcde"
-            Expect.equal result 2 "at boundary"
+            assertThat result (tag "at boundary" >> isEqualTo 2)
+        )
 
-        testCase "indexOfStringFromFor: start at last position count 1" <| fun _ ->
+        test ("indexOfStringFromFor: start at last position count 1", fun _ ->
             let result = Str.indexOfStringFromFor "e" 4 1 "abcde"
-            Expect.equal result 4 "last position"
+            assertThat result (tag "last position" >> isEqualTo 4)
+        )
 
-        testCase "indexOfStringFromFor: long pattern in long string" <| fun _ ->
+        test ("indexOfStringFromFor: long pattern in long string", fun _ ->
             let s = String.replicate 100 "ab" + "XYZ" + String.replicate 100 "cd"
             let result = Str.indexOfStringFromFor "XYZ" 0 s.Length s
-            Expect.equal result 200 "long string"
+            assertThat result (tag "long string" >> isEqualTo 200)
+        )
 
-        testCase "indexOfStringFromFor: long pattern only in narrow range" <| fun _ ->
+        test ("indexOfStringFromFor: long pattern only in narrow range", fun _ ->
             let s = String.replicate 100 "ab" + "XYZ" + String.replicate 100 "cd"
             let result = Str.indexOfStringFromFor "XYZ" 0 200 s
-            Expect.equal result -1 "not in narrow range"
+            assertThat result (tag "not in narrow range" >> isEqualTo -1)
+        )
 
-        testCase "indexOfStringFromFor: repeated single char" <| fun _ ->
+        test ("indexOfStringFromFor: repeated single char", fun _ ->
             let result = Str.indexOfStringFromFor "a" 3 2 "aaaaa"
-            Expect.equal result 3 "repeated single"
+            assertThat result (tag "repeated single" >> isEqualTo 3)
+        )
 
 
         // ============ normalize - extensive tests ============
 
-        testCase "normalize: null throws" <| fun _ ->
-            Expect.throws (fun _ -> Str.normalize null |> ignore<string>) "null throws"
+        test ("normalize: null throws", fun _ ->
+            assertThat (fun _ -> Str.normalize null |> ignore<string>) (tag "null throws" >> throws)
+        )
 
-        testCase "normalize: empty string" <| fun _ ->
+        test ("normalize: empty string", fun _ ->
             let result = Str.normalize ""
-            Expect.equal result "" "empty stays empty"
+            assertThat result (tag "empty stays empty" >> isEqualTo "")
+        )
 
-        testCase "normalize: plain ASCII unchanged" <| fun _ ->
+        test ("normalize: plain ASCII unchanged", fun _ ->
             let result = Str.normalize "Hello World"
-            Expect.equal result "Hello World" "ASCII unchanged"
+            assertThat result (tag "ASCII unchanged" >> isEqualTo "Hello World")
+        )
 
-        testCase "normalize: digits and punctuation unchanged" <| fun _ ->
+        test ("normalize: digits and punctuation unchanged", fun _ ->
             let result = Str.normalize "123!@#$%^&*()"
-            Expect.equal result "123!@#$%^&*()" "digits and punctuation"
+            assertThat result (tag "digits and punctuation" >> isEqualTo "123!@#$%^&*()")
+        )
 
-        testCase "normalize: acute accent e" <| fun _ ->
+        test ("normalize: acute accent e", fun _ ->
             let result = Str.normalize "é"
-            Expect.equal result "e" "acute e"
+            assertThat result (tag "acute e" >> isEqualTo "e")
+        )
 
-        testCase "normalize: grave accent e" <| fun _ ->
+        test ("normalize: grave accent e", fun _ ->
             let result = Str.normalize "è"
-            Expect.equal result "e" "grave e"
+            assertThat result (tag "grave e" >> isEqualTo "e")
+        )
 
-        testCase "normalize: circumflex accent e" <| fun _ ->
+        test ("normalize: circumflex accent e", fun _ ->
             let result = Str.normalize "ê"
-            Expect.equal result "e" "circumflex e"
+            assertThat result (tag "circumflex e" >> isEqualTo "e")
+        )
 
-        testCase "normalize: diaeresis accent e" <| fun _ ->
+        test ("normalize: diaeresis accent e", fun _ ->
             let result = Str.normalize "ë"
-            Expect.equal result "e" "diaeresis e"
+            assertThat result (tag "diaeresis e" >> isEqualTo "e")
+        )
 
-        testCase "normalize: tilde n" <| fun _ ->
+        test ("normalize: tilde n", fun _ ->
             let result = Str.normalize "ñ"
-            Expect.equal result "n" "tilde n"
+            assertThat result (tag "tilde n" >> isEqualTo "n")
+        )
 
-        testCase "normalize: umlaut characters" <| fun _ ->
+        test ("normalize: umlaut characters", fun _ ->
             let result = Str.normalize "äöü"
-            Expect.equal result "aou" "umlauts"
+            assertThat result (tag "umlauts" >> isEqualTo "aou")
+        )
 
-        testCase "normalize: uppercase accented" <| fun _ ->
+        test ("normalize: uppercase accented", fun _ ->
             let result = Str.normalize "ÀÁÂÃÄÅ"
-            Expect.equal result "AAAAAA" "uppercase accented A variants"
+            assertThat result (tag "uppercase accented A variants" >> isEqualTo "AAAAAA")
+        )
 
-        testCase "normalize: cedilla" <| fun _ ->
+        test ("normalize: cedilla", fun _ ->
             let result = Str.normalize "ç"
-            Expect.equal result "c" "cedilla"
+            assertThat result (tag "cedilla" >> isEqualTo "c")
+        )
 
-        testCase "normalize: uppercase cedilla" <| fun _ ->
+        test ("normalize: uppercase cedilla", fun _ ->
             let result = Str.normalize "Ç"
-            Expect.equal result "C" "uppercase cedilla"
+            assertThat result (tag "uppercase cedilla" >> isEqualTo "C")
+        )
 
-        testCase "normalize: mixed accented and plain" <| fun _ ->
+        test ("normalize: mixed accented and plain", fun _ ->
             let result = Str.normalize "café"
-            Expect.equal result "cafe" "mixed"
+            assertThat result (tag "mixed" >> isEqualTo "cafe")
+        )
 
-        testCase "normalize: full sentence with accents" <| fun _ ->
+        test ("normalize: full sentence with accents", fun _ ->
             let result = Str.normalize "Les élèves français"
-            Expect.equal result "Les eleves francais" "full sentence"
+            assertThat result (tag "full sentence" >> isEqualTo "Les eleves francais")
+        )
 
-        testCase "normalize: crème brûlée" <| fun _ ->
+        test ("normalize: crème brûlée", fun _ ->
             let result = Str.normalize "crème brûlée"
-            Expect.equal result "creme brulee" "creme brulee"
+            assertThat result (tag "creme brulee" >> isEqualTo "creme brulee")
+        )
 
-        testCase "normalize: whitespace preserved" <| fun _ ->
+        test ("normalize: whitespace preserved", fun _ ->
             let result = Str.normalize "  \t\n  "
-            Expect.equal result "  \t\n  " "whitespace preserved"
+            assertThat result (tag "whitespace preserved" >> isEqualTo "  \t\n  ")
+        )
 
-        testCase "normalize: single accented character" <| fun _ ->
+        test ("normalize: single accented character", fun _ ->
             let result = Str.normalize "ö"
-            Expect.equal result "o" "single accented"
+            assertThat result (tag "single accented" >> isEqualTo "o")
+        )
 
-        testCase "normalize: multiple accents on same base (precomposed)" <| fun _ ->
+        test ("normalize: multiple accents on same base (precomposed)", fun _ ->
             // Vietnamese: ồ = o + combining breve + combining grave
             let result = Str.normalize "ồ"
             // Should at least remove diacritics, result should be plain o
-            Expect.equal result "o" "multiple accents"
+            assertThat result (tag "multiple accents" >> isEqualTo "o")
+        )
 
-        testCase "normalize: string with no accents is idempotent" <| fun _ ->
+        test ("normalize: string with no accents is idempotent", fun _ ->
             let input = "The quick brown fox jumps over the lazy dog 1234567890"
             let result = Str.normalize input
-            Expect.equal result input "no change for plain ASCII"
+            assertThat result (tag "no change for plain ASCII" >> isEqualTo input)
+        )
 
-        testCase "normalize: accented string normalized twice is same as once" <| fun _ ->
+        test ("normalize: accented string normalized twice is same as once", fun _ ->
             let input = "crème brûlée"
             let once = Str.normalize input
             let twice = Str.normalize once
-            Expect.equal twice once "idempotent"
+            assertThat twice (tag "idempotent" >> isEqualTo once)
+        )
 
-        testCase "normalize: Scandinavian characters" <| fun _ ->
+        test ("normalize: Scandinavian characters", fun _ ->
             let result = Str.normalize "Ångström"
-            Expect.equal result "Angstrom" "Scandinavian"
+            assertThat result (tag "Scandinavian" >> isEqualTo "Angstrom")
+        )
 
-        testCase "normalize: Spanish text" <| fun _ ->
+        test ("normalize: Spanish text", fun _ ->
             let result = Str.normalize "El niño está aquí"
-            Expect.equal result "El nino esta aqui" "Spanish"
+            assertThat result (tag "Spanish" >> isEqualTo "El nino esta aqui")
+        )
 
-        testCase "normalize: German text" <| fun _ ->
+        test ("normalize: German text", fun _ ->
             let result = Str.normalize "Ärger über böse Füße"
-            Expect.equal result "Arger uber bose Fuße" "German - sharp s preserved"
+            assertThat result (tag "German - sharp s preserved" >> isEqualTo "Arger uber bose Fuße")
+        )
 
-        testCase "normalize: only accents (combining characters)" <| fun _ ->
+        test ("normalize: only accents (combining characters)", fun _ ->
             // standalone combining acute accent
             let result = Str.normalize "\u0301"
-            Expect.equal result "" "standalone combining accent removed"
+            assertThat result (tag "standalone combining accent removed" >> isEqualTo "")
+        )
 
-        testCase "normalize: preserves non-Latin scripts without accents" <| fun _ ->
+        test ("normalize: preserves non-Latin scripts without accents", fun _ ->
             // CJK and numbers should pass through
             let result = Str.normalize "abc123"
-            Expect.equal result "abc123" "basic latin+digits"
+            assertThat result (tag "basic latin+digits" >> isEqualTo "abc123")
+        )
 
         // --- additional normalize tests ---
 
-        testCase "normalize: brackets and special symbols preserved" <| fun _ ->
+        test ("normalize: brackets and special symbols preserved", fun _ ->
             let input = "[]{}()<>|\\~`_-+=/"
-            Expect.equal (Str.normalize input) input "brackets and symbols"
+            assertThat (Str.normalize input) (tag "brackets and symbols" >> isEqualTo input)
+        )
 
-        testCase "normalize: quotes preserved" <| fun _ ->
+        test ("normalize: quotes preserved", fun _ ->
             let input = "\"hello\" 'world'"
-            Expect.equal (Str.normalize input) input "quotes"
+            assertThat (Str.normalize input) (tag "quotes" >> isEqualTo input)
+        )
 
-        testCase "normalize: decomposed form (NFD) e + combining acute" <| fun _ ->
+        test ("normalize: decomposed form (NFD) e + combining acute", fun _ ->
             // e (U+0065) + combining acute (U+0301) = é in NFD
             let input = "e\u0301"
             let result = Str.normalize input
-            Expect.equal result "e" "decomposed acute removed"
+            assertThat result (tag "decomposed acute removed" >> isEqualTo "e")
+        )
 
-        testCase "normalize: decomposed form a + combining ring above" <| fun _ ->
+        test ("normalize: decomposed form a + combining ring above", fun _ ->
             // a (U+0061) + combining ring above (U+030A) = å in NFD
             let input = "a\u030A"
             let result = Str.normalize input
-            Expect.equal result "a" "decomposed ring removed"
+            assertThat result (tag "decomposed ring removed" >> isEqualTo "a")
+        )
 
-        testCase "normalize: multiple combining marks on one base" <| fun _ ->
+        test ("normalize: multiple combining marks on one base", fun _ ->
             // a + combining acute + combining tilde
             let input = "a\u0301\u0303"
             let result = Str.normalize input
-            Expect.equal result "a" "multiple combining marks removed"
+            assertThat result (tag "multiple combining marks removed" >> isEqualTo "a")
+        )
 
-        testCase "normalize: precomposed vs decomposed same result" <| fun _ ->
+        test ("normalize: precomposed vs decomposed same result", fun _ ->
             let precomposed = Str.normalize "é"      // U+00E9
             let decomposed = Str.normalize "e\u0301" // e + combining acute
-            Expect.equal precomposed decomposed "precomposed and decomposed yield same result"
+            assertThat precomposed (tag "precomposed and decomposed yield same result" >> isEqualTo decomposed)
+        )
 
-        testCase "normalize: CJK characters preserved" <| fun _ ->
+        test ("normalize: CJK characters preserved", fun _ ->
             let input = "\u4F60\u597D\u4E16\u754C" // 你好世界
-            Expect.equal (Str.normalize input) input "CJK unchanged"
+            assertThat (Str.normalize input) (tag "CJK unchanged" >> isEqualTo input)
+        )
 
-        testCase "normalize: Cyrillic without accents preserved" <| fun _ ->
+        test ("normalize: Cyrillic without accents preserved", fun _ ->
             let input = "\u041F\u0440\u0438\u0432\u0435\u0442" // Привет
-            Expect.equal (Str.normalize input) input "Cyrillic preserved"
+            assertThat (Str.normalize input) (tag "Cyrillic preserved" >> isEqualTo input)
+        )
 
-        testCase "normalize: Cyrillic with combining accent" <| fun _ ->
+        test ("normalize: Cyrillic with combining accent", fun _ ->
             // и (U+0438) + combining acute (U+0301) → и
             let input = "\u0438\u0301"
             let result = Str.normalize input
-            Expect.equal result "\u0438" "Cyrillic accent removed"
+            assertThat result (tag "Cyrillic accent removed" >> isEqualTo "\u0438")
+        )
 
-        testCase "normalize: Greek without accents preserved" <| fun _ ->
+        test ("normalize: Greek without accents preserved", fun _ ->
             let input = "\u03B1\u03B2\u03B3" // αβγ
-            Expect.equal (Str.normalize input) input "Greek preserved"
+            assertThat (Str.normalize input) (tag "Greek preserved" >> isEqualTo input)
+        )
 
-        testCase "normalize: Greek with tonos" <| fun _ ->
+        test ("normalize: Greek with tonos", fun _ ->
             // ά (U+03AC, alpha with tonos) → α
             let result = Str.normalize "\u03AC"
-            Expect.equal result "\u03B1" "Greek tonos removed"
+            assertThat result (tag "Greek tonos removed" >> isEqualTo "\u03B1")
+        )
 
-        testCase "normalize: Polish text" <| fun _ ->
+        test ("normalize: Polish text", fun _ ->
             let result = Str.normalize "\u0179\u00F3\u0142\u0107"  // Źółć
             // ł (U+0142) is a distinct letter, not a base + combining mark, so it stays
-            Expect.equal result "Zo\u0142c" "Polish diacritics removed, ł preserved"
+            assertThat result (tag "Polish diacritics removed, ł preserved" >> isEqualTo "Zo\u0142c")
+        )
 
-        testCase "normalize: Czech text" <| fun _ ->
+        test ("normalize: Czech text", fun _ ->
             let result = Str.normalize "\u0159\u00E1\u010D\u0161\u0165" // řáčšť
-            Expect.equal result "racst" "Czech diacritics removed"
+            assertThat result (tag "Czech diacritics removed" >> isEqualTo "racst")
+        )
 
-        testCase "normalize: Turkish dotted and dotless i" <| fun _ ->
+        test ("normalize: Turkish dotted and dotless i", fun _ ->
             // İ (U+0130, capital I with dot) should lose the dot
             let result = Str.normalize "\u0130"
-            Expect.equal result "I" "Turkish capital dotted I"
+            assertThat result (tag "Turkish capital dotted I" >> isEqualTo "I")
+        )
 
-        testCase "normalize: Vietnamese text" <| fun _ ->
+        test ("normalize: Vietnamese text", fun _ ->
             let result = Str.normalize "\u1ED3\u1EA5\u1EBF"  // ồấế
-            Expect.equal result "oae" "Vietnamese diacritics removed"
+            assertThat result (tag "Vietnamese diacritics removed" >> isEqualTo "oae")
+        )
 
-        testCase "normalize: single char string" <| fun _ ->
-            Expect.equal (Str.normalize "a") "a" "single plain char"
+        test ("normalize: single char string", fun _ ->
+            assertThat (Str.normalize "a") (tag "single plain char" >> isEqualTo "a")
+        )
 
-        testCase "normalize: string of only combining marks" <| fun _ ->
+        test ("normalize: string of only combining marks", fun _ ->
             // two standalone combining marks (acute + grave)
             let result = Str.normalize "\u0301\u0300"
-            Expect.equal result "" "only combining marks → empty"
+            assertThat result (tag "only combining marks → empty" >> isEqualTo "")
+        )
 
-        testCase "normalize: accented chars interspersed with numbers" <| fun _ ->
+        test ("normalize: accented chars interspersed with numbers", fun _ ->
             let result = Str.normalize "\u00E91\u00E82\u00F63"  // é1è2ö3
-            Expect.equal result "e1e2o3" "accents removed, digits kept"
+            assertThat result (tag "accents removed, digits kept" >> isEqualTo "e1e2o3")
+        )
 
-        testCase "normalize: tabs and newlines with accents" <| fun _ ->
+        test ("normalize: tabs and newlines with accents", fun _ ->
             let result = Str.normalize "\u00E9\t\u00E8\n\u00F6"  // é\tè\nö
-            Expect.equal result "e\te\no" "whitespace preserved with accents"
+            assertThat result (tag "whitespace preserved with accents" >> isEqualTo "e\te\no")
+        )
 
-        testCase "normalize: long string performance" <| fun _ ->
+        test ("normalize: long string performance", fun _ ->
             let input = String.replicate 1000 "\u00E9"  // 1000 × é
             let result = Str.normalize input
-            Expect.equal result (String.replicate 1000 "e") "long accented string"
+            assertThat result (tag "long accented string" >> isEqualTo (String.replicate 1000 "e"))
+        )
 
-        testCase "normalize: mixed scripts in one string" <| fun _ ->
+        test ("normalize: mixed scripts in one string", fun _ ->
             // Latin accented + CJK + Cyrillic + digits
             let input = "caf\u00E9\u4F60\u597D\u041F\u0440\u0438\u0432\u0435\u044242"
             let result = Str.normalize input
-            Expect.equal result "cafe\u4F60\u597D\u041F\u0440\u0438\u0432\u0435\u044242" "mixed scripts"
+            assertThat result (tag "mixed scripts" >> isEqualTo "cafe\u4F60\u597D\u041F\u0440\u0438\u0432\u0435\u044242")
+        )
 
-        testCase "normalize: sharp s (ß) preserved" <| fun _ ->
+        test ("normalize: sharp s (ß) preserved", fun _ ->
             // ß (U+00DF) is not a diacritic, should stay
             let result = Str.normalize "\u00DF"
-            Expect.equal result "\u00DF" "sharp s unchanged"
+            assertThat result (tag "sharp s unchanged" >> isEqualTo "\u00DF")
+        )
 
-        testCase "normalize: eth (ð) preserved" <| fun _ ->
+        test ("normalize: eth (ð) preserved", fun _ ->
             let result = Str.normalize "\u00F0"
-            Expect.equal result "\u00F0" "eth unchanged"
+            assertThat result (tag "eth unchanged" >> isEqualTo "\u00F0")
+        )
 
-        testCase "normalize: thorn (þ) preserved" <| fun _ ->
+        test ("normalize: thorn (þ) preserved", fun _ ->
             let result = Str.normalize "\u00FE"
-            Expect.equal result "\u00FE" "thorn unchanged"
+            assertThat result (tag "thorn unchanged" >> isEqualTo "\u00FE")
+        )
 
-        testCase "normalize: copyright and trademark symbols preserved" <| fun _ ->
+        test ("normalize: copyright and trademark symbols preserved", fun _ ->
             let input = "\u00A9\u00AE\u2122"  // ©®™
-            Expect.equal (Str.normalize input) input "symbols preserved"
+            assertThat (Str.normalize input) (tag "symbols preserved" >> isEqualTo input)
+        )
 
-        testCase "normalize: currency symbols preserved" <| fun _ ->
+        test ("normalize: currency symbols preserved", fun _ ->
             let input = "$\u20AC\u00A3\u00A5"  // $€£¥
-            Expect.equal (Str.normalize input) input "currency symbols"
+            assertThat (Str.normalize input) (tag "currency symbols" >> isEqualTo input)
+        )
 
-        testCase "normalize: result length <= input length" <| fun _ ->
+        test ("normalize: result length <= input length", fun _ ->
             let input = "\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00C7\u00C8\u00C9\u00CA"  // ÀÁÂÃÄÅÇÈÉÊ
             let result = Str.normalize input
-            Expect.isTrue (result.Length <= input.Length) "result not longer than input"
+            assertThat (result.Length <= input.Length) (tag "result not longer than input" >> isTrue)
+        )
 
-        testCase "normalize: triple application is same as single" <| fun _ ->
+        test ("normalize: triple application is same as single", fun _ ->
             let input = "\u00C4rger \u00FCber b\u00F6se F\u00FC\u00DFe"  // Ärger über böse Füße
             let once = Str.normalize input
             let triple = Str.normalize (Str.normalize (Str.normalize input))
-            Expect.equal triple once "triple application idempotent"
+            assertThat triple (tag "triple application idempotent" >> isEqualTo once)
+        )
 
-    ]
+    ])
 
 
 

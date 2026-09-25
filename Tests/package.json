@@ -4,13 +4,11 @@
     "watchTS": "dotnet fable watch --outDir ts --lang typescript ../Src/Str.fsproj --run tsc" ,
 
     "buildTS": "dotnet fable --outDir ts --noCache  --lang typescript ../Src/Str.fsproj --silent --run tsc" ,
-    "pretest": "dotnet fable --outDir js --noCache ",
-    "test": "mocha js",
-    "testTS": "mocha js && npm run buildTS"
+    "test": "dotnet fable --outDir js --noCache --runScript",
+    "testTS": "npm test && npm run buildTS"
   },
 
   "devDependencies": {
-    "mocha": "12.0.0-rc.6",
     "typescript": "^7.0.2"
   }
 }

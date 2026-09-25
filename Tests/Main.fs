@@ -1,23 +1,15 @@
 namespace Tests
 
-open Str
+open Scriptorium.Quill
 
 module Main =
 
-    #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
-
-    open Fable.Mocha
-    Mocha.runTests Tests.Extensions.tests |> ignore
-    Mocha.runTests Tests.Module.tests |> ignore
-    Mocha.runTests Tests.StringBuilder.tests |> ignore
-    #else
-
-    open Expecto
+    // The same entry point runs on .NET (`dotnet run`) and on JS (`dotnet fable --runScript`).
+    // On JS, Scriptorium runs the tests asynchronously and sets the process exit code itself.
     [<EntryPoint>]
-    let main argv =
-        let a = runTestsWithCLIArgs [] [||] Tests.Extensions.tests
-        let b = runTestsWithCLIArgs [] [||] Tests.Module.tests
-        let c = runTestsWithCLIArgs [] [||] Tests.StringBuilder.tests
-        a|||b|||c
-
-    #endif
+    let main _argv =
+        Runner.runTests [
+            Tests.Extensions.tests
+            Tests.Module.tests
+            Tests.StringBuilder.tests
+        ]
