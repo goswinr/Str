@@ -9,13 +9,13 @@
 [![license](https://img.shields.io/github/license/goswinr/Str)](LICENSE.md)
 ![code size](https://img.shields.io/github/languages/code-size/goswinr/Str.svg)
 
-Str is an F# extension and module library for `System.String`
+Str is an F# extension and module library for `System.String`.
 It compiles to Javascript and Typescript with [Fable](https://fable.io/).
 
 ## It Includes
 
 - A `Str` module that has all methods from the String type as functions, and more. Adapted and extended from [FSharpX](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/String.fs)
-- A  Computational Expressions `str` that can be used build up strings ( using a StringBuilder internally).
+- A Computational Expression `str` that can be used to build up strings ( using a StringBuilder internally).
 - Extension members on `System.String` like `.Get` `.First` `.Last` `.SecondLast` and more.
 With nicer IndexOutOfRangeExceptions that include the bad index and the actual size.
 
@@ -27,7 +27,7 @@ With nicer IndexOutOfRangeExceptions that include the bad index and the actual s
 [goswinr.github.io/Str](https://goswinr.github.io/Str/reference/str.html)
 
 ### Use of AI and LLMs in the project
-All core function are are written by hand to ensure performance and correctness.<br>
+All core functions are written by hand to ensure performance and correctness.<br>
 However, AI tools have been used for code review, typo and grammar checking in documentation<br>
 and to generate not all but many of the tests.
 
@@ -41,7 +41,7 @@ open Str
 
 this module contains:
 - a static class also called `Str`
-- a Computational Expressions called `str`
+- a Computational Expression called `str`
 - this will also auto open the extension members on `System.String`
 
 ### The `str` Computation Expression
@@ -134,7 +134,7 @@ Negative indices count from the end (`-1` is the last character). The end index 
 Str.slice  0   4  "Hello, World!"    // "Hello"
 Str.slice  7  11  "Hello, World!"    // "World"
 Str.slice  0  -1  "Hello, World!"    // "Hello, World!"
-Str.slice -6  -2  "Hello, World!"    // "orld"
+Str.slice -6  -2  "Hello, World!"    // "World"
 ```
 
 ### Truncate, Skip, and Take
@@ -221,14 +221,14 @@ Str.addThousandSeparators ','  "1234567.1234"  // "1,234,567.123,4"
 
 ```fsharp
 Str.normalize "cafe\u0301"  // "cafe"  (removes combining accent)
-Str.normalize "Zurich"      // "Zurich"
+Str.normalize "Zürich"      // "Zurich"
 ```
 
 ### Display Formatting
 
 ```fsharp
 Str.formatInOneLine "hello\n  world"            // "hello world"
-Str.formatTruncated 10 "a long string here"     // "\"a lon(..)\"" (truncated with placeholder)
+Str.formatTruncated 10 "a long string here"     // "\"a long(..)\"" (truncated with placeholder)
 Str.formatTruncatedToMaxLines 2 "a\nb\nc\nd"    // shows first 2 lines + note
 ```
 
@@ -270,7 +270,7 @@ s.LastIndex    // 4
 
 s.Get 0        // 'H'  (with descriptive errors on out-of-range)
 s.GetNeg(-1)   // 'o'  (negative index, -1 = last)
-s.GetLooped 7  // 'e'  (wraps around: 7 % 5 = 2)
+s.GetLooped 7  // 'l'  (wraps around: 7 % 5 = 2)
 
 s.Slice(0, 2)    // "Hel"  (inclusive end index)
 s.Slice(-3, -1)  // "llo"
@@ -311,8 +311,7 @@ for JS testing (Fable compiles the tests and runs them with Node.js via `dotnet 
 
 ```bash
 cd Tests
-npm test
-npm run buildTS
+npm run testTS   # = npm test && npm run buildTS
 ```
 
 ### License

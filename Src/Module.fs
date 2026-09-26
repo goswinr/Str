@@ -142,7 +142,7 @@ type Str private () =
     /// (Will return the same string instance, if char to remove is not found)
     /// Code: fromString.Replace(charToRemove.ToString(), "")
     static member (*inline*) deleteChar (charToRemove:char) (fromString:string) :string =
-        if isNull fromString then StrException.Raise "Str.delete: fromString is null (charToRemove:'%c')" charToRemove
+        if isNull fromString then StrException.Raise "Str.deleteChar: fromString is null (charToRemove:'%c')" charToRemove
         fromString.Replace(charToRemove.ToString(), "") // will return the same instance if text to remove is not found
 
 
@@ -318,12 +318,12 @@ type Str private () =
     /// Fails unless both splitters are found.
     /// Delimiters are excluded from the returned string.
     static member (*inline*) betweenChars (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string) :string =
-        if isNull stringToSplit then StrException.Raise "Str.between: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
+        if isNull stringToSplit then StrException.Raise "Str.betweenChars: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
-        if start = -1 then StrException.Raise "Str.between: firstSplitter: '%c' not found in stringToSplit: %s  (secondSplitter: '%c')" ( firstSplitter) (exnf stringToSplit) ( secondSplitter)
+        if start = -1 then StrException.Raise "Str.betweenChars: firstSplitter: '%c' not found in stringToSplit: %s  (secondSplitter: '%c')" ( firstSplitter) (exnf stringToSplit) ( secondSplitter)
         else
             let ende = stringToSplit.IndexOf(secondSplitter, start + 1)
-            if ende = -1 then StrException.Raise "Str.between: secondSplitter: '%c' not found in stringToSplit: %s  (firstSplitter: '%c')" ( secondSplitter) (exnf stringToSplit) ( firstSplitter)
+            if ende = -1 then StrException.Raise "Str.betweenChars: secondSplitter: '%c' not found in stringToSplit: %s  (firstSplitter: '%c')" ( secondSplitter) (exnf stringToSplit) ( firstSplitter)
             else
                 stringToSplit.Substring(start + 1, ende - start - 1)// finds text between two chars
 
@@ -334,7 +334,7 @@ type Str private () =
     /// Delimiters are excluded from the returned string.
     /// Throws StrException if the input string is null.
     static member (*inline*) tryBetweenChars (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string): option<string>  =
-        if isNull stringToSplit then StrException.Raise "Str.tryBetween: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
+        if isNull stringToSplit then StrException.Raise "Str.tryBetweenChars: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
         if start = -1 then None
         else
@@ -348,7 +348,7 @@ type Str private () =
     /// Returns the full input string unless both splitters are found.
     /// Delimiters are excluded from the returned string.
     static member (*inline*) betweenCharsOrInput (firstSplitter:Char) (secondSplitter:Char) (stringToSplit:string): string  =
-        if isNull stringToSplit then StrException.Raise "Str.betweenOrInput: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
+        if isNull stringToSplit then StrException.Raise "Str.betweenCharsOrInput: stringToSplit is null (firstSplitter: '%c', secondSplitter: '%c') " ( firstSplitter) ( secondSplitter)
         let start = stringToSplit.IndexOf(firstSplitter)
         if start = -1 then stringToSplit
         else
@@ -442,7 +442,7 @@ type Str private () =
         if st < 0 || st > count-1 then
             StrException.Raise "Str.slice: Start index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" startIdx count (count-1) (exnf txt) count
         if st+len > count then
-            StrException.Raise "Str.slice: End index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" startIdx count (count-1) (exnf txt) count
+            StrException.Raise "Str.slice: End index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" endIdx count (count-1) (exnf txt) count
         if len < 0 then
             let en = if endIdx<0 then count+endIdx else endIdx
             StrException.Raise "Str.slice: Start index '%A' (= %d) is bigger than end index '%A'(= %d) for String %s of %d items" startIdx st endIdx en (exnf txt) count
@@ -785,8 +785,6 @@ type Str private () =
         if isNull stringToSearchIn then StrException.Raise "Str.lastIndexOfString: stringToSearchIn is null. (stringToFind:%s) " (exnf stringToFind)
         stringToSearchIn.LastIndexOf(stringToFind, StringComparison.Ordinal)
 
-    (*inline*)
-    (*inline*)
     (* // TODO implement indicesOf from end searching
 
     /// Returns the zero-based index position of the last occurrence of the specified Unicode character in a substring within this instance.
@@ -815,7 +813,7 @@ type Str private () =
     /// Or -1 if not found.
     static member (*inline*) lastIndexOfStringFrom (stringToFind:string) (startIndex:int) (stringToSearchIn:string)  =
         if isNull stringToFind then StrException.Raise "Str.lastIndexOfStringFrom: stringToFind is null. (startIndex:%d)  (stringToSearchIn:%s) " startIndex (exnf stringToSearchIn)
-        if isNull stringToSearchIn then StrException.Raise "Str.lastIndexOfString': stringToSearchIn is null. (stringToFind:%s)  (startIndex:%d) " (exnf stringToFind) startIndex
+        if isNull stringToSearchIn then StrException.Raise "Str.lastIndexOfStringFrom: stringToSearchIn is null. (stringToFind:%s)  (startIndex:%d) " (exnf stringToFind) startIndex
         stringToSearchIn.LastIndexOf(stringToFind, startIndex, StringComparison.Ordinal)
 
 
@@ -851,7 +849,7 @@ type Str private () =
 
     /// Returns a new string in which all occurrences of a specified Unicode character in this instance are replaced with another specified Unicode character.
     static member (*inline*) replaceChar (oldChar:char) (newChar:char) (txt:string)  =
-        if isNull txt then StrException.Raise "Str.replace': txt is null. (oldChar:'%c')  (newChar:'%c') " oldChar newChar
+        if isNull txt then StrException.Raise "Str.replaceChar: txt is null. (oldChar:'%c')  (newChar:'%c') " oldChar newChar
         txt.Replace(oldChar, newChar) // will return the same instance if char to replace is not found
 
     /// Returns a new string in which all occurrences of a specified string in the current instance are replaced with another specified string.
@@ -926,7 +924,7 @@ type Str private () =
     /// Splits a string by any of multiple characters and removes empty entries.
     /// Like: string.Split([| splitter |], StringSplitOptions.RemoveEmptyEntries)
     static member (*inline*) splitChars(separators:char[]) (stringToSplit:string)  =
-        if isNull stringToSplit then StrException.Raise "Str.splitByChars: stringToSplit is null. (separators:%A)  " separators
+        if isNull stringToSplit then StrException.Raise "Str.splitChars: stringToSplit is null. (separators:%A)  " separators
         #if FABLE_COMPILER_TYPESCRIPT // TS-only
         stringToSplit.Split((emitJsExpr separators "$0 as string[]" : char[]), StringSplitOptions.RemoveEmptyEntries)
         #else

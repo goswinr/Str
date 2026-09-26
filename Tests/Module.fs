@@ -489,6 +489,16 @@ module Module =
             assertThat result (tag "Should be equal" >> isEqualTo "ld!")
         )
 
+        test ("slice with negative start and end as in README", fun _ ->
+            let result = Str.slice -6 -2 "Hello, World!"
+            assertThat result (tag "Should be equal" >> isEqualTo "World")
+        )
+
+        test ("slice error for out of range end index reports the end index", fun _ ->
+            let msg = try Str.slice 0 10 "abc" |> ignore; "" with e -> e.Message
+            assertThat (msg.Contains "End index 10") (tag $"Message should name end index 10, got: {msg}" >> isTrue)
+        )
+
 
         // countSubString
         test ("countSubString should return the number of occurrences of the substring", fun _ ->

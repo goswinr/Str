@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v6.0.0
       with:
-        dotnet-version: '10.x'
+        dotnet-version: '10.0.x'
 
     - name: Replace <br> in README.md with two spaces for nuget.org
       run: |

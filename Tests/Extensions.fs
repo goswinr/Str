@@ -302,4 +302,9 @@ module Extensions =
             let s = "Hello"
             assertThat (fun _ -> s.Slice(3, 1) |> ignore) (tag "Expected exception for invalid range" >> throws)
         )
+
+        test ("Slice error for out of range end index reports the end index", fun _ ->
+            let msg = try "abc".Slice(0, 10) |> ignore; "" with e -> e.Message
+            assertThat (msg.Contains "End index 10") (tag $"Message should name end index 10, got: {msg}" >> isTrue)
+        )
         ])

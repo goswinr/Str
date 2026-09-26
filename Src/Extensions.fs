@@ -110,19 +110,18 @@ module internal Format =
 [<AutoOpen>]
 module AutoOpenExtensionsString =
 
-    // This type extension should be alway available that is why it is in this Auto-open module
+    // This type extension should be always available that is why it is in this Auto-open module
     type System.String with
 
         /// s.IndexOf(subString,StringComparison.Ordinal) = -1
         member inline s.DoesNotContain(subString:string) : bool =
-            s.IndexOf(subString, StringComparison.Ordinal) = -1 // in Fable the StringComparison ar is ignored. TODO Fable should issue a warning for that !
+            s.IndexOf(subString, StringComparison.Ordinal) = -1 // in Fable the StringComparison arg is ignored. TODO Fable should issue a warning for that !
 
         /// s.IndexOf(chr) = -1
         member inline s.DoesNotContain(chr:char) : bool =
             s.IndexOf(chr) = -1
 
         /// s.IndexOf(char) <> -1
-
         member inline s.Contains(chr:char) : bool =  // this overload does not exist by default
             s.IndexOf(chr) <> -1
 
@@ -264,16 +263,16 @@ module ExtensionsString =
             let len = if endIdx<0 then count+endIdx-st+1 else endIdx-st+1
 
             if st < 0 || st > count-1 then
-                StrException.Raise "Str.ExtensionsString: str.GetSlice: Start index %d is out of range. Allowed values are -%d up to %d for String '%s' of %d chars" startIdx count (count-1) (exnf str) count
+                StrException.Raise "Str.ExtensionsString: str.Slice: Start index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" startIdx count (count-1) (exnf str) count
 
 
             if st+len > count then
-                StrException.Raise "Str.ExtensionsString: str.GetSlice: End index %d is out of range. Allowed values are -%d up to %d for String '%s' of %d chars" startIdx count (count-1) (exnf str) count
+                StrException.Raise "Str.ExtensionsString: str.Slice: End index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" endIdx count (count-1) (exnf str) count
 
 
             if len < 0 then
                 let en = if endIdx<0 then count+endIdx else endIdx
-                StrException.Raise "Str.ExtensionsString: str.GetSlice: Start index '%A' (= %d) is bigger than end index '%A'(= %d) for String '%s' of %d chars" startIdx st endIdx en (exnf str) count
+                StrException.Raise "Str.ExtensionsString: str.Slice: Start index '%A' (= %d) is bigger than end index '%A'(= %d) for String %s of %d chars" startIdx st endIdx en (exnf str) count
 
             str.Substring(st,len)
 
