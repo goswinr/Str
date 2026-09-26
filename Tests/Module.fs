@@ -988,6 +988,27 @@ module Module =
             assertThat result3 (tag "Should be -1" >> isEqualTo -1)
         )
 
+        test ("indexOfStringFromFor finds empty string at startIndex", fun _ ->
+            assertThat (Str.indexOfStringFromFor "" 2 1 "test") (tag "Should be 2" >> isEqualTo 2)
+            assertThat (Str.indexOfStringFromFor "" 4 0 "test") (tag "Should be 4" >> isEqualTo 4)
+        )
+
+        test ("indexOfStringFromFor throws StrException for out of range arguments", fun _ ->
+            let isStrExn f = try f () |> ignore; false with :? Str.ExtensionsString.StrException -> true
+            assertThat (isStrExn (fun () -> Str.indexOfStringFromFor "t" -1 1 "test")) (tag "negative startIndex" >> isTrue)
+            assertThat (isStrExn (fun () -> Str.indexOfStringFromFor "t" 0 -1 "test")) (tag "negative count" >> isTrue)
+            assertThat (isStrExn (fun () -> Str.indexOfStringFromFor "t" 2 3 "test")) (tag "startIndex + count too big" >> isTrue)
+            assertThat (isStrExn (fun () -> Str.indexOfStringFromFor "" 5 0 "test")) (tag "empty search string, startIndex too big" >> isTrue)
+        )
+
+        test ("indexOfCharFromFor throws StrException for out of range arguments", fun _ ->
+            let isStrExn f = try f () |> ignore; false with :? Str.ExtensionsString.StrException -> true
+            assertThat (isStrExn (fun () -> Str.indexOfCharFromFor 't' -1 1 "test")) (tag "negative startIndex" >> isTrue)
+            assertThat (isStrExn (fun () -> Str.indexOfCharFromFor 't' 0 -1 "test")) (tag "negative count" >> isTrue)
+            assertThat (isStrExn (fun () -> Str.indexOfCharFromFor 't' 2 3 "test")) (tag "startIndex + count too big" >> isTrue)
+            assertThat (Str.indexOfCharFromFor 't' 4 0 "test") (tag "empty range at end should be -1" >> isEqualTo -1)
+        )
+
         test ("Test indexOfAny function", fun _ ->
             let result1 = Str.indexOfAny [|'e'; 's'|] "test"
             let result2 = Str.indexOfAny [|'z'; 'x'|] "test"
@@ -1112,6 +1133,13 @@ module Module =
             let result = Str.replaceLast "es" "ar" "testes"
             assertThat result (tag "Should be 'testar'" >> isEqualTo "testar")
         )
+
+        test ("replace, replaceFirst and replaceLast return the input for an empty oldValue", fun _ ->
+            assertThat (Str.replace "" "x" "abc") (tag "replace" >> isEqualTo "abc")
+            assertThat (Str.replaceFirst "" "x" "abc") (tag "replaceFirst" >> isEqualTo "abc")
+            assertThat (Str.replaceLast "" "x" "abc") (tag "replaceLast" >> isEqualTo "abc")
+        )
+
 
         test ("Test replaceLast function bad case ", fun _ ->
             let result = Str.replaceLast "eS" "ar" "testes"
@@ -1504,6 +1532,16 @@ module Module =
         test ("addThousandSeparators should work with underscore separator", fun _ ->
             let result = Str.addThousandSeparators '_' "123456789"
             assertThat result (tag "Should be '123_456_789'" >> isEqualTo "123_456_789")
+        )
+
+        test ("addThousandSeparators keeps a leading plus sign", fun _ ->
+            assertThat (Str.addThousandSeparators ',' "+123") (tag "Should be '+123'" >> isEqualTo "+123")
+            assertThat (Str.addThousandSeparators ',' "+1234") (tag "Should be '+1,234'" >> isEqualTo "+1,234")
+        )
+
+        test ("addThousandSeparators returns inputs without integer digits unchanged", fun _ ->
+            for s in [ "-"; "+"; "."; "-.5"; "e5"; "-e5" ] do
+                assertThat (Str.addThousandSeparators ',' s) (tag $"Should be unchanged for {s}" >> isEqualTo s)
         )
 
         test ("addThousandSeparators should work with space separator", fun _ ->

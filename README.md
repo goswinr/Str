@@ -59,7 +59,8 @@ let hello = // "Hello, World !!!"
     }
 ```
 
-Use `yield!` to append with a trailing newline:
+Use `yield!` to append with a trailing newline.
+Newlines are `Environment.NewLine`, so `\r\n` on Windows and `\n` elsewhere (the examples below show `\n`):
 
 ```fsharp
 let lines = // "line one\nline two\nline three\n"
@@ -152,6 +153,7 @@ Str.replace      "o" "0" "foo boo"  // "f00 b00"  (all occurrences)
 Str.replaceFirst "o" "0" "foo boo"  // "f0o boo"  (first only)
 Str.replaceLast  "o" "0" "foo boo"  // "foo bo0"  (last only)
 Str.replaceChar  'o' '0' "foo boo"  // "f00 b00"  (all char occurrences)
+Str.replace      ""  "0" "foo boo"  // "foo boo"  (an empty oldValue is a no-op)
 ```
 
 ### Delete

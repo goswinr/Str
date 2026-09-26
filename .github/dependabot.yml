@@ -10,7 +10,9 @@ updates:
 
   # Update to newer NuGet dependencies
   - package-ecosystem: "nuget"
-    directory: "/Src/"
+    directories:
+      - "/Src/"
+      - "/Tests/"
     schedule:
       interval: "weekly"
     cooldown:

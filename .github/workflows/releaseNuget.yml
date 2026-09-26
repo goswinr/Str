@@ -5,6 +5,11 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
 
+# id-token: write is needed for NuGet trusted publishing (OIDC), see https://learn.microsoft.com/nuget/nuget-org/trusted-publishing
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
     runs-on: windows-latest
@@ -17,6 +22,26 @@ jobs:
       uses: actions/setup-dotnet@v6.0.0
       with:
         dotnet-version: '10.0.x'
+
+    - name: Run tests .NET
+      run: dotnet run
+      working-directory: ./Tests
+
+    - name: Restore .NET tools (Fable)
+      run: dotnet tool restore
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version: '24.x'
+
+    - name: Clean Install npm dependencies
+      run: npm ci
+      working-directory: ./Tests
+
+    - name: Run tests JS
+      run: npm test
+      working-directory: ./Tests
 
     - name: Replace <br> in README.md with two spaces for nuget.org
       run: |
@@ -47,6 +72,14 @@ jobs:
       id: repo-name
       run: echo "REPO_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
 
+    - name: NuGet login (OIDC, gets a short-lived API key)
+      # needs a trusted publishing policy on nuget.org for this repo and workflow file,
+      # and the nuget.org user name (profile name, not email) in the repository secret NUGET_USER
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
     - name: Publish NuGet package
       run: |
         $nupkgPath = Get-ChildItem -Path "./Src/bin/Release/" -Filter "*.symbols.nupkg" -Recurse | Select-Object -First 1 -ExpandProperty FullName
@@ -54,4 +87,4 @@ jobs:
           Write-Error "No .symbols.nupkg file found in ./Src/bin/Release/ folder."
           exit 1
         }
-        dotnet nuget push $nupkgPath --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        dotnet nuget push $nupkgPath --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
