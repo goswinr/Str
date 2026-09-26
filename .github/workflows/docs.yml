@@ -30,7 +30,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: '9.0.x' # Adjust the version as needed
+          dotnet-version: '10.0.x' # Tests.fsproj targets net10.0 and is part of the solution build
 
 
       - name: Restore dotnet tools

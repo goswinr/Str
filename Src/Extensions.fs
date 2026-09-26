@@ -110,19 +110,18 @@ module internal Format =
 [<AutoOpen>]
 module AutoOpenExtensionsString =
 
-    // This type extension should be alway available that is why it is in this Auto-open module
+    // This type extension should be always available that is why it is in this Auto-open module
     type System.String with
 
         /// s.IndexOf(subString,StringComparison.Ordinal) = -1
         member inline s.DoesNotContain(subString:string) : bool =
-            s.IndexOf(subString, StringComparison.Ordinal) = -1 // in Fable the StringComparison ar is ignored. TODO Fable should issue a warning for that !
+            s.IndexOf(subString, StringComparison.Ordinal) = -1 // in Fable the StringComparison arg is ignored. TODO Fable should issue a warning for that !
 
         /// s.IndexOf(chr) = -1
         member inline s.DoesNotContain(chr:char) : bool =
             s.IndexOf(chr) = -1
 
         /// s.IndexOf(char) <> -1
-
         member inline s.Contains(chr:char) : bool =  // this overload does not exist by default
             s.IndexOf(chr) <> -1
 
@@ -263,37 +262,42 @@ module ExtensionsString =
             let st  = if startIdx<0 then count+startIdx else startIdx
             let len = if endIdx<0 then count+endIdx-st+1 else endIdx-st+1
 
+            if count = 0 then
+                StrException.Raise "Str.ExtensionsString: str.Slice: can't slice an empty string. startIdx: %d endIdx: %d" startIdx endIdx
+
             if st < 0 || st > count-1 then
-                StrException.Raise "Str.ExtensionsString: str.GetSlice: Start index %d is out of range. Allowed values are -%d up to %d for String '%s' of %d chars" startIdx count (count-1) (exnf str) count
+                StrException.Raise "Str.ExtensionsString: str.Slice: Start index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" startIdx count (count-1) (exnf str) count
 
 
             if st+len > count then
-                StrException.Raise "Str.ExtensionsString: str.GetSlice: End index %d is out of range. Allowed values are -%d up to %d for String '%s' of %d chars" startIdx count (count-1) (exnf str) count
+                StrException.Raise "Str.ExtensionsString: str.Slice: End index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" endIdx count (count-1) (exnf str) count
 
 
             if len < 0 then
                 let en = if endIdx<0 then count+endIdx else endIdx
-                StrException.Raise "Str.ExtensionsString: str.GetSlice: Start index '%A' (= %d) is bigger than end index '%A'(= %d) for String '%s' of %d chars" startIdx st endIdx en (exnf str) count
+                StrException.Raise "Str.ExtensionsString: str.Slice: Start index '%A' (= %d) is bigger than end index '%A'(= %d) for String %s of %d chars" startIdx st endIdx en (exnf str) count
 
             str.Substring(st,len)
 
 
         /// Returns a new string in which only the first occurrence of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
+        /// An empty oldValue is treated as a no-op and returns the input unchanged.
         member txt.ReplaceFirst (oldValue:string, newValue:string) : string =
             if isNull oldValue then StrException.Raise "str.ReplaceFirst: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
             if isNull newValue then StrException.Raise "str.ReplaceFirst: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
-            let idx = txt.IndexOf(oldValue, StringComparison.Ordinal)
+            let idx = if oldValue.Length = 0 then -1 else txt.IndexOf(oldValue, StringComparison.Ordinal)
             if idx < 0 then txt
             else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
 
 
         /// Returns a new string in which only the last occurrence of a specified string in the current instance is replaced with another specified string.
         /// (Will return the same instance if text to replace is not found)
+        /// An empty oldValue is treated as a no-op and returns the input unchanged.
         member txt.ReplaceLast (oldValue:string, newValue:string) : string =
             if isNull oldValue then StrException.Raise "str.ReplaceLast: oldValue is null. (newValue:%s)  (txt:%s) " (exnf newValue) (exnf txt)
             if isNull newValue then StrException.Raise "str.ReplaceLast: newValue is null. (oldValue:%s)  (txt:%s) " (exnf oldValue) (exnf txt)
-            let idx = txt.LastIndexOf(oldValue, StringComparison.Ordinal)
+            let idx = if oldValue.Length = 0 then -1 else txt.LastIndexOf(oldValue, StringComparison.Ordinal)
             if idx < 0 then txt
             else txt.Substring(0, idx) + newValue + txt.Substring(idx + oldValue.Length)
 
