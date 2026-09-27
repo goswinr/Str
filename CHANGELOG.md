@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- `Str.replace`, `Str.replaceFirst`, `Str.replaceLast` and the `.ReplaceFirst` / `.ReplaceLast` extensions return the input unchanged for an empty `oldValue` (before, `replace` threw an `ArgumentException`, `replaceFirst` prepended and `replaceLast` appended or, on .NET Framework, inserted before the last character).
+- `Str.indexOfCharFromFor` and `Str.indexOfStringFromFor` validate `startIndex` and `count` and throw a `StrException` on both .NET and JS (before: `ArgumentOutOfRangeException` on .NET).
+- Tests use Scriptorium instead of Expecto and Fable.Mocha, on both .NET and JS.
+### Fixed
+- `Str.addThousandSeparators` keeps a leading `+` sign, and returns inputs without integer digits (e.g. `"-"`, `"e5"`) unchanged instead of failing or duplicating the sign.
+- `Str.slice` and `str.Slice` report the end index in the out-of-range error message, and give a clear message for empty strings.
+- Several error messages named the wrong function.
+- README examples for `slice`, `formatTruncated` and `GetLooped`.
+- CI: docs build uses .NET 10, releases run the tests first and publish via NuGet trusted publishing.
+
 ## [0.24.1] - 2026-09-07
 ### Fixed
 - Packaging: the Fable content glob is no longer recursive, so the package no longer ships generated obj AssemblyInfo files, only the real source files.

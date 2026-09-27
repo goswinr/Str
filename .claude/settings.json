@@ -3,7 +3,13 @@
     "allow": [
       "Edit",
       "Write",
-      "Bash(rm:*)"
+      "Bash(rm -rf Tests/js:*)",
+      "Bash(rm -rf Tests/ts:*)",
+      "Bash(rm -rf Tests/bin:*)",
+      "Bash(rm -rf Tests/obj:*)",
+      "Bash(rm -rf Src/bin:*)",
+      "Bash(rm -rf Src/obj:*)",
+      "Bash(rm -rf DocsGenerated:*)"
     ]
   }
 }
