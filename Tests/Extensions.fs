@@ -9,6 +9,9 @@ module Extensions =
     open Scriptorium.Nib.Assertion
     open type Scriptorium.Quill.Test
 
+#nowarn "44" // to test the obsolete Slice alias
+    let private obsoleteSlice (s: string) startIdx endIdx : string = s.Slice(startIdx, endIdx)
+#warnon "44"
 
     let tests = testList ("String extensions tests", [
 
@@ -101,15 +104,15 @@ module Extensions =
             assertThat result (tag "Expected character at looped index -1 to be '!'" >> isEqualTo '!')
         )
 
-        test ("Slice with positive indices", fun _ ->
+        test ("SliceNeg with positive indices", fun _ ->
             let s = "Hello, world!"
-            let result = s.Slice(0, 4)
+            let result = s.SliceNeg(0, 4)
             assertThat result (tag "Expected slice from index 0 to 5 to be 'Hello'" >> isEqualTo "Hello")
         )
 
-        test ("Slice with negative indices", fun _ ->
+        test ("SliceNeg with negative indices", fun _ ->
             let s = "Hello, world!"
-            let result = s.Slice(-6, -1)
+            let result = s.SliceNeg(-6, -1)
             assertThat result (tag "Expected slice from index -6 to -1 to be 'world'" >> isEqualTo "world!")
         )
 
@@ -298,9 +301,9 @@ module Extensions =
             assertThat (fun _ -> s.GetLooped 0 |> ignore) (tag "Expected exception for empty string" >> throws)
         )
 
-        test ("Slice should throw for invalid range", fun _ ->
+        test ("SliceNeg should throw for invalid range", fun _ ->
             let s = "Hello"
-            assertThat (fun _ -> s.Slice(3, 1) |> ignore) (tag "Expected exception for invalid range" >> throws)
+            assertThat (fun _ -> s.SliceNeg(3, 1) |> ignore) (tag "Expected exception for invalid range" >> throws)
         )
 
         test ("ReplaceFirst and ReplaceLast return the input for an empty oldValue", fun _ ->
@@ -308,8 +311,56 @@ module Extensions =
             assertThat ("abc".ReplaceLast("", "x")) (tag "ReplaceLast" >> isEqualTo "abc")
         )
 
-        test ("Slice error for out of range end index reports the end index", fun _ ->
-            let msg = try "abc".Slice(0, 10) |> ignore; "" with e -> e.Message
+        test ("SliceNeg error for out of range end index reports the end index", fun _ ->
+            let msg = try "abc".SliceNeg(0, 10) |> ignore; "" with e -> e.Message
             assertThat (msg.Contains "End index 10") (tag $"Message should name end index 10, got: {msg}" >> isTrue)
+        )
+
+        test ("SliceNeg error for out of range negative end index reports the end index", fun _ ->
+            let msg = try "abcde".SliceNeg(1, -99) |> ignore; "" with e -> e.Message
+            assertThat (msg.Contains "End index -99 is out of range") (tag $"Message should name end index -99, got: {msg}" >> isTrue)
+            let msg6 = try "abcde".SliceNeg(1, -6) |> ignore; "" with e -> e.Message
+            assertThat (msg6.Contains "End index -6 is out of range") (tag $"Message should name end index -6, got: {msg6}" >> isTrue)
+            let msgStart = try "abcde".SliceNeg(3, 1) |> ignore; "" with e -> e.Message
+            assertThat (msgStart.Contains "Start index 3 is bigger than end index 1") (tag $"Message should name both indices, got: {msgStart}" >> isTrue)
+        )
+
+        test ("SliceNeg returns empty when end index is one less than start index", fun _ ->
+            assertThat ("abcde".SliceNeg(3, 2)) (tag "SliceNeg 3 2" >> isEqualTo "")
+            assertThat ("abcde".SliceNeg(0, -6)) (tag "SliceNeg 0 -6" >> isEqualTo "")
+        )
+
+        test ("obsolete Slice still works like SliceNeg", fun _ ->
+            assertThat (obsoleteSlice "Hello" -3 -1) (tag "Slice(-3, -1)" >> isEqualTo "llo")
+        )
+
+        test ("SliceIdx uses an inclusive end index", fun _ ->
+            let s = "01234"
+            assertThat (s.SliceIdx(0, 0)) (tag "first char" >> isEqualTo "0")
+            assertThat (s.SliceIdx(1, 3)) (tag "indices 1 through 3" >> isEqualTo "123")
+            assertThat (s.SliceIdx(0, 4)) (tag "full range" >> isEqualTo "01234")
+            assertThat (s.SliceIdx(4, 4)) (tag "last char" >> isEqualTo "4")
+        )
+
+        test ("SliceIdx rejects invalid ranges", fun _ ->
+            let s = "01234"
+            assertThat (fun _ -> s.SliceIdx(-1, 2) |> ignore) (tag "negative start" >> throws)
+            assertThat (fun _ -> s.SliceIdx(0, -1) |> ignore) (tag "negative end" >> throws)
+            assertThat (fun _ -> s.SliceIdx(5, 5) |> ignore) (tag "start at Length" >> throws)
+            assertThat (fun _ -> s.SliceIdx(0, 5) |> ignore) (tag "end past Length" >> throws)
+            assertThat (fun _ -> s.SliceIdx(3, 2) |> ignore) (tag "start greater than end" >> throws)
+            let msg = try s.SliceIdx(-1, 2) |> ignore; "" with e -> e.Message
+            assertThat (msg.Contains "str.SliceIdx: Start index -1 is out of range") (tag $"Message should name start index -1, got: {msg}" >> isTrue)
+            let msgEmpty = try "".SliceIdx(0, 0) |> ignore; "" with e -> e.Message
+            assertThat (msgEmpty.Contains "Can't slice an empty string") (tag $"Message should say the string is empty, got: {msgEmpty}" >> isTrue)
+        )
+
+        test ("SliceLooped normalizes indices with modulo", fun _ ->
+            let s = "abc"
+            assertThat (s.SliceLooped(-1, 0)) (tag "-1..0 is empty" >> isEqualTo "")
+            assertThat (s.SliceLooped(-1, -1)) (tag "-1..-1 is the last char" >> isEqualTo "c")
+            assertThat (s.SliceLooped(3, 4)) (tag "3..4 loops to 0..1" >> isEqualTo "ab")
+            assertThat (s.SliceLooped(-3, -1)) (tag "-3..-1 is all chars" >> isEqualTo "abc")
+            assertThat ("".SliceLooped(0, 5)) (tag "empty input gives empty result" >> isEqualTo "")
         )
         ])

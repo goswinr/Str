@@ -132,11 +132,28 @@ Str.splitLines "line1\nline2\r\nline3"        // [|"line1"; "line2"; "line3"|]
 Negative indices count from the end (`-1` is the last character). The end index is **inclusive**.
 
 ```fsharp
-Str.slice  0   4  "Hello, World!"    // "Hello"
-Str.slice  7  11  "Hello, World!"    // "World"
-Str.slice  0  -1  "Hello, World!"    // "Hello, World!"
-Str.slice -6  -2  "Hello, World!"    // "World"
+Str.sliceNeg  0   4  "Hello, World!"    // "Hello"
+Str.sliceNeg  7  11  "Hello, World!"    // "World"
+Str.sliceNeg  0  -1  "Hello, World!"    // "Hello, World!"
+Str.sliceNeg -6  -2  "Hello, World!"    // "World"
 ```
+
+`Str.sliceIdx` rejects negative indices, `Str.sliceLooped` wraps any index around with modulo:
+
+```fsharp
+Str.sliceIdx     7  11  "Hello, World!"    // "World"
+Str.sliceIdx    -6  -2  "Hello, World!"    // throws StrException
+Str.sliceLooped -6  -2  "Hello, World!"    // "World"
+Str.sliceLooped 13  17  "Hello, World!"    // "Hello"  (13 wraps to 0, 17 to 4)
+```
+
+For a start index and a length use `Str.sub`, like `Array.sub`:
+
+```fsharp
+Str.sub 7 5 "Hello, World!"    // "World"
+```
+
+(`Str.slice` and `str.Slice` still work, but are obsolete: in .NET the `.Slice` method of some collections, like `List<'T>` and `Span<'T>`, takes a start index and a length.)
 
 ### Truncate, Skip, and Take
 
@@ -274,8 +291,10 @@ s.Get 0        // 'H'  (with descriptive errors on out-of-range)
 s.GetNeg(-1)   // 'o'  (negative index, -1 = last)
 s.GetLooped 7  // 'l'  (wraps around: 7 % 5 = 2)
 
-s.Slice(0, 2)    // "Hel"  (inclusive end index)
-s.Slice(-3, -1)  // "llo"
+s.SliceNeg(0, 2)    // "Hel"  (inclusive end index)
+s.SliceNeg(-3, -1)  // "llo"
+s.SliceIdx(1, 3)    // "ell"  (throws on negative indices)
+s.SliceLooped(5, 7) // "Hel"  (5 wraps to 0, 7 to 2)
 
 s.ReplaceFirst("l", "L")  // "HeLlo"  (only first match)
 s.ReplaceLast ("l", "L")  // "HelLo"  (only last match)

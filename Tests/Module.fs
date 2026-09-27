@@ -9,6 +9,9 @@ open System
 
 module Module =
 
+#nowarn "44" // to test the obsolete slice alias
+ let private obsoleteSlice startIdx endIdx (txt: string) : string = Str.slice startIdx endIdx txt
+#warnon "44"
 
  let tests =
   testList ("Module.fs Tests", [
@@ -477,26 +480,68 @@ module Module =
             assertThat result (tag "Should be equal" >> isEqualTo "hELLO")
         )
 
-        // slice
-        test ("slice should return a substring from the start index to the end index", fun _ ->
-            let result = Str.slice 0 5 "Hello, World!"
+        // sliceNeg
+        test ("sliceNeg should return a substring from the start index to the end index", fun _ ->
+            let result = Str.sliceNeg 0 5 "Hello, World!"
             assertThat result (tag "Should be equal" >> isEqualTo "Hello,")
         )
 
-        // slice
-        test ("neg slice should return a substring from the start index to the end index", fun _ ->
-            let result = Str.slice -3 -1 "Hello, World!"
+        test ("sliceNeg with negative indices should return a substring from the start index to the end index", fun _ ->
+            let result = Str.sliceNeg -3 -1 "Hello, World!"
             assertThat result (tag "Should be equal" >> isEqualTo "ld!")
         )
 
-        test ("slice with negative start and end as in README", fun _ ->
-            let result = Str.slice -6 -2 "Hello, World!"
+        test ("sliceNeg with negative start and end as in README", fun _ ->
+            let result = Str.sliceNeg -6 -2 "Hello, World!"
             assertThat result (tag "Should be equal" >> isEqualTo "World")
         )
 
-        test ("slice error for out of range end index reports the end index", fun _ ->
-            let msg = try Str.slice 0 10 "abc" |> ignore; "" with e -> e.Message
+        test ("sliceNeg error for out of range end index reports the end index", fun _ ->
+            let msg = try Str.sliceNeg 0 10 "abc" |> ignore; "" with e -> e.Message
             assertThat (msg.Contains "End index 10") (tag $"Message should name end index 10, got: {msg}" >> isTrue)
+        )
+
+        test ("sliceNeg, sliceIdx and sliceLooped throw on null", fun _ ->
+            assertThat (fun _ -> Str.sliceNeg 0 1 null |> ignore) (tag "sliceNeg" >> throws)
+            assertThat (fun _ -> Str.sliceIdx 0 1 null |> ignore) (tag "sliceIdx" >> throws)
+            assertThat (fun _ -> Str.sliceLooped 0 1 null |> ignore) (tag "sliceLooped" >> throws)
+        )
+
+        test ("obsolete slice still works like sliceNeg", fun _ ->
+            assertThat (obsoleteSlice -6 -2 "Hello, World!") (tag "slice -6 -2" >> isEqualTo "World")
+            assertThat (fun _ -> obsoleteSlice 0 1 null |> ignore) (tag "slice on null" >> throws)
+        )
+
+        test ("sub takes a start index and a count", fun _ ->
+            assertThat (Str.sub 7 5 "Hello, World!") (tag "sub 7 5" >> isEqualTo "World")
+            assertThat (Str.sub 0 0 "abc") (tag "sub 0 0" >> isEqualTo "")
+            assertThat (Str.sub 3 0 "abc") (tag "sub 3 0 at the end" >> isEqualTo "")
+            assertThat (Str.sub 0 3 "abc") (tag "sub 0 3 whole string" >> isEqualTo "abc")
+        )
+
+        test ("sub throws descriptive errors", fun _ ->
+            let msg f = try f () |> ignore; "" with e -> e.Message
+            let mNull = msg (fun () -> Str.sub 0 1 null)
+            assertThat (mNull.Contains "Str.sub: string is null") (tag $"null input, got: {mNull}" >> isTrue)
+            let mStart = msg (fun () -> Str.sub -1 2 "abc")
+            assertThat (mStart.Contains "startIndex -1 can't be negative") (tag $"negative startIndex, got: {mStart}" >> isTrue)
+            let mCount = msg (fun () -> Str.sub 0 -1 "abc")
+            assertThat (mCount.Contains "count -1 can't be negative") (tag $"negative count, got: {mCount}" >> isTrue)
+            let mLong = msg (fun () -> Str.sub 2 2 "abc")
+            assertThat (mLong.Contains "startIndex 2 + count 2 is more than the 3 chars") (tag $"too long, got: {mLong}" >> isTrue)
+            let mHuge = msg (fun () -> Str.sub 1 Int32.MaxValue "abc")
+            assertThat (mHuge.Contains "is more than the 3 chars") (tag $"no overflow for a huge count, got: {mHuge}" >> isTrue)
+        )
+
+        test ("sliceIdx as in README", fun _ ->
+            assertThat (Str.sliceIdx 7 11 "Hello, World!") (tag "sliceIdx 7 11" >> isEqualTo "World")
+            assertThat (fun _ -> Str.sliceIdx -6 -2 "Hello, World!" |> ignore) (tag "sliceIdx -6 -2" >> throws)
+        )
+
+        test ("sliceLooped as in README", fun _ ->
+            assertThat (Str.sliceLooped -6 -2 "Hello, World!") (tag "sliceLooped -6 -2" >> isEqualTo "World")
+            assertThat (Str.sliceLooped 13 17 "Hello, World!") (tag "sliceLooped 13 17" >> isEqualTo "Hello")
+            assertThat (Str.sliceLooped 5 4 "Hello, World!") (tag "sliceLooped 5 4" >> isEqualTo "")
         )
 
 

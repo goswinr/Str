@@ -432,23 +432,71 @@ type Str private () =
         elif Char.IsLetter txt.[0] then  String(Char.ToLower(txt.[0]),1) + txt.Substring(1)
         else txt
 
-    /// Allows for negative indices too. -1 is last character
+    /// <summary>Slice the string given start and end index.
+    /// Allows for negative indices too. ( -1 is the last character, like Python)
     /// The resulting string includes the end index.
-    static member (*inline*) slice startIdx endIdx (txt:string) : string =
+    /// If the end index is one less than the start index an empty string is returned.
+    /// To reject negative indices use Str.sliceIdx, to normalize any index with modulo use Str.sliceLooped.
+    /// (With LangVersion preview, F# also supports slicing from the end with the '^' prefix, e.g. txt.[1..^1] skips the first and last character.)</summary>
+    /// <param name="startIdx">The start index (inclusive, can be negative).</param>
+    /// <param name="endIdx">The end index (inclusive, can be negative).</param>
+    /// <param name="txt">The input string.</param>
+    /// <returns>A new string containing the sliced characters.</returns>
+    /// <exception cref="T:Str.ExtensionsString.StrException">Thrown when the string is null, either index is out of range or the start index is after the end index.</exception>
+    static member (*inline*) sliceNeg (startIdx:int) (endIdx:int) (txt:string) : string =
+        if isNull txt then StrException.Raise "Str.sliceNeg: string is null! startIdx: %d endIdx: %d" startIdx  endIdx
+        txt.SliceNeg(startIdx, endIdx)
+
+    /// <summary>Use Str.sliceNeg instead.
+    /// Slice the string given an inclusive start and end index. Allows for negative indices too. ( -1 is the last character, like Python)</summary>
+    /// <param name="startIdx">The start index (inclusive, can be negative).</param>
+    /// <param name="endIdx">The end index (inclusive, can be negative).</param>
+    /// <param name="txt">The input string.</param>
+    /// <returns>A new string containing the sliced characters.</returns>
+    [<Obsolete("Use Str.sliceNeg instead. The name slice is avoided because in .NET the .Slice method of some collections, like List<'T> and Span<'T>, takes a start index and a length, not an inclusive end index.")>]
+    static member (*inline*) slice (startIdx:int) (endIdx:int) (txt:string) : string =
         if isNull txt then StrException.Raise "Str.slice: string is null! startIdx: %d endIdx: %d" startIdx  endIdx
-        let count = txt.Length
-        let st  = if startIdx<0 then count+startIdx    else startIdx
-        let len = if endIdx<0   then count+endIdx-st+1 else endIdx-st+1
-        if count = 0 then
-            StrException.Raise "Str.slice: can't slice an empty string. startIdx: %d endIdx: %d" startIdx endIdx
-        if st < 0 || st > count-1 then
-            StrException.Raise "Str.slice: Start index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" startIdx count (count-1) (exnf txt) count
-        if st+len > count then
-            StrException.Raise "Str.slice: End index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" endIdx count (count-1) (exnf txt) count
-        if len < 0 then
-            let en = if endIdx<0 then count+endIdx else endIdx
-            StrException.Raise "Str.slice: Start index '%A' (= %d) is bigger than end index '%A'(= %d) for String %s of %d items" startIdx st endIdx en (exnf txt) count
-        txt.Substring(st,len)
+        txt.SliceNeg(startIdx, endIdx)
+
+    /// <summary>Returns a new string containing the characters between the specified inclusive start and end indices.
+    /// This function rejects negative and out-of-bounds indices, while the F# slicing notation txt.[1..3] does not.
+    /// To allow negative indices use Str.sliceNeg, to normalize any index with modulo use Str.sliceLooped.</summary>
+    /// <param name="startIdx">The inclusive start index of the slice.</param>
+    /// <param name="endIdx">The inclusive end index of the slice.</param>
+    /// <param name="txt">The input string.</param>
+    /// <returns>A new string containing the requested range.</returns>
+    /// <exception cref="T:Str.ExtensionsString.StrException">Thrown when the string is null, either index is outside the string or startIdx is greater than endIdx.</exception>
+    static member (*inline*) sliceIdx (startIdx:int) (endIdx:int) (txt:string) : string =
+        if isNull txt then StrException.Raise "Str.sliceIdx: string is null! startIdx: %d endIdx: %d" startIdx  endIdx
+        txt.SliceIdx(startIdx, endIdx)
+
+    /// <summary>Returns a new string containing the characters between the specified start and end indices after normalizing both indices with modulo.
+    /// Both indices are inclusive, and negative and out-of-range indices are allowed.
+    /// If the normalized start index is greater than the normalized end index, an empty string is returned.
+    /// For an empty input string, an empty string is returned.</summary>
+    /// <param name="startIdx">The inclusive start index to normalize.</param>
+    /// <param name="endIdx">The inclusive end index to normalize.</param>
+    /// <param name="txt">The input string.</param>
+    /// <returns>A new string containing the requested range.</returns>
+    /// <exception cref="T:Str.ExtensionsString.StrException">Thrown when the string is null.</exception>
+    static member (*inline*) sliceLooped (startIdx:int) (endIdx:int) (txt:string) : string =
+        if isNull txt then StrException.Raise "Str.sliceLooped: string is null! startIdx: %d endIdx: %d" startIdx  endIdx
+        txt.SliceLooped(startIdx, endIdx)
+
+    /// <summary>Returns a new string with the given sub-range specified by starting index and length.
+    /// Like Array.sub and ResizeArray.sub. Same as txt.Substring(startIndex, count), but with a more descriptive exception.</summary>
+    /// <param name="startIndex">The index of the first character of the substring.</param>
+    /// <param name="count">The length of the substring.</param>
+    /// <param name="txt">The input string.</param>
+    /// <returns>The substring.</returns>
+    /// <exception cref="T:Str.ExtensionsString.StrException">Thrown when the string is null, startIndex or count is negative, or the string does not have enough characters.</exception>
+    static member (*inline*) sub (startIndex:int) (count:int) (txt:string) : string =
+        if isNull txt then StrException.Raise "Str.sub: string is null! startIndex: %d count: %d" startIndex count
+        if startIndex < 0 then StrException.Raise "Str.sub: startIndex %d can't be negative. (count: %d) for String %s" startIndex count (exnf txt)
+        if count < 0 then StrException.Raise "Str.sub: count %d can't be negative. (startIndex: %d) for String %s" count startIndex (exnf txt)
+        if startIndex > txt.Length - count then // not 'startIndex + count > txt.Length', that could overflow
+            StrException.Raise "Str.sub: startIndex %d + count %d is more than the %d chars of String %s" startIndex count txt.Length (exnf txt)
+        txt.Substring(startIndex, count)
 
 
     /// Counts non-overlapping occurrences of a non-empty substring in a string.
@@ -969,6 +1017,7 @@ type Str private () =
         txt.Substring(startIndex)
 
     /// Retrieves a substring from this instance. The substring starts at a specified character position and has a specified length.
+    /// (Str.sub does the same with a more descriptive exception.)
     static member (*inline*) substringFromFor startIndex length (txt:string)  =
         if isNull txt then StrException.Raise "Str.substringFromFor : txt is null. (startIndex:%d)  (length:%d) " startIndex length
         txt.Substring(startIndex, length)

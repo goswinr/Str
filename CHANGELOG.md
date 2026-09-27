@@ -6,13 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `Str.sliceNeg` and `str.SliceNeg` to slice with an inclusive end index and negative indices (-1 is the last character), like ArrayT and ResizeArrayT. They replace `Str.slice` and `str.Slice`.
+- `Str.sliceIdx` and `str.SliceIdx` to slice with an inclusive end index, rejecting negative and out-of-range indices, like ArrayT and ResizeArrayT.
+- `Str.sliceLooped` and `str.SliceLooped` to slice with indices normalized by modulo, like ArrayT and ResizeArrayT.
+- `Str.sub` to get a substring by start index and length, like `Array.sub`, with a descriptive `StrException`.
 ### Changed
+- `Str.slice` and `str.Slice` are marked obsolete, use `Str.sliceNeg` and `str.SliceNeg` instead. In .NET the `.Slice` method of some collections, like `List<'T>` and `Span<'T>`, takes a start index and a length, not an inclusive end index.
+- `Str.sliceNeg` calls `str.SliceNeg`, like `Str.get` calls `str.Get`, so its exception messages name `str.SliceNeg`.
 - `Str.replace`, `Str.replaceFirst`, `Str.replaceLast` and the `.ReplaceFirst` / `.ReplaceLast` extensions return the input unchanged for an empty `oldValue` (before, `replace` threw an `ArgumentException`, `replaceFirst` prepended and `replaceLast` appended or, on .NET Framework, inserted before the last character).
 - `Str.indexOfCharFromFor` and `Str.indexOfStringFromFor` validate `startIndex` and `count` and throw a `StrException` on both .NET and JS (before: `ArgumentOutOfRangeException` on .NET).
 - Tests use Scriptorium instead of Expecto and Fable.Mocha, on both .NET and JS.
 ### Fixed
 - `Str.addThousandSeparators` keeps a leading `+` sign, and returns inputs without integer digits (e.g. `"-"`, `"e5"`) unchanged instead of failing or duplicating the sign.
 - `Str.slice` and `str.Slice` report the end index in the out-of-range error message, and give a clear message for empty strings.
+- `Str.slice` and `str.Slice` (now `sliceNeg` and `SliceNeg`) report an out-of-range negative end index as such, instead of "start index is bigger than end index", like ArrayT.
 - Several error messages named the wrong function.
 - README examples for `slice`, `formatTruncated` and `GetLooped`.
 - CI: docs build uses .NET 10, releases run the tests first and publish via NuGet trusted publishing.

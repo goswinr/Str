@@ -151,7 +151,7 @@ module AutoOpenExtensionsString =
 /// Extension methods for System.String.
 /// Adds extension members on System.String.
 /// E.G. .First, .Second, .Last and similar indices.
-/// Also adds functionality for negative indices and s.Slice(startIdx:int , endIdx: int) that works with negative numbers.
+/// Also adds functionality for negative indices, and s.SliceNeg, s.SliceIdx and s.SliceLooped with an inclusive end index.
 /// This module is NOT automatically opened when the namespace Str is opened.
 module ExtensionsString =
 
@@ -235,7 +235,7 @@ module ExtensionsString =
 
         /// Gets an item in the string by index.
         /// Allows negative indexes too (-1 is the last item, as in Python).
-        /// (Since F# 5, from-end indexes can also use the '^' prefix in index expressions, e.g. str.[^0] for the last item.)
+        /// (With LangVersion preview, F# also supports indexing from the end with the '^' prefix, e.g. str.[^0] for the last item.)
         member str.GetNeg index : char =
             let len = str.Length
             let ii =  if index < 0 then len + index else index
@@ -253,31 +253,85 @@ module ExtensionsString =
             str.[ii]
 
 
-        /// Allows for negative indices too. -1 is last character
-        /// Includes end index in string
-        /// For example, str.Slice(0,-3) trims the last two characters from the string.
-        member str.Slice(startIdx:int , endIdx:int):string =
-             // overrides of existing methods are unfortunately silently ignored and not possible. see https://github.com/dotnet/fsharp/issues/3692#issuecomment-334297164
+        /// <summary>Allows for negative indices too. ( -1 is the last character, like Python)
+        /// The resulting string includes the end index.
+        /// If the end index is one less than the start index an empty string is returned.
+        /// For example, str.SliceNeg(0,-3) trims the last two characters from the string.
+        /// To reject negative indices use SliceIdx, to normalize any index with modulo use SliceLooped.
+        /// (With LangVersion preview, F# also supports slicing from the end with the '^' prefix, e.g. str.[1..^1] skips the first and last character.)</summary>
+        /// <param name="startIdx">The start index (inclusive, can be negative).</param>
+        /// <param name="endIdx">The end index (inclusive, can be negative).</param>
+        /// <returns>A new string containing the sliced characters.</returns>
+        /// <exception cref="T:Str.ExtensionsString.StrException">Thrown when either index is out of range or the start index is after the end index.</exception>
+        member str.SliceNeg(startIdx:int , endIdx:int) : string =
+            // overrides of existing methods are unfortunately silently ignored and not possible. see https://github.com/dotnet/fsharp/issues/3692#issuecomment-334297164
             let count = str.Length
-            let st  = if startIdx<0 then count+startIdx else startIdx
-            let len = if endIdx<0 then count+endIdx-st+1 else endIdx-st+1
-
             if count = 0 then
-                StrException.Raise "Str.ExtensionsString: str.Slice: can't slice an empty string. startIdx: %d endIdx: %d" startIdx endIdx
+                StrException.Raise "Str.ExtensionsString: str.SliceNeg: Can't slice an empty string. startIdx: %d endIdx: %d" startIdx endIdx
+            let st  = if startIdx < 0 then count + startIdx else startIdx
+            let en  = if endIdx   < 0 then count + endIdx   else endIdx
+            let len = en - st + 1 // zero if end is one less than start
 
-            if st < 0 || st > count-1 then
-                StrException.Raise "Str.ExtensionsString: str.Slice: Start index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" startIdx count (count-1) (exnf str) count
+            if st < 0 || st > count - 1 then
+                StrException.Raise "Str.ExtensionsString: str.SliceNeg: Start index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" startIdx count (count-1) (exnf str) count
 
-
-            if st+len > count then
-                StrException.Raise "Str.ExtensionsString: str.Slice: End index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" endIdx count (count-1) (exnf str) count
-
+            if en > count - 1 || (len < 0 && en < 0) then
+                StrException.Raise "Str.ExtensionsString: str.SliceNeg: End index %d is out of range. Allowed values are -%d up to %d for String %s of %d chars" endIdx count (count-1) (exnf str) count
 
             if len < 0 then
-                let en = if endIdx<0 then count+endIdx else endIdx
-                StrException.Raise "Str.ExtensionsString: str.Slice: Start index '%A' (= %d) is bigger than end index '%A'(= %d) for String %s of %d chars" startIdx st endIdx en (exnf str) count
+                StrException.Raise "Str.ExtensionsString: str.SliceNeg: Start index %d is bigger than end index %d for String %s of %d chars" startIdx endIdx (exnf str) count
 
-            str.Substring(st,len)
+            str.Substring(st, len)
+
+        /// <summary>Use str.SliceNeg(startIdx, endIdx) instead.
+        /// Slice the string given an inclusive start and end index. Allows for negative indices too. ( -1 is the last character, like Python)</summary>
+        /// <param name="startIdx">The start index (inclusive, can be negative).</param>
+        /// <param name="endIdx">The end index (inclusive, can be negative).</param>
+        /// <returns>A new string containing the sliced characters.</returns>
+        [<Obsolete("Use str.SliceNeg(startIdx, endIdx) instead. The name Slice is avoided because in .NET the .Slice method of some collections, like List<'T> and Span<'T>, takes a start index and a length, not an inclusive end index.")>]
+        member str.Slice(startIdx:int , endIdx:int) : string =
+            str.SliceNeg(startIdx, endIdx)
+
+        /// <summary>Returns a new string containing the characters between the specified inclusive start and end indices.
+        /// This member rejects negative and out-of-bounds indices, while the F# slicing notation str.[1..3] does not.
+        /// To allow negative indices use SliceNeg, to normalize any index with modulo use SliceLooped.</summary>
+        /// <param name="startIdx">The inclusive start index of the slice.</param>
+        /// <param name="endIdx">The inclusive end index of the slice.</param>
+        /// <returns>A new string containing the requested range.</returns>
+        /// <exception cref="T:Str.ExtensionsString.StrException">Thrown when either index is outside the string or startIdx is greater than endIdx.</exception>
+        member str.SliceIdx(startIdx:int , endIdx:int) : string =
+            let count = str.Length
+            if count = 0 then
+                StrException.Raise "Str.ExtensionsString: str.SliceIdx: Can't slice an empty string. startIdx: %d endIdx: %d" startIdx endIdx
+            if startIdx < 0 || startIdx >= count then
+                StrException.Raise "Str.ExtensionsString: str.SliceIdx: Start index %d is out of range. Allowed values are 0 through %d for String %s of %d chars" startIdx (count-1) (exnf str) count
+            if endIdx < 0 || endIdx >= count then
+                StrException.Raise "Str.ExtensionsString: str.SliceIdx: End index %d is out of range. Allowed values are 0 through %d for String %s of %d chars" endIdx (count-1) (exnf str) count
+            if startIdx > endIdx then
+                StrException.Raise "Str.ExtensionsString: str.SliceIdx: Start index %d is bigger than end index %d for String %s of %d chars" startIdx endIdx (exnf str) count
+            str.Substring(startIdx, endIdx - startIdx + 1)
+
+        /// <summary>Returns a new string containing the characters between the specified start and end indices after normalizing both indices with modulo.
+        /// Both indices are inclusive, and negative and out-of-range indices are allowed.
+        /// If the normalized start index is greater than the normalized end index, an empty string is returned.
+        /// For an empty input string, an empty string is returned.</summary>
+        /// <param name="startIdx">The inclusive start index to normalize.</param>
+        /// <param name="endIdx">The inclusive end index to normalize.</param>
+        /// <returns>A new string containing the requested range.</returns>
+        member str.SliceLooped(startIdx:int , endIdx:int) : string =
+            let count = str.Length
+            if count = 0 then
+                ""
+            else
+                let s = startIdx % count
+                let e = endIdx % count
+                let st = if s >= 0 then s else s + count
+                let en = if e >= 0 then e else e + count
+                let len = en - st + 1
+                if len < 0 then
+                    ""
+                else
+                    str.Substring(st, len)
 
 
         /// Returns a new string in which only the first occurrence of a specified string in the current instance is replaced with another specified string.
