@@ -27,6 +27,8 @@ dotnet build Src/Str.fsproj
 dotnet build Src/Str.fsproj --configuration Release
 ```
 
+The library `Src/Str.fsproj` targets `netstandard2.0`. The tests in `Tests/Tests.fsproj` target `net8.0` only, so the .NET 8 runtime is required to run them (any SDK that can build `net8.0`, e.g. .NET 10 SDK, works).
+
 Run tests from `Tests/`:
 
 ```bash
