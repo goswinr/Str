@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.1] - 2026-10-10
+### Changed
+- The library is unchanged. It still targets `netstandard2.0`. The tests now run on `net8.0` instead of `net10.0` and the CI workflows install the .NET 8 and 10 SDKs.
 ## [0.25.0] - 2026-09-27
 ### Added
 - `Str.sliceNeg` and `str.SliceNeg` to slice with an inclusive end index and negative indices (-1 is the last character), like ArrayT and ResizeArrayT. They replace `Str.slice` and `str.Slice`.
@@ -87,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation ported from [FsEx](https://github.com/goswinr/FsEx/blob/main/Src/StringModule.fs)
 - Added more tests
 
+[0.25.1]: https://github.com/goswinr/Str/compare/0.25.0...0.25.1
 [0.25.0]: https://github.com/goswinr/Str/compare/0.24.1...0.25.0
 [0.24.1]: https://github.com/goswinr/Str/compare/0.24.0...0.24.1
 [0.24.0]: https://github.com/goswinr/Str/compare/0.23.0...0.24.0
