@@ -1,6 +1,7 @@
 namespace Str
 
 open System
+open System.ComponentModel
 open System.Text
 
 [<Obsolete("not obsolete but hidden, needs to be visible for inlining")>]
@@ -75,7 +76,7 @@ module ComputationalExpressions =
 /// This module is automatically opened when the namespace Str is opened.
 /// It provides a computational expression for building strings called <c>str</c>.
 /// </summary>
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenComputationalExpression  =
 
     /// Computational Expression String Builder:

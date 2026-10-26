@@ -1,11 +1,12 @@
 namespace Str
 
 open System
+open System.ComponentModel
 
 /// Extension methods for StringBuilder.
 /// Provides IndexOf methods and append operations that return unit.
 /// This module is automatically opened when the namespace Str is opened.
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenExtensionsStringBuilder =
     type Text.StringBuilder with
 

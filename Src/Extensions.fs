@@ -1,5 +1,6 @@
 namespace Str
 open System
+open System.ComponentModel
 
 
 
@@ -107,7 +108,7 @@ module internal Format =
 /// Extension methods for System.String.
 /// Like DoesNotContain(str),..,
 /// This module is automatically opened when the namespace Str is opened.
-[<AutoOpen>]
+[<AutoOpen; EditorBrowsable(EditorBrowsableState.Never)>]
 module AutoOpenExtensionsString =
 
     // This type extension should be always available that is why it is in this Auto-open module
